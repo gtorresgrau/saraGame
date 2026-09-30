@@ -687,7 +687,9 @@
                 <div class="game-card" onclick="showGame('mouse')">
                     <div style="font-size: 80px;">🐭</div>
                     <h2>El Ratón y el Queso</h2>
-                    <p>Guía al ratón hasta el queso evitando la caja-trampa</p>
+                    <p>Guía al ratón hasta el queso en 10 niveles evitando las cajas-trampa</p>
+                    <br>
+                    <span class="progress" id="mouseMenuProgress">Nivel 1/10 · ⭐ 0</span>
                 </div>
                 <div class="game-card" onclick="showGame('school')">
                     <img src="icono.jpg" alt="Logo Escuela" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
@@ -703,14 +705,16 @@
         <div class="game-screen" id="mouseGame">
             <button class="back-btn" onclick="showMenu()">← Volver al menú</button>
             <div class="game-container">
-                <div class="maze-section">
+                <div class="maze-section" id="mouseMazeSection">
                     <canvas id="mouseCanvas" width="600" height="480"></canvas>
                 </div>
 
                 <div class="controls-section">
                     <div class="hud">
                         <img class="avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
-                        <span class="level-badge">🐭 Nivel único</span>
+                        <span class="level-badge" id="mouseLevelBadge">Nivel 1/10</span>
+                        <span class="hud-stars" id="mouseStars">☆☆☆</span>
+                        <span class="hud-par" id="mousePar">Par 11</span>
                         <span class="hud-stars" id="mouseWins" title="Veces que el ratón llegó al queso">🧀 0</span>
                     </div>
                     <!-- Acordeón de instrucciones -->
@@ -726,11 +730,16 @@
                                     <li>Haz clic en un bloque para eliminarlo</li>
                                     <li>Presiona EJECUTAR o ESPACIO</li>
                                     <li>Lleva al ratón al queso amarillo</li>
-                                    <li>Evita la caja-trampa: ¡la caja cae sobre el ratón!</li>
+                                    <li>Evita las cajas-trampa: ¡la caja cae sobre el ratón!</li>
+                                    <li>Completa los 10 niveles ¡y conseguí el Queso Dorado! 🏆</li>
+                                    <li>Menos comandos = más estrellas ⭐</li>
                                 </ul>
                             </div>
                         </div>
                     </div>
+
+                    <div class="section-title">🗺️ Niveles</div>
+                    <div class="level-select" id="mouseLevelSelect"></div>
 
                     <div class="section-title">🧩 Bloques</div>
                     <div class="palette">
@@ -953,22 +962,23 @@
         // =====================================================================
         // Laberinto del Ratón (nivel único, ya validado como ganable)
         // =====================================================================
-        const MOUSE_MAZE = [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-            [1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        ];
+        // Niveles de El Ratón y el Queso (10 niveles, dificultad escalada).
+        // Cada nivel es ajustable: levelTitle, message, speed (ms por paso),
+        // spawnRate (cantidad de cajas-trampa), goalScore (par de comandos),
+        // maxCommands, maze, start, cheese, traps y theme.
+        const MOUSE_LEVELS = [
+        {id: 1, levelTitle: "¡El primer queso! 🧀", message: "El ratón huele queso cerca. ¡Guiálo con cuidado y evitá la caja!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [1, 1, 1, 1, 1, 1, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[5, 3]], speed: 500, spawnRate: 1, maxCommands: 15, goalScore: 11, theme: {floor: "#f5f5dc", line: "#ccc", wall: "#464646", edge: "#333"}},
+        {id: 2, levelTitle: "El queso del vecino 🧀", message: "Hay otro queso esperando. ¡Nivel 2, vamos!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 1, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 1], traps: [[4, 4]], speed: 490, spawnRate: 1, maxCommands: 14, goalScore: 9, theme: {floor: "#faf6e9", line: "#d8cfae", wall: "#5d4037", edge: "#3e2723"}},
+        {id: 3, levelTitle: "Cuidado con las cajas 📦", message: "¡Paso 3 completado! Las cajas están por todos lados.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [4, 6], traps: [[8, 6]], speed: 470, spawnRate: 1, maxCommands: 13, goalScore: 8, theme: {floor: "#f3efe4", line: "#c9c2ab", wall: "#6d4c41", edge: "#4e342e"}},
+        {id: 4, levelTitle: "Doble trampa 📦📦", message: "Ahora hay DOS cajas-trampa. Pensá cada movimiento.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[3, 4], [4, 6]], speed: 450, spawnRate: 2, maxCommands: 15, goalScore: 11, theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#4e342e", edge: "#32241f"}},
+        {id: 5, levelTitle: "Queso de medianoche 🌙", message: "De noche el queso sabe mejor. ¡Pero mirá dónde pisás!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [1, 1, 0, 1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 1, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 3], traps: [[7, 5], [5, 4]], speed: 430, spawnRate: 2, maxCommands: 13, goalScore: 9, theme: {floor: "#e8eaf6", line: "#9fa8da", wall: "#37474f", edge: "#1c262b"}},
+        {id: 6, levelTitle: "El sótano misterioso 🏚️", message: "Bajamos al sótano. ¡El queso está más lejos ahora!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 1, 1], [1, 1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [7, 5], traps: [[5, 2], [8, 2]], speed: 410, spawnRate: 2, maxCommands: 14, goalScore: 10, theme: {floor: "#eceff1", line: "#b0bec5", wall: "#455a64", edge: "#263238"}},
+        {id: 7, levelTitle: "La gran reserva 🧀", message: "¡Casi lo lográs! La reserva de queso está protegida.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 1, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 6], traps: [[6, 1], [7, 2]], speed: 390, spawnRate: 2, maxCommands: 15, goalScore: 12, theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#5d4037", edge: "#3e2723"}},
+        {id: 8, levelTitle: "Corre, ratoncito, corre ⚡", message: "¡Más rápido! Tres cajas y poco tiempo para pensar.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 1, 1], [1, 0, 1, 1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 1, 0, 1, 0, 0, 0, 1], [1, 0, 1, 1, 0, 1, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 6], traps: [[6, 4], [6, 2], [1, 5]], speed: 370, spawnRate: 3, maxCommands: 15, goalScore: 12, theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#6a1b9a", edge: "#4a148c"}},
+        {id: 9, levelTitle: "El queso del rey 👑", message: "Solo los valientes llegan al queso del rey. ¡Último esfuerzo!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 0, 0, 0, 1, 1, 0, 1], [1, 1, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 1, 1, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [6, 1], traps: [[4, 6], [5, 5], [5, 2]], speed: 350, spawnRate: 3, maxCommands: 16, goalScore: 13, theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#4527a0", edge: "#311b92"}},
+        {id: 10, levelTitle: "¡El Gran Queso Dorado! 🏆", message: "¡Último nivel! Conseguí el legendario Queso Dorado.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 1, 1, 0, 0, 1], [1, 1, 0, 0, 1, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 1, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 4], traps: [[8, 2], [2, 6], [3, 6]], speed: 380, spawnRate: 3, maxCommands: 16, goalScore: 12, theme: {floor: "#fffde7", line: "#f0d060", wall: "#6d4c41", edge: "#4e342e"}, finale: true}
 
-        const MOUSE_START = { x: 1, y: 1 };
-        const CHEESE_POS = { x: 8, y: 5 };
-        const TRAP_POS = { x: 5, y: 3 };
-        const MOUSE_MAX_COMMANDS = 15;
-        const MOUSE_SPEED = 500;
+        ];
 
         // =====================================================================
         // Niveles del Nene a la Escuela (10 niveles, dificultad escalada).
@@ -995,16 +1005,29 @@
         // Estados de los juegos
         // =====================================================================
         let mouseState = {
-            pos: { ...MOUSE_START },
+            // Si ya completo todo antes, arranca en el nivel 1 (puede elegir otro en el selector)
+            levelIdx: (() => { const u = store.get('sara_mouse_unlocked', 1); return (u >= 10) ? 0 : Math.min(Math.max(u - 1, 0), 9); })(),
+            pos: { x: 1, y: 1 },
             program: [],
             executing: false,
             currentIndex: 0,
             runToken: 0,
             fxToken: 0,
             boxT: -1,      // progreso de la animación de la caja (-1 = inactiva)
+            hitTrap: null, // [x, y] de la caja que atrapo al raton
             winFx: -1,     // progreso del destello de victoria
-            wins: store.get('sara_mouse_wins', 0)
+            wins: store.get('sara_mouse_wins', 0),
+            stars: store.get('sara_mouse_stars', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+            unlocked: store.get('sara_mouse_unlocked', 1)
         };
+        // Normalizar estrellas por si cambió el formato guardado
+        if (!Array.isArray(mouseState.stars) || mouseState.stars.length !== 10) {
+            mouseState.stars = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        }
+
+        function mouseLevel() {
+            return MOUSE_LEVELS[mouseState.levelIdx];
+        }
 
         let schoolState = {
             // Si ya completo todo antes, arranca en el nivel 1 (puede elegir otro en el selector)
@@ -1039,8 +1062,7 @@
 
             if (game === 'mouse') {
                 document.getElementById('mouseGame').classList.add('active');
-                updateMouseHUD();
-                drawMouseGame();
+                loadMouseLevel(mouseState.levelIdx, { intro: true });
             } else {
                 document.getElementById('schoolGame').classList.add('active');
                 loadSchoolLevel(schoolState.levelIdx, { intro: true });
@@ -1053,6 +1075,7 @@
             document.getElementById('schoolGame').classList.remove('active');
             hideLevelOverlay();
             updateMenuProgress();
+            updateMouseMenuProgress();
         }
 
         function updateMenuProgress() {
@@ -1108,8 +1131,6 @@
             }
         }
 
-        const MOUSE_THEME = { floor: '#f5f5dc', line: '#ccc', wall: '#464646', edge: '#333' };
-
         // Charco de barro dibujado en canvas
         function drawMud(ctx, gx, gy, scale) {
             const s = scale || 1;
@@ -1137,13 +1158,30 @@
         function drawMouseGame() {
             const canvas = document.getElementById('mouseCanvas');
             const ctx = canvas.getContext('2d');
-            drawGrid(ctx, canvas, MOUSE_MAZE, MOUSE_THEME);
+            const lv = mouseLevel();
+            drawGrid(ctx, canvas, lv.maze, lv.theme);
 
-            // Queso
-            drawEmoji(ctx, '🧀', CHEESE_POS.x, CHEESE_POS.y);
+            const ch = lv.cheese;
+            // Queso (corona en la final del Queso Dorado)
+            if (lv.finale) {
+                drawEmoji(ctx, '🏆', ch[0], ch[1] - 0.7, { scale: 0.9 });
+                drawEmoji(ctx, '🧀', ch[0], ch[1], { scale: 1.3 });
+            } else {
+                drawEmoji(ctx, '🧀', ch[0], ch[1]);
+            }
 
-            // Caja-trampa (o animación de caída)
-            if (mouseState.boxT >= 0) {
+            const hit = mouseState.hitTrap;
+            const animating = mouseState.boxT >= 0 && hit;
+
+            // Cajas-trampa fijas (todas menos la que esta cayendo)
+            lv.traps.forEach(tr => {
+                if (!(animating && tr[0] === hit[0] && tr[1] === hit[1])) {
+                    drawEmoji(ctx, '📦', tr[0], tr[1], { scale: 1.1 });
+                }
+            });
+
+            // Caja en caida (animacion de "atrapado")
+            if (animating) {
                 const t = mouseState.boxT;
                 // Caída con aceleración + aplastamiento al final + sacudida
                 const fall = Math.min(1, t * 1.25);
@@ -1152,18 +1190,18 @@
                 const shakeX = t > 0.8 ? Math.sin(t * 60) * 3 * (1 - t) : 0;
                 ctx.save();
                 ctx.translate(shakeX, 0);
-                drawEmoji(ctx, '📦', TRAP_POS.x, TRAP_POS.y, { scale: squash, dy: dy });
+                drawEmoji(ctx, '📦', hit[0], hit[1], { scale: squash, dy: dy });
                 // Polvo al aterrizar
                 if (t > 0.75) {
                     ctx.globalAlpha = Math.min(1, (t - 0.75) * 4) * (1 - (t - 0.75) * 2);
                     ctx.font = '24px Arial';
                     ctx.textAlign = 'center';
                     ctx.fillText('💨',
-                        TRAP_POS.x * CELL_SIZE + CELL_SIZE / 2 - 25,
-                        TRAP_POS.y * CELL_SIZE + CELL_SIZE / 2 + 15);
+                        hit[0] * CELL_SIZE + CELL_SIZE / 2 - 25,
+                        hit[1] * CELL_SIZE + CELL_SIZE / 2 + 15);
                     ctx.fillText('💨',
-                        TRAP_POS.x * CELL_SIZE + CELL_SIZE / 2 + 25,
-                        TRAP_POS.y * CELL_SIZE + CELL_SIZE / 2 + 15);
+                        hit[0] * CELL_SIZE + CELL_SIZE / 2 + 25,
+                        hit[1] * CELL_SIZE + CELL_SIZE / 2 + 15);
                     ctx.globalAlpha = 1;
                 }
                 ctx.restore();
@@ -1174,23 +1212,23 @@
                     drawEmoji(ctx, '😵', mouseState.pos.x, mouseState.pos.y - 0.55, { scale: 0.8 });
                 }
             } else {
-                drawEmoji(ctx, '📦', TRAP_POS.x, TRAP_POS.y, { scale: 1.1 });
                 drawEmoji(ctx, '🐭', mouseState.pos.x, mouseState.pos.y);
             }
 
             // Destello de victoria
             if (mouseState.winFx >= 0) {
                 const t = mouseState.winFx;
-                drawEmoji(ctx, '⭐', CHEESE_POS.x, CHEESE_POS.y - 0.4 * t, {
+                drawEmoji(ctx, lv.finale ? '🏆' : '⭐', ch[0], ch[1] - 0.4 * t, {
                     scale: 1 + t * 1.2, alpha: 1 - t * 0.6
                 });
             }
         }
 
         // Animación: la caja cae sobre el ratón (efecto "atrapado")
-        function triggerBoxTrap() {
+        function triggerBoxTrap(hit) {
             mouseState.executing = 'trap';
             mouseState.boxT = 0;
+            mouseState.hitTrap = hit;
             const token = ++mouseState.fxToken;
             sfxCreak();
             setTimeout(() => { if (token === mouseState.fxToken) sfxThud(); }, 450);
@@ -1206,7 +1244,9 @@
                 } else {
                     mouseState.executing = false;
                     mouseState.boxT = -1;
-                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                    mouseState.hitTrap = null;
+                    const lv = mouseLevel();
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                     sfxLose();
                     showMessage('¡PERDISTE! La caja atrapó al ratón 📦', 'lose');
                     drawMouseGame();
@@ -1218,9 +1258,15 @@
         function mouseWinEffect(done) {
             mouseState.executing = 'win';
             const token = ++mouseState.fxToken;
-            sfxWin();
+            const lv = mouseLevel();
+            if (lv.finale) {
+                sfxFanfare();
+                launchConfetti(4500);
+            } else {
+                sfxWin();
+            }
             const start = performance.now();
-            const DUR = 700;
+            const DUR = lv.finale ? 1400 : 700;
             function frame(now) {
                 if (token !== mouseState.fxToken) return;
                 const t = Math.min(1, (now - start) / DUR);
@@ -1359,6 +1405,132 @@
                 }
             }
             requestAnimationFrame(frame);
+        }
+
+        // =====================================================================
+        // Niveles del ratón: carga, HUD, selector y progresión
+        // =====================================================================
+        function loadMouseLevel(i, opts) {
+            mouseState.levelIdx = i;
+            const lv = mouseLevel();
+            mouseState.pos = { x: lv.start[0], y: lv.start[1] };
+            mouseState.program = [];
+            mouseState.executing = false;
+            mouseState.currentIndex = 0;
+            mouseState.runToken++;
+            mouseState.fxToken++;
+            mouseState.boxT = -1;
+            mouseState.hitTrap = null;
+            mouseState.winFx = -1;
+            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
+            updateMouseHUD();
+            buildMouseLevelSelect();
+            document.getElementById('mouseMazeSection').classList.toggle('graduation', !!lv.finale);
+            drawMouseGame();
+            if (opts && opts.intro) {
+                showLevelOverlay({
+                    title: 'Nivel ' + lv.id + ': ' + lv.levelTitle,
+                    stars: 0,
+                    message: lv.message,
+                    button: '¡Jugar! ▶',
+                    grad: !!lv.finale,
+                    onGo: null
+                });
+            }
+        }
+
+        function updateMouseHUD() {
+            const lv = mouseLevel();
+            const badge = document.getElementById('mouseLevelBadge');
+            badge.textContent = 'Nivel ' + lv.id + '/10';
+            badge.classList.toggle('grad', !!lv.finale);
+            const best = mouseState.stars[mouseState.levelIdx] || 0;
+            document.getElementById('mouseStars').textContent = '★'.repeat(best) + '☆'.repeat(3 - best);
+            document.getElementById('mousePar').textContent = 'Par ' + lv.goalScore;
+            document.getElementById('mouseWins').textContent = '🧀 ' + mouseState.wins;
+        }
+
+        function buildMouseLevelSelect() {
+            const box = document.getElementById('mouseLevelSelect');
+            box.innerHTML = '';
+            MOUSE_LEVELS.forEach((lv, idx) => {
+                const b = document.createElement('button');
+                const locked = idx + 1 > mouseState.unlocked;
+                const best = mouseState.stars[idx] || 0;
+                b.className = 'lvl-btn' + (locked ? ' locked' : '') +
+                    (idx === mouseState.levelIdx ? ' current' : '') +
+                    (lv.finale ? ' grad-btn' : '');
+                b.innerHTML = (locked ? '🔒 ' : '') + lv.id +
+                    '<small>' + (locked ? '···' : ('★'.repeat(best) + '☆'.repeat(3 - best))) + '</small>';
+                if (!locked) {
+                    b.addEventListener('click', () => {
+                        if (mouseState.executing) return;
+                        sfxClick();
+                        loadMouseLevel(idx, { intro: true });
+                    });
+                } else {
+                    b.addEventListener('click', () => showMessage('Completa el nivel anterior para desbloquear', 'info'));
+                }
+                box.appendChild(b);
+            });
+        }
+
+        function updateMouseMenuProgress() {
+            const total = mouseState.stars.reduce((a, b) => a + b, 0);
+            const lvl = Math.min(mouseState.unlocked, 10);
+            document.getElementById('mouseMenuProgress').textContent = 'Nivel ' + lvl + '/10 · ⭐ ' + total;
+        }
+
+        function onMouseWin(used) {
+            const lv = mouseLevel();
+            const stars = starsFor(used, lv.goalScore);
+            const prev = mouseState.stars[mouseState.levelIdx] || 0;
+            if (stars > prev) {
+                mouseState.stars[mouseState.levelIdx] = stars;
+                store.set('sara_mouse_stars', mouseState.stars);
+            }
+            mouseState.wins++;
+            store.set('sara_mouse_wins', mouseState.wins);
+            const last = mouseState.levelIdx === MOUSE_LEVELS.length - 1;
+            if (!last && mouseState.unlocked < mouseState.levelIdx + 2) {
+                mouseState.unlocked = mouseState.levelIdx + 2;
+                store.set('sara_mouse_unlocked', mouseState.unlocked);
+            }
+            updateMouseHUD();
+            buildMouseLevelSelect();
+            updateMouseMenuProgress();
+            mouseWinEffect(() => {
+                const lvNow = mouseLevel();
+                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lvNow.maxCommands);
+                if (last) {
+                    showLevelOverlay({
+                        title: '🏆 ¡QUESO DORADO CONSEGUIDO! 🏆',
+                        stars: stars,
+                        message: '¡INCREÍBLE! El ratón superó los 10 niveles, esquivó todas las cajas y consiguió el legendario Gran Queso Dorado. ¡Sos un programador increíble! 🎉',
+                        button: '🏆 Jugar de nuevo',
+                        grad: true,
+                        onGo: () => {
+                            mouseState.unlocked = 10;
+                            store.set('sara_mouse_unlocked', 10);
+                            loadMouseLevel(0, { intro: true });
+                        }
+                    });
+                } else {
+                    sfxLevel();
+                    const next = MOUSE_LEVELS[mouseState.levelIdx + 1];
+                    showLevelOverlay({
+                        title: '¡Nivel ' + lv.id + ' completado! 🎉',
+                        stars: stars,
+                        message: next.message,
+                        button: 'Siguiente: Nivel ' + next.id + ' ▶',
+                        grad: !!next.finale,
+                        onGo: () => {
+                            loadMouseLevel(mouseState.levelIdx + 1, { intro: false });
+                            showLevelIntro(next);
+                        }
+                    });
+                }
+            });
         }
 
         // =====================================================================
@@ -1671,22 +1843,24 @@
         // Juego del Ratón: ejecución
         // =====================================================================
         function runMouseGame() {
+            const lv = mouseLevel();
             if (mouseState.program.length === 0) {
                 showMessage('¡Añade comandos primero!', 'info');
                 return;
             }
             if (mouseState.executing) return;
 
-            mouseState.pos = { ...MOUSE_START };
+            mouseState.pos = { x: lv.start[0], y: lv.start[1] };
             mouseState.executing = true;
             mouseState.currentIndex = 0;
             const token = ++mouseState.runToken;
-            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
             drawMouseGame();
-            setTimeout(() => executeMouseCommand(token), MOUSE_SPEED);
+            setTimeout(() => executeMouseCommand(token), lv.speed);
         }
 
         function executeMouseCommand(token) {
+            const lv = mouseLevel();
             if (token !== mouseState.runToken || !mouseState.executing) return;
             if (mouseState.currentIndex < mouseState.program.length) {
                 const cmd = mouseState.program[mouseState.currentIndex];
@@ -1694,7 +1868,7 @@
                 const newX = mouseState.pos.x + dir.x;
                 const newY = mouseState.pos.y + dir.y;
 
-                if (isValidMove(MOUSE_MAZE, newX, newY)) {
+                if (isValidMove(lv.maze, newX, newY)) {
                     mouseState.pos = { x: newX, y: newY };
                     sfxStep(mouseState.currentIndex);
                 } else {
@@ -1702,51 +1876,51 @@
                     showMessage('¡El ratón chocó con una pared!', 'info');
                 }
 
+                const used = mouseState.currentIndex + 1;
+
                 // ¡Victoria o trampa inmediata al pisar la casilla!
-                if (mouseState.pos.x === CHEESE_POS.x && mouseState.pos.y === CHEESE_POS.y) {
+                if (mouseState.pos.x === lv.cheese[0] && mouseState.pos.y === lv.cheese[1]) {
                     mouseState.currentIndex++;
-                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                     drawMouseGame();
-                    mouseWinEffect(() => {
-                        mouseState.wins++;
-                        store.set('sara_mouse_wins', mouseState.wins);
-                        updateMouseHUD();
-                        updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
-                        showMessage('¡GANASTE! El ratón llegó al queso 🧀', 'win');
-                    });
+                    onMouseWin(used);
                     return;
                 }
-                if (mouseState.pos.x === TRAP_POS.x && mouseState.pos.y === TRAP_POS.y) {
+                const hit = lv.traps.find(t => t[0] === mouseState.pos.x && t[1] === mouseState.pos.y);
+                if (hit) {
                     mouseState.currentIndex++;
-                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                     drawMouseGame();
-                    triggerBoxTrap();
+                    triggerBoxTrap(hit);
                     return;
                 }
 
                 mouseState.currentIndex++;
-                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                 drawMouseGame();
 
-                setTimeout(() => executeMouseCommand(token), MOUSE_SPEED);
+                setTimeout(() => executeMouseCommand(token), lv.speed);
             } else {
                 mouseState.executing = false;
-                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                 showMessage('El ratón no llegó a ningún destino', 'info');
             }
         }
 
         function resetMouseGame() {
-            mouseState.pos = { ...MOUSE_START };
+            const lv = mouseLevel();
+            mouseState.pos = { x: lv.start[0], y: lv.start[1] };
             mouseState.program = [];
             mouseState.executing = false;
             mouseState.currentIndex = 0;
             mouseState.boxT = -1;
+            mouseState.hitTrap = null;
             mouseState.winFx = -1;
             mouseState.runToken++;
             mouseState.fxToken++;
             sfxClick();
-            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
+            updateMouseHUD();
             drawMouseGame();
         }
 
@@ -1852,7 +2026,7 @@
                 const command = block.dataset.command;
                 const game = block.dataset.game;
                 if (game === 'mouse') {
-                    addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                    addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter', mouseLevel().maxCommands);
                 } else {
                     const lv = schoolLevel();
                     addToProgram(schoolState, command, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
@@ -1880,7 +2054,7 @@
                 const game = e.dataTransfer.getData('game');
 
                 if (command && game === 'mouse' && areaId === 'mouseProgramArea') {
-                    addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                    addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter', mouseLevel().maxCommands);
                 } else if (command && game === 'school' && areaId === 'schoolProgramArea') {
                     const lv = schoolLevel();
                     addToProgram(schoolState, command, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
@@ -1909,10 +2083,11 @@
         });
 
         // Inicializar
-        updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+        updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', mouseLevel().maxCommands);
         updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', schoolLevel().maxCommands);
         updateMouseHUD();
         updateMenuProgress();
+        updateMouseMenuProgress();
         if (!soundOn) document.getElementById('muteBtn').textContent = '🔇';
     </script>
 </body>
