@@ -844,6 +844,14 @@
             'derecha': { x: 1, y: 0 },
         };
 
+        // Etiquetas visibles de los bloques en el panel Programa
+        const CMD_LABEL = {
+            'adelante': 'ARRIBA',
+            'atras': 'ABAJO',
+            'izquierda': 'IZQUIERDA',
+            'derecha': 'DERECHA',
+        };
+
         const ICONO_FALLBACK = 'https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg';
 
         // =====================================================================
@@ -1251,7 +1259,7 @@
             ctx.fillStyle = 'white';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(isGrad ? 'GRADÚO' : 'ESCUELA', schoolX, schoolY + 4);
+            ctx.fillText(isGrad ? 'GRADÚO' : 'SARA', schoolX, schoolY + 4);
 
             // Techo
             ctx.fillStyle = isGrad ? '#ffd700' : '#b71c1c';
@@ -1630,7 +1638,7 @@
                     if (state.executing && index === state.currentIndex) {
                         block.classList.add('executing');
                     }
-                    block.textContent = cmd.toUpperCase();
+                    block.textContent = CMD_LABEL[cmd] || cmd.toUpperCase();
                     block.addEventListener('click', () => {
                         if (!state.executing) {
                             sfxClick();
