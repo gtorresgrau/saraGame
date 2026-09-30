@@ -1,0 +1,30 @@
+{
+  "name": "Sara Game — Camino a la Escuela",
+  "short_name": "Sara Game",
+  "description": "Juego de programación con bloques para chicos: guía al ratón hasta el queso y acompaña al nene hasta la escuela.",
+  "lang": "es",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1730",
+  "theme_color": "#0f1730",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

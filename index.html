@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="icono.jpg">
+<meta name="description" content="Sara Game: programa con bloques, guía al ratón hasta el queso y acompaña al nene hasta la escuela.">
+<meta name="theme-color" content="#0f1730">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sara Game">
 <title>Sara Game — Camino a la Escuela</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -231,6 +239,18 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 .overlay-card .btn{flex:none;padding:13px 30px;font-size:1.05rem;background:var(--leaf);color:#fff}
 #confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:1500}
 .foot{margin-top:22px;text-align:center;color:#8b96b8;font-size:.8rem;font-weight:700}
+.top-actions{display:flex;gap:10px;align-items:center}
+.wipe-btn{font-family:'Fredoka',sans-serif;background:#fff;border:var(--border);border-radius:50%;width:52px;height:52px;font-size:1.3rem;cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .15s ease}
+.wipe-btn:hover{transform:rotate(8deg) scale(1.06)}
+.wipe-btn:focus-visible{outline:4px solid var(--bus);outline-offset:2px}
+.confirm-row{display:flex;gap:10px;margin-top:6px}
+.confirm-row .btn{font-size:.95rem;padding:12px 10px}
+.btn-wipe{background:var(--apple);color:#fff}
+.site-foot{margin-top:22px;background:var(--paper);border:var(--border);border-radius:18px;box-shadow:var(--shadow-sm);padding:14px 18px;text-align:center}
+.site-foot .made{color:var(--ink-soft);font-size:.85rem;font-weight:800;margin-bottom:6px}
+.site-foot .author{color:var(--ink);font-size:.85rem;font-weight:900}
+.site-foot .author a{color:var(--sky-deep);text-decoration:none;border-bottom:2px solid var(--bus)}
+.site-foot .author a:hover{color:var(--ink)}
 @media(max-width:640px){
   body{padding:14px 12px 44px}
   .hero{padding:20px}.hero::after{width:120px;height:120px}
@@ -255,7 +275,10 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <p>Programa con bloques y ayuda a Sara en cada nivel</p>
 </div>
 </div>
+<div class="top-actions">
 <button class="mute-btn" id="muteBtn" onclick="toggleSound()" title="Activar o silenciar sonido" aria-label="Activar o silenciar sonido">🔊</button>
+<button class="wipe-btn" onclick="askWipeProgress()" title="Borrar todo el progreso" aria-label="Borrar todo el progreso">🗑️</button>
+</div>
 </div>
 
 <!-- Menu principal -->
@@ -400,7 +423,10 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 </div>
 </div>
 </div>
-<p class="foot">Hecho con cariño para Sara · tocá, probá y animate a usar menos bloques</p>
+<footer class="site-foot">
+<p class="made">Hecho con cariño para Sara · tocá, probá y animate a usar menos bloques</p>
+<p class="author">Gonzalo Torres Grau · 2026 · <a href="https://gonzalotorresgrau.com/" target="_blank" rel="noopener">gonzalotorresgrau.com</a> · <a href="https://github.com/gtorresgrau" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
 </div>
 
 <!-- Overlay -->
@@ -411,6 +437,18 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="overlay-stars" id="overlayStars" style="display:none;">⭐⭐⭐</div>
 <p id="overlayMessage">¡Vamos!</p>
 <button class="btn btn-run" id="overlayButton" onclick="closeLevelOverlay()">¡Jugar!</button>
+</div>
+</div>
+
+<!-- Confirmar borrado total del progreso -->
+<div class="overlay" id="wipeOverlay">
+<div class="overlay-card">
+<h2>¿Borrar todo el progreso? 🧹</h2>
+<p>Se borran los niveles desbloqueados, las estrellas y los quesos de ambos juegos. Esta acción no se puede deshacer.</p>
+<div class="confirm-row">
+<button class="btn btn-reset" onclick="closeWipeOverlay()">Cancelar</button>
+<button class="btn btn-wipe" onclick="wipeAllProgress()">Sí, borrar todo</button>
+</div>
 </div>
 </div>
 
@@ -574,16 +612,16 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // spawnRate (cantidad de cajas-trampa), goalScore (par de comandos),
         // maxCommands, maze, start, cheese, traps y theme.
         const MOUSE_LEVELS = [
-        {id: 1, levelTitle: "¡El primer queso! 🧀", message: "El ratón huele queso cerca. ¡Guiálo con cuidado y evitá la caja!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [1, 1, 1, 1, 1, 1, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[5, 3]], cats: [], snaps: [[6, 5]], speed: 500, spawnRate: 1, maxCommands: 15, goalScore: 11, theme: {floor: "#f5f5dc", line: "#ccc", wall: "#464646", edge: "#333"}},
-        {id: 2, levelTitle: "El queso del vecino 🧀", message: "Hay otro queso esperando. ¡Nivel 2, vamos!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 1, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 1], traps: [[4, 4]], cats: [[6, 3]], snaps: [[2, 5]], speed: 490, spawnRate: 1, maxCommands: 14, goalScore: 9, theme: {floor: "#faf6e9", line: "#d8cfae", wall: "#5d4037", edge: "#3e2723"}},
-        {id: 3, levelTitle: "Cuidado con las cajas 📦", message: "¡Paso 3 completado! Las cajas están por todos lados.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [4, 6], traps: [[8, 6]], cats: [[4, 2]], snaps: [[2, 4]], speed: 470, spawnRate: 1, maxCommands: 13, goalScore: 8, theme: {floor: "#f3efe4", line: "#c9c2ab", wall: "#6d4c41", edge: "#4e342e"}},
-        {id: 4, levelTitle: "Doble trampa 📦📦", message: "Ahora hay DOS cajas-trampa. Pensá cada movimiento.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[3, 4], [4, 6]], cats: [[6, 2]], snaps: [[2, 6]], speed: 450, spawnRate: 2, maxCommands: 15, goalScore: 11, theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#4e342e", edge: "#32241f"}},
-        {id: 5, levelTitle: "Queso de medianoche 🌙", message: "De noche el queso sabe mejor. ¡Pero mirá dónde pisás! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 1, 1], [1, 0, 1, 1, 1, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [6, 4], traps: [[3, 4], [7, 6]], cats: [[3, 2]], snaps: [[7, 5]], speed: 430, spawnRate: 2, maxCommands: 18, goalScore: 14, theme: {floor: "#e8eaf6", line: "#9fa8da", wall: "#37474f", edge: "#1c262b"}},
-        {id: 6, levelTitle: "El sótano misterioso 🏚️", message: "Bajamos al sótano. ¡El queso está más lejos ahora! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 0, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 0, 1, 1, 1], [1, 0, 1, 0, 1, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [7, 5], traps: [[3, 3], [4, 3]], cats: [[6, 4]], snaps: [[3, 5]], speed: 410, spawnRate: 2, maxCommands: 18, goalScore: 14, theme: {floor: "#eceff1", line: "#b0bec5", wall: "#455a64", edge: "#263238"}},
-        {id: 7, levelTitle: "La gran reserva 🧀", message: "¡Casi lo lográs! La reserva de queso está protegida. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 1, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [1, 4], traps: [[6, 5], [7, 5]], cats: [[5, 5]], snaps: [], speed: 390, spawnRate: 2, maxCommands: 16, goalScore: 13, theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#5d4037", edge: "#3e2723"}},
-        {id: 8, levelTitle: "Corre, ratoncito, corre ⚡", message: "¡Más rápido! Tres cajas y poco tiempo para pensar. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [4, 1], traps: [[5, 5], [7, 3], [6, 3]], cats: [[5, 3]], snaps: [[5, 1]], speed: 370, spawnRate: 3, maxCommands: 18, goalScore: 15, theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#6a1b9a", edge: "#4a148c"}},
-        {id: 9, levelTitle: "El queso del rey 👑", message: "Solo los valientes llegan al queso del rey. ¡Último esfuerzo! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 0, 1, 0, 1], [1, 0, 1, 1, 1, 0, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [7, 3], traps: [[5, 3], [8, 3], [8, 4]], cats: [[3, 3]], snaps: [[8, 5]], speed: 350, spawnRate: 3, maxCommands: 19, goalScore: 16, theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#4527a0", edge: "#311b92"}},
-        {id: 10, levelTitle: "¡El Gran Queso Dorado! 🏆", message: "¡Último nivel! Conseguí el legendario Queso Dorado. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 0, 0, 0, 1], [1, 1, 0, 0, 1, 0, 0, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [6, 2], traps: [[8, 1], [7, 1], [6, 1]], cats: [[3, 2]], snaps: [[5, 5]], speed: 380, spawnRate: 3, maxCommands: 19, goalScore: 16, theme: {floor: "#fffde7", line: "#f0d060", wall: "#6d4c41", edge: "#4e342e"}, finale: true}
+        {id: 1, levelTitle: "¡El primer queso! 🧀", message: "El ratón huele queso cerca. ¡Guiálo con cuidado y evitá la caja!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [1, 1, 1, 1, 1, 1, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[5, 3]], cats: [], snaps: [[6, 5]], speed: 500, spawnRate: 1, maxCommands: 15, goalScore: 11, theme: {floor: "#f5f5dc", line: "#ccc", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}},
+        {id: 2, levelTitle: "El queso del vecino 🧀", message: "Hay otro queso esperando. ¡Nivel 2, vamos!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 1, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 1], traps: [[4, 4]], cats: [[6, 3]], snaps: [[2, 5]], speed: 490, spawnRate: 1, maxCommands: 14, goalScore: 9, theme: {floor: "#faf6e9", line: "#d8cfae", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}},
+        {id: 3, levelTitle: "Cuidado con las cajas 📦", message: "¡Paso 3 completado! Las cajas están por todos lados.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [4, 6], traps: [[8, 6]], cats: [[4, 2]], snaps: [[2, 4]], speed: 470, spawnRate: 1, maxCommands: 13, goalScore: 8, theme: {floor: "#f3efe4", line: "#c9c2ab", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}},
+        {id: 4, levelTitle: "Doble trampa 📦📦", message: "Ahora hay DOS cajas-trampa. Pensá cada movimiento.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[3, 4], [4, 6]], cats: [[6, 2]], snaps: [[2, 6]], speed: 450, spawnRate: 2, maxCommands: 15, goalScore: 11, theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}},
+        {id: 5, levelTitle: "Queso de medianoche 🌙", message: "De noche el queso sabe mejor. ¡Pero mirá dónde pisás! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 1, 1], [1, 0, 1, 1, 1, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [6, 4], traps: [[3, 4], [7, 6]], cats: [[3, 2]], snaps: [[7, 5]], speed: 430, spawnRate: 2, maxCommands: 18, goalScore: 14, theme: {floor: "#e8eaf6", line: "#9fa8da", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}},
+        {id: 6, levelTitle: "El sótano misterioso 🏚️", message: "Bajamos al sótano. ¡El queso está más lejos ahora! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 0, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 0, 1, 1, 1], [1, 0, 1, 0, 1, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [7, 5], traps: [[3, 3], [4, 3]], cats: [[6, 4]], snaps: [[3, 5]], speed: 410, spawnRate: 2, maxCommands: 18, goalScore: 14, theme: {floor: "#eceff1", line: "#b0bec5", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}},
+        {id: 7, levelTitle: "La gran reserva 🧀", message: "¡Casi lo lográs! La reserva de queso está protegida. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 1, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [1, 4], traps: [[6, 5], [7, 5]], cats: [[5, 5]], snaps: [], speed: 390, spawnRate: 2, maxCommands: 16, goalScore: 13, theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}},
+        {id: 8, levelTitle: "Corre, ratoncito, corre ⚡", message: "¡Más rápido! Tres cajas y poco tiempo para pensar. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [4, 1], traps: [[5, 5], [7, 3], [6, 3]], cats: [[5, 3]], snaps: [[5, 1]], speed: 370, spawnRate: 3, maxCommands: 18, goalScore: 15, theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}},
+        {id: 9, levelTitle: "El queso del rey 👑", message: "Solo los valientes llegan al queso del rey. ¡Último esfuerzo! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 0, 1, 0, 1], [1, 0, 1, 1, 1, 0, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [7, 3], traps: [[5, 3], [8, 3], [8, 4]], cats: [[3, 3]], snaps: [[8, 5]], speed: 350, spawnRate: 3, maxCommands: 19, goalScore: 16, theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}},
+        {id: 10, levelTitle: "¡El Gran Queso Dorado! 🏆", message: "¡Último nivel! Conseguí el legendario Queso Dorado. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 0, 0, 0, 1], [1, 1, 0, 0, 1, 0, 0, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [6, 2], traps: [[8, 1], [7, 1], [6, 1]], cats: [[3, 2]], snaps: [[5, 5]], speed: 380, spawnRate: 3, maxCommands: 19, goalScore: 16, theme: {floor: "#fffde7", line: "#f0d060", wall: "#f6c945", wallAlt: "#dda400", edge: "#9a6a00"}, finale: true}
 
         ];
 
@@ -701,6 +739,38 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             document.getElementById('menuProgress').textContent = 'Nivel ' + lvl + '/10 ⭐ ' + total;
         }
 
+        // Borrado total del progreso (con diálogo de aceptación)
+        const PROGRESS_KEYS = ['sara_mouse_unlocked', 'sara_mouse_wins', 'sara_mouse_stars', 'sara_unlocked', 'sara_stars'];
+
+        function askWipeProgress() {
+            sfxClick();
+            document.getElementById('wipeOverlay').classList.add('show');
+        }
+
+        function closeWipeOverlay() {
+            sfxClick();
+            document.getElementById('wipeOverlay').classList.remove('show');
+        }
+
+        function wipeAllProgress() {
+            try {
+                PROGRESS_KEYS.forEach(k => localStorage.removeItem(k));
+            } catch (e) {}
+            PROGRESS_KEYS.forEach(k => { try { delete memStore[k]; } catch (e) {} });
+            mouseState.levelIdx = 0;
+            mouseState.stars = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            mouseState.unlocked = 1;
+            mouseState.wins = 0;
+            schoolState.levelIdx = 0;
+            schoolState.stars = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            schoolState.unlocked = 1;
+            document.getElementById('wipeOverlay').classList.remove('show');
+            loadMouseLevel(0, {});
+            loadSchoolLevel(0, {});
+            showMenu();
+            showMessage('Progreso borrado. ¡A empezar de nuevo! 🧹', 'info');
+        }
+
         // Acordeón
         function toggleAccordion(id) {
             const content = document.getElementById(id);
@@ -732,11 +802,20 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             for (let y = 0; y < GRID_ROWS; y++) {
                 for (let x = 0; x < GRID_COLS; x++) {
                     if (maze[y][x] === 1) {
-                        ctx.fillStyle = theme.wall;
+                        ctx.fillStyle = (theme.wallAlt && ((x + y) % 2 === 0)) ? theme.wallAlt : theme.wall;
                         ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                         ctx.strokeStyle = theme.edge;
                         ctx.lineWidth = 2;
                         ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                        if (theme.wallAlt && ((x * 3 + y * 7) % 5 === 0)) {
+                            ctx.fillStyle = 'rgba(154, 106, 0, 0.5)';
+                            ctx.beginPath();
+                            ctx.ellipse(x * CELL_SIZE + CELL_SIZE * 0.32, y * CELL_SIZE + CELL_SIZE * 0.4, 5, 3.5, 0.3, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.ellipse(x * CELL_SIZE + CELL_SIZE * 0.68, y * CELL_SIZE + CELL_SIZE * 0.62, 3.5, 2.5, -0.3, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
                     } else {
                         ctx.fillStyle = theme.floor;
                         ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
@@ -847,7 +926,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             // Trampas clásicas fijas (todas menos la que se está cerrando)
             snaps.forEach(tr => {
                 if (!(snapAnim && tr[0] === mouseState.hitSnap[0] && tr[1] === mouseState.hitSnap[1])) {
-                    drawEmoji(ctx, '\U0001FAA4', tr[0], tr[1], { scale: 1.1 });
+                    drawEmoji(ctx, '🪤', tr[0], tr[1], { scale: 1.1 });
                 }
             });
 
@@ -911,7 +990,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                 const shakeX = Math.sin(t * 55) * 5 * (1 - t);
                 ctx.save();
                 ctx.translate(shakeX, 0);
-                drawEmoji(ctx, '\U0001FAA4', hs[0], hs[1], { scale: 1 + t * 0.6 });
+                drawEmoji(ctx, '🪤', hs[0], hs[1], { scale: 1 + t * 0.6 });
                 ctx.restore();
                 if (t > 0.2) {
                     drawEmoji(ctx, '💥', hs[0], hs[1] - 0.55, { scale: 0.6 + t * 0.8, alpha: 1 - t * 0.5 });
@@ -1018,7 +1097,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                     const lv = mouseLevel();
                     updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                     sfxLose();
-                    showMessage('¡La trampa se cerró de golpe! \U0001FAA4', 'lose');
+                    showMessage('¡La trampa se cerró de golpe! 🪤', 'lose');
                     drawMouseGame();
                 }
             }
@@ -2038,6 +2117,10 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // Atajos de teclado
         document.addEventListener('keydown', (e) => {
             if (overlayVisible()) return;
+            if (document.getElementById('wipeOverlay').classList.contains('show')) {
+                if (e.code === 'Escape') closeWipeOverlay();
+                return;
+            }
             if (e.code === 'Space') {
                 e.preventDefault();
                 if (document.getElementById('mouseGame').classList.contains('active')) {
@@ -2062,6 +2145,13 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         updateMenuProgress();
         updateMouseMenuProgress();
         if (!soundOn) document.getElementById('muteBtn').textContent = '🔇';
+
+        // PWA: registrar el Service Worker para instalar el juego (solo http/https)
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            });
+        }
     </script>
 </body>
 </html>
