@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Karts - El Ratón y el Queso</title>
+    <title>Code Karts - Juegos de Programación</title>
     <style>
         * {
             margin: 0;
@@ -15,37 +15,117 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
         }
         
         h1 {
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
             margin-bottom: 20px;
-            font-size: 2.5em;
+            font-size: clamp(1.5em, 4vw, 2.5em);
         }
         
-        .game-container {
+        /* Pantalla de selección */
+        .menu-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            gap: 30px;
+        }
+        
+        .game-cards {
             display: flex;
             gap: 30px;
             flex-wrap: wrap;
             justify-content: center;
-            max-width: 1400px;
+        }
+        
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 300px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        .game-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        
+        .game-card h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .game-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        /* Pantalla de juego */
+        .game-screen {
+            display: none;
+        }
+        
+        .game-screen.active {
+            display: block;
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         
         .maze-section {
             background: white;
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         
         canvas {
             border-radius: 10px;
             display: block;
+            max-width: 100%;
+            height: auto;
         }
         
         .controls-section {
@@ -53,16 +133,49 @@
             border-radius: 15px;
             padding: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            min-width: 300px;
+            min-width: 280px;
+            max-width: 350px;
         }
         
         .section-title {
-            font-size: 1.3em;
+            font-size: 1.2em;
             font-weight: bold;
             color: #333;
             margin-bottom: 15px;
             padding-bottom: 10px;
             border-bottom: 2px solid #667eea;
+        }
+        
+        /* Instrucciones primero */
+        .instructions-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .instructions-box h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        
+        .instructions-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .instructions-box li {
+            padding: 4px 0;
+            color: #555;
+            font-size: 0.85em;
+        }
+        
+        .instructions-box li::before {
+            content: '▸ ';
+            color: #667eea;
+            font-weight: bold;
         }
         
         .palette {
@@ -73,7 +186,7 @@
         }
         
         .block {
-            padding: 15px 10px;
+            padding: 12px 8px;
             border-radius: 10px;
             text-align: center;
             font-weight: bold;
@@ -82,6 +195,7 @@
             transition: transform 0.2s, box-shadow 0.2s;
             user-select: none;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 0.85em;
         }
         
         .block:hover {
@@ -102,9 +216,9 @@
             background: #f5f5f5;
             border: 3px dashed #ccc;
             border-radius: 10px;
-            min-height: 300px;
+            min-height: 200px;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .program-area.drag-over {
@@ -113,15 +227,16 @@
         }
         
         .program-block {
-            padding: 12px 15px;
+            padding: 10px 12px;
             border-radius: 8px;
             text-align: center;
             font-weight: bold;
             color: white;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             cursor: pointer;
             position: relative;
             animation: slideIn 0.3s ease;
+            font-size: 0.85em;
         }
         
         @keyframes slideIn {
@@ -138,10 +253,10 @@
         .program-block:hover::after {
             content: '✕';
             position: absolute;
-            right: 10px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 1.2em;
+            font-size: 1.1em;
         }
         
         .program-block.adelante { background: linear-gradient(135deg, #4CAF50, #45a049); }
@@ -165,10 +280,10 @@
         
         .btn {
             flex: 1;
-            padding: 15px 20px;
+            padding: 12px 15px;
             border: none;
             border-radius: 10px;
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
@@ -197,14 +312,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 30px 50px;
+            padding: 25px 40px;
             border-radius: 15px;
-            font-size: 2em;
+            font-size: clamp(1.2em, 3vw, 1.8em);
             font-weight: bold;
             color: white;
             z-index: 1000;
             animation: fadeInOut 3s ease forwards;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 90%;
         }
         
         .message.win {
@@ -227,98 +344,179 @@
             100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
         }
         
-        .instructions {
-            background: rgba(255,255,255,0.9);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            max-width: 600px;
-        }
-        
-        .instructions h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .instructions ul {
-            list-style: none;
-            padding-left: 0;
-        }
-        
-        .instructions li {
-            padding: 5px 0;
-            color: #555;
-        }
-        
-        .instructions li::before {
-            content: '▸ ';
-            color: #667eea;
-            font-weight: bold;
-        }
-        
         .counter {
             text-align: center;
             color: #666;
-            margin-top: 10px;
-            font-size: 0.9em;
+            margin-top: 8px;
+            font-size: 0.85em;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .controls-section {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            canvas {
+                width: 100%;
+                height: auto;
+            }
+            
+            .game-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .palette {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .block {
+                padding: 10px 5px;
+                font-size: 0.8em;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🐭 Code Karts - El Ratón y el Queso 🧀</h1>
-    
-    <div class="game-container">
-        <div class="maze-section">
-            <canvas id="gameCanvas" width="600" height="480"></canvas>
+    <div class="container">
+        <h1>🎮 Code Karts - Juegos de Programación</h1>
+        
+        <!-- Menú principal -->
+        <div class="menu-screen" id="menuScreen">
+            <div class="game-cards">
+                <div class="game-card" onclick="showGame('mouse')">
+                    <div style="font-size: 80px;">🐭</div>
+                    <h2>El Ratón y el Queso</h2>
+                    <p>Guía al ratón hasta el queso evitando la trampa</p>
+                </div>
+                <div class="game-card" onclick="showGame('school')">
+                    <img src="icono.jpg" alt="Logo Escuela">
+                    <h2>El Nene a la Escuela</h2>
+                    <p>Ayuda al nene a llegar a la escuela esquivando obstáculos</p>
+                </div>
+            </div>
         </div>
         
-        <div class="controls-section">
-            <div class="section-title">🧩 Bloques de Comandos</div>
-            <div class="palette">
-                <div class="block adelante" draggable="true" data-command="adelante">⬆ ADELANTE</div>
-                <div class="block atras" draggable="true" data-command="atras">⬇ ATRÁS</div>
-                <div class="block izquierda" draggable="true" data-command="izquierda">⬅ IZQUIERDA</div>
-                <div class="block derecha" draggable="true" data-command="derecha">➡ DERECHA</div>
-            </div>
-            
-            <div class="section-title">📋 Programa</div>
-            <div class="program-area" id="programArea">
-                <p style="color: #999; text-align: center; margin-top: 120px;">
-                    Arrastra los bloques aquí
-                </p>
-            </div>
-            <div class="counter" id="counter">0 / 8 comandos</div>
-            
-            <div class="buttons">
-                <button class="btn btn-run" id="runBtn">▶ EJECUTAR</button>
-                <button class="btn btn-reset" id="resetBtn">↺ REINICIAR</button>
+        <!-- Juego del Ratón -->
+        <div class="game-screen" id="mouseGame">
+            <button class="back-btn" onclick="showMenu()">← Volver al menú</button>
+            <div class="game-container">
+                <div class="maze-section">
+                    <canvas id="mouseCanvas" width="600" height="480"></canvas>
+                </div>
+                
+                <div class="controls-section">
+                    <div class="instructions-box">
+                        <h3>📖 Instrucciones</h3>
+                        <ul>
+                            <li>Arrastra los bloques al área de programa</li>
+                            <li>Haz clic en un bloque para eliminarlo</li>
+                            <li>Presiona EJECUTAR o ESPACIO</li>
+                            <li>Lleva al ratón al queso amarillo</li>
+                            <li>Evita la trampa roja</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="section-title">🧩 Bloques</div>
+                    <div class="palette">
+                        <div class="block adelante" draggable="true" data-command="adelante" data-game="mouse">⬆ ADELANTE</div>
+                        <div class="block atras" draggable="true" data-command="atras" data-game="mouse">⬇ ATRÁS</div>
+                        <div class="block izquierda" draggable="true" data-command="izquierda" data-game="mouse">⬅ IZQUIERDA</div>
+                        <div class="block derecha" draggable="true" data-command="derecha" data-game="mouse">➡ DERECHA</div>
+                    </div>
+                    
+                    <div class="section-title">📋 Programa</div>
+                    <div class="program-area" id="mouseProgramArea">
+                        <p style="color: #999; text-align: center; margin-top: 80px;">Arrastra los bloques aquí</p>
+                    </div>
+                    <div class="counter" id="mouseCounter">0 / 8 comandos</div>
+                    
+                    <div class="buttons">
+                        <button class="btn btn-run" onclick="runMouseGame()">▶ EJECUTAR</button>
+                        <button class="btn btn-reset" onclick="resetMouseGame()">↺ REINICIAR</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="instructions">
-        <h3>📖 Instrucciones</h3>
-        <ul>
-            <li>Arrastra los bloques de la paleta al área de programa</li>
-            <li>Haz clic en un bloque del programa para eliminarlo</li>
-            <li>Presiona EJECUTAR para ver al ratón en acción</li>
-            <li>Guía al ratón hasta el queso amarillo para ganar</li>
-            <li>Evita la trampa roja o perderás</li>
-            <li>El ratón no puede atravesar las paredes</li>
-        </ul>
+        
+        <!-- Juego del Nene a la Escuela -->
+        <div class="game-screen" id="schoolGame">
+            <button class="back-btn" onclick="showMenu()">← Volver al menú</button>
+            <div class="game-container">
+                <div class="maze-section">
+                    <canvas id="schoolCanvas" width="600" height="480"></canvas>
+                </div>
+                
+                <div class="controls-section">
+                    <div class="instructions-box">
+                        <h3>📖 Instrucciones</h3>
+                        <ul>
+                            <li>Arrastra los bloques al área de programa</li>
+                            <li>Haz clic en un bloque para eliminarlo</li>
+                            <li>Presiona EJECUTAR o ESPACIO</li>
+                            <li>Lleva al nene a la escuela</li>
+                            <li>Evita los charcos de barro</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="section-title">🧩 Bloques</div>
+                    <div class="palette">
+                        <div class="block adelante" draggable="true" data-command="adelante" data-game="school">⬆ ADELANTE</div>
+                        <div class="block atras" draggable="true" data-command="atras" data-game="school">⬇ ATRÁS</div>
+                        <div class="block izquierda" draggable="true" data-command="izquierda" data-game="school">⬅ IZQUIERDA</div>
+                        <div class="block derecha" draggable="true" data-command="derecha" data-game="school">➡ DERECHA</div>
+                    </div>
+                    
+                    <div class="section-title">📋 Programa</div>
+                    <div class="program-area" id="schoolProgramArea">
+                        <p style="color: #999; text-align: center; margin-top: 80px;">Arrastra los bloques aquí</p>
+                    </div>
+                    <div class="counter" id="schoolCounter">0 / 8 comandos</div>
+                    
+                    <div class="buttons">
+                        <button class="btn btn-run" onclick="runSchoolGame()">▶ EJECUTAR</button>
+                        <button class="btn btn-reset" onclick="resetSchoolGame()">↺ REINICIAR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Configuración del juego
+        // Configuración general
         const CELL_SIZE = 60;
         const GRID_COLS = 10;
         const GRID_ROWS = 8;
-        const GRID_OFFSET_X = 0;
-        const GRID_OFFSET_Y = 0;
         const MAX_COMMANDS = 8;
 
-        // Laberinto (1 = pared, 0 = camino)
-        const MAZE = [
+        // Direcciones
+        const DIRECTIONS = {
+            'adelante': { x: 0, y: -1 },
+            'atras': { x: 0, y: 1 },
+            'izquierda': { x: -1, y: 0 },
+            'derecha': { x: 1, y: 0 },
+        };
+
+        // Laberinto del Ratón
+        const MOUSE_MAZE = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
             [1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
@@ -329,167 +527,175 @@
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ];
 
-        // Posiciones especiales
         const MOUSE_START = { x: 1, y: 1 };
         const CHEESE_POS = { x: 8, y: 5 };
         const TRAP_POS = { x: 5, y: 3 };
 
-        // Direcciones
-        const DIRECTIONS = {
-            'adelante': { x: 0, y: -1 },
-            'atras': { x: 0, y: 1 },
-            'izquierda': { x: -1, y: 0 },
-            'derecha': { x: 1, y: 0 },
+        // Laberinto del Nene
+        const SCHOOL_MAZE = [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 0, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ];
+
+        const SCHOOL_START = { x: 1, y: 1 };
+        const SCHOOL_POS = { x: 8, y: 5 };
+        const MUD_PUDDLES = [{ x: 4, y: 2 }, { x: 6, y: 4 }, { x: 3, y: 5 }];
+
+        // Estados de los juegos
+        let mouseState = {
+            pos: { ...MOUSE_START },
+            program: [],
+            executing: false,
+            currentIndex: 0
         };
 
-        // Estado del juego
-        let mousePos = { ...MOUSE_START };
-        let program = [];
-        let executing = false;
-        let currentCommandIndex = 0;
+        let schoolState = {
+            pos: { ...SCHOOL_START },
+            program: [],
+            executing: false,
+            currentIndex: 0
+        };
 
-        // Canvas
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        // Navegación
+        function showGame(game) {
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('mouseGame').classList.remove('active');
+            document.getElementById('schoolGame').classList.remove('active');
+            
+            if (game === 'mouse') {
+                document.getElementById('mouseGame').classList.add('active');
+                drawMouseGame();
+            } else {
+                document.getElementById('schoolGame').classList.add('active');
+                drawSchoolGame();
+            }
+        }
 
-        // Elementos del DOM
-        const programArea = document.getElementById('programArea');
-        const counter = document.getElementById('counter');
-        const runBtn = document.getElementById('runBtn');
-        const resetBtn = document.getElementById('resetBtn');
+        function showMenu() {
+            document.getElementById('menuScreen').style.display = 'flex';
+            document.getElementById('mouseGame').classList.remove('active');
+            document.getElementById('schoolGame').classList.remove('active');
+        }
 
-        // Dibujar el juego
-        function draw() {
-            // Limpiar canvas
+        // Dibujar juego del ratón
+        function drawMouseGame() {
+            const canvas = document.getElementById('mouseCanvas');
+            const ctx = canvas.getContext('2d');
+            
             ctx.fillStyle = '#f5f5dc';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar laberinto
-            for (let fila = 0; fila < GRID_ROWS; fila++) {
-                for (let col = 0; col < GRID_COLS; col++) {
-                    const x = GRID_OFFSET_X + col * CELL_SIZE;
-                    const y = GRID_OFFSET_Y + fila * CELL_SIZE;
-
-                    if (MAZE[fila][col] === 1) {
-                        // Pared
+            // Laberinto
+            for (let y = 0; y < GRID_ROWS; y++) {
+                for (let x = 0; x < GRID_COLS; x++) {
+                    if (MOUSE_MAZE[y][x] === 1) {
                         ctx.fillStyle = '#464646';
-                        ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                         ctx.strokeStyle = '#333';
                         ctx.lineWidth = 2;
-                        ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     } else {
-                        // Camino
                         ctx.fillStyle = '#f5f5dc';
-                        ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                         ctx.strokeStyle = '#ccc';
                         ctx.lineWidth = 1;
-                        ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     }
                 }
             }
 
-            // Dibujar queso
-            const cheeseX = GRID_OFFSET_X + CHEESE_POS.x * CELL_SIZE + CELL_SIZE / 2;
-            const cheeseY = GRID_OFFSET_Y + CHEESE_POS.y * CELL_SIZE + CELL_SIZE / 2;
+            // Queso
+            drawEmoji(ctx, '🧀', CHEESE_POS.x, CHEESE_POS.y);
             
-            ctx.fillStyle = '#ffd700';
-            ctx.beginPath();
-            ctx.arc(cheeseX, cheeseY, 20, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#ff8c00';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            // Trampa
+            drawEmoji(ctx, '🪤', TRAP_POS.x, TRAP_POS.y);
             
-            // Agujeros del queso
-            ctx.fillStyle = '#ff8c00';
+            // Ratón
+            drawEmoji(ctx, '🐭', mouseState.pos.x, mouseState.pos.y);
+        }
+
+        // Dibujar juego del nene
+        function drawSchoolGame() {
+            const canvas = document.getElementById('schoolCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#e8f5e9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Laberinto
+            for (let y = 0; y < GRID_ROWS; y++) {
+                for (let x = 0; x < GRID_COLS; x++) {
+                    if (SCHOOL_MAZE[y][x] === 1) {
+                        ctx.fillStyle = '#5d4037';
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeStyle = '#3e2723';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    } else {
+                        ctx.fillStyle = '#e8f5e9';
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeStyle = '#a5d6a7';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    }
+                }
+            }
+
+            // Escuela (usando el logo)
+            const schoolX = SCHOOL_POS.x * CELL_SIZE + CELL_SIZE / 2;
+            const schoolY = SCHOOL_POS.y * CELL_SIZE + CELL_SIZE / 2;
+            
+            ctx.fillStyle = '#1565c0';
+            ctx.fillRect(schoolX - 25, schoolY - 20, 50, 40);
+            ctx.fillStyle = '#0d47a1';
+            ctx.fillRect(schoolX - 20, schoolY - 15, 40, 30);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('ESCUELA', schoolX, schoolY + 4);
+            
+            // Techo
+            ctx.fillStyle = '#b71c1c';
             ctx.beginPath();
-            ctx.arc(cheeseX - 5, cheeseY - 5, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(cheeseX + 7, cheeseY + 3, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(cheeseX - 2, cheeseY + 8, 2, 0, Math.PI * 2);
+            ctx.moveTo(schoolX - 30, schoolY - 20);
+            ctx.lineTo(schoolX, schoolY - 35);
+            ctx.lineTo(schoolX + 30, schoolY - 20);
+            ctx.closePath();
             ctx.fill();
 
-            // Dibujar trampa
-            const trapX = GRID_OFFSET_X + TRAP_POS.x * CELL_SIZE + CELL_SIZE / 2;
-            const trapY = GRID_OFFSET_Y + TRAP_POS.y * CELL_SIZE + CELL_SIZE / 2;
+            // Charcos de barro
+            MUD_PUDDLES.forEach(puddle => {
+                drawEmoji(ctx, '💧', puddle.x, puddle.y);
+            });
             
-            ctx.fillStyle = '#dc143c';
-            ctx.beginPath();
-            ctx.arc(trapX, trapY, 20, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // X de trampa
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(trapX - 10, trapY - 10);
-            ctx.lineTo(trapX + 10, trapY + 10);
-            ctx.moveTo(trapX + 10, trapY - 10);
-            ctx.lineTo(trapX - 10, trapY + 10);
-            ctx.stroke();
+            // Nene
+            drawEmoji(ctx, '👦', schoolState.pos.x, schoolState.pos.y);
+        }
 
-            // Dibujar ratón
-            const mouseX = GRID_OFFSET_X + mousePos.x * CELL_SIZE + CELL_SIZE / 2;
-            const mouseY = GRID_OFFSET_Y + mousePos.y * CELL_SIZE + CELL_SIZE / 2;
-            
-            // Cuerpo
-            ctx.fillStyle = '#808080';
-            ctx.beginPath();
-            ctx.arc(mouseX, mouseY, 18, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#555';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // Orejas
-            ctx.fillStyle = '#808080';
-            ctx.beginPath();
-            ctx.arc(mouseX - 12, mouseY - 12, 8, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(mouseX + 12, mouseY - 12, 8, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = '#ffb6c1';
-            ctx.beginPath();
-            ctx.arc(mouseX - 12, mouseY - 12, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(mouseX + 12, mouseY - 12, 4, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Ojos
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(mouseX - 5, mouseY - 3, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(mouseX + 5, mouseY - 3, 3, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Nariz
-            ctx.fillStyle = '#ffb6c1';
-            ctx.beginPath();
-            ctx.arc(mouseX, mouseY + 5, 3, 0, Math.PI * 2);
-            ctx.fill();
+        // Dibujar emoji en el canvas
+        function drawEmoji(ctx, emoji, gridX, gridY) {
+            ctx.font = '30px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emoji, gridX * CELL_SIZE + CELL_SIZE / 2, gridY * CELL_SIZE + CELL_SIZE / 2);
         }
 
         // Verificar movimiento válido
-        function isValidMove(x, y) {
-            if (x >= 0 && x < GRID_COLS && y >= 0 && y < GRID_ROWS) {
-                return MAZE[y][x] === 0;
-            }
-            return false;
+        function isValidMove(maze, x, y) {
+            return x >= 0 && x < GRID_COLS && y >= 0 && y < GRID_ROWS && maze[y][x] === 0;
         }
 
         // Mostrar mensaje
         function showMessage(text, type) {
+            const existing = document.querySelector('.message');
+            if (existing) existing.remove();
+            
             const msg = document.createElement('div');
             msg.className = `message ${type}`;
             msg.textContent = text;
@@ -498,87 +704,81 @@
         }
 
         // Actualizar programa en el DOM
-        function updateProgramDisplay() {
-            programArea.innerHTML = '';
+        function updateProgramDisplay(state, areaId, counterId) {
+            const area = document.getElementById(areaId);
+            area.innerHTML = '';
             
-            if (program.length === 0) {
-                programArea.innerHTML = '<p style="color: #999; text-align: center; margin-top: 120px;">Arrastra los bloques aquí</p>';
+            if (state.program.length === 0) {
+                area.innerHTML = '<p style="color: #999; text-align: center; margin-top: 60px;">Arrastra los bloques aquí</p>';
             } else {
-                program.forEach((cmd, index) => {
+                state.program.forEach((cmd, index) => {
                     const block = document.createElement('div');
                     block.className = `program-block ${cmd}`;
-                    if (executing && index === currentCommandIndex) {
+                    if (state.executing && index === state.currentIndex) {
                         block.classList.add('executing');
                     }
                     block.textContent = cmd.toUpperCase();
-                    block.addEventListener('click', () => removeFromProgram(index));
-                    programArea.appendChild(block);
+                    block.addEventListener('click', () => {
+                        if (!state.executing) {
+                            state.program.splice(index, 1);
+                            updateProgramDisplay(state, areaId, counterId);
+                        }
+                    });
+                    area.appendChild(block);
                 });
             }
             
-            counter.textContent = `${program.length} / ${MAX_COMMANDS} comandos`;
+            document.getElementById(counterId).textContent = `${state.program.length} / ${MAX_COMMANDS} comandos`;
         }
 
         // Añadir al programa
-        function addToProgram(command) {
-            if (program.length < MAX_COMMANDS && !executing) {
-                program.push(command);
-                updateProgramDisplay();
+        function addToProgram(state, command, areaId, counterId) {
+            if (state.program.length < MAX_COMMANDS && !state.executing) {
+                state.program.push(command);
+                updateProgramDisplay(state, areaId, counterId);
             }
         }
 
-        // Eliminar del programa
-        function removeFromProgram(index) {
-            if (!executing) {
-                program.splice(index, 1);
-                updateProgramDisplay();
-            }
-        }
-
-        // Ejecutar programa
-        function runProgram() {
-            if (program.length === 0) {
+        // Juego del Ratón
+        function runMouseGame() {
+            if (mouseState.program.length === 0) {
                 showMessage('¡Añade comandos primero!', 'info');
                 return;
             }
+            if (mouseState.executing) return;
             
-            if (executing) return;
-            
-            mousePos = { ...MOUSE_START };
-            executing = true;
-            currentCommandIndex = 0;
-            updateProgramDisplay();
-            
-            executeNextCommand();
+            mouseState.pos = { ...MOUSE_START };
+            mouseState.executing = true;
+            mouseState.currentIndex = 0;
+            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
+            executeMouseCommand();
         }
 
-        // Ejecutar siguiente comando
-        function executeNextCommand() {
-            if (currentCommandIndex < program.length) {
-                const cmd = program[currentCommandIndex];
+        function executeMouseCommand() {
+            if (mouseState.currentIndex < mouseState.program.length) {
+                const cmd = mouseState.program[mouseState.currentIndex];
                 const dir = DIRECTIONS[cmd];
-                const newX = mousePos.x + dir.x;
-                const newY = mousePos.y + dir.y;
+                const newX = mouseState.pos.x + dir.x;
+                const newY = mouseState.pos.y + dir.y;
                 
-                if (isValidMove(newX, newY)) {
-                    mousePos = { x: newX, y: newY };
+                if (isValidMove(MOUSE_MAZE, newX, newY)) {
+                    mouseState.pos = { x: newX, y: newY };
                 } else {
                     showMessage('¡El ratón chocó con una pared!', 'info');
                 }
                 
-                currentCommandIndex++;
-                updateProgramDisplay();
-                draw();
+                mouseState.currentIndex++;
+                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
+                drawMouseGame();
                 
-                setTimeout(executeNextCommand, 500);
+                setTimeout(executeMouseCommand, 500);
             } else {
-                // Verificar condiciones de victoria/derrota
-                executing = false;
-                updateProgramDisplay();
+                mouseState.executing = false;
+                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
                 
-                if (mousePos.x === CHEESE_POS.x && mousePos.y === CHEESE_POS.y) {
+                if (mouseState.pos.x === CHEESE_POS.x && mouseState.pos.y === CHEESE_POS.y) {
                     showMessage('¡GANASTE! El ratón llegó al queso', 'win');
-                } else if (mousePos.x === TRAP_POS.x && mousePos.y === TRAP_POS.y) {
+                } else if (mouseState.pos.x === TRAP_POS.x && mouseState.pos.y === TRAP_POS.y) {
                     showMessage('¡PERDISTE! El ratón cayó en la trampa', 'lose');
                 } else {
                     showMessage('El ratón no llegó a ningún destino', 'info');
@@ -586,59 +786,127 @@
             }
         }
 
-        // Reiniciar juego
-        function resetGame() {
-            mousePos = { ...MOUSE_START };
-            program = [];
-            executing = false;
-            currentCommandIndex = 0;
-            updateProgramDisplay();
-            draw();
+        function resetMouseGame() {
+            mouseState.pos = { ...MOUSE_START };
+            mouseState.program = [];
+            mouseState.executing = false;
+            mouseState.currentIndex = 0;
+            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
+            drawMouseGame();
+        }
+
+        // Juego del Nene
+        function runSchoolGame() {
+            if (schoolState.program.length === 0) {
+                showMessage('¡Añade comandos primero!', 'info');
+                return;
+            }
+            if (schoolState.executing) return;
+            
+            schoolState.pos = { ...SCHOOL_START };
+            schoolState.executing = true;
+            schoolState.currentIndex = 0;
+            updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
+            executeSchoolCommand();
+        }
+
+        function executeSchoolCommand() {
+            if (schoolState.currentIndex < schoolState.program.length) {
+                const cmd = schoolState.program[schoolState.currentIndex];
+                const dir = DIRECTIONS[cmd];
+                const newX = schoolState.pos.x + dir.x;
+                const newY = schoolState.pos.y + dir.y;
+                
+                if (isValidMove(SCHOOL_MAZE, newX, newY)) {
+                    schoolState.pos = { x: newX, y: newY };
+                } else {
+                    showMessage('¡El nene chocó con una pared!', 'info');
+                }
+                
+                schoolState.currentIndex++;
+                updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
+                drawSchoolGame();
+                
+                setTimeout(executeSchoolCommand, 500);
+            } else {
+                schoolState.executing = false;
+                updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
+                
+                if (schoolState.pos.x === SCHOOL_POS.x && schoolState.pos.y === SCHOOL_POS.y) {
+                    showMessage('¡GANASTE! El nene llegó a la escuela', 'win');
+                } else if (MUD_PUDDLES.some(p => p.x === schoolState.pos.x && p.y === schoolState.pos.y)) {
+                    showMessage('¡PERDISTE! El nene cayó en un charco', 'lose');
+                } else {
+                    showMessage('El nene no llegó a ningún destino', 'info');
+                }
+            }
+        }
+
+        function resetSchoolGame() {
+            schoolState.pos = { ...SCHOOL_START };
+            schoolState.program = [];
+            schoolState.executing = false;
+            schoolState.currentIndex = 0;
+            updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
+            drawSchoolGame();
         }
 
         // Eventos de arrastrar y soltar
         document.querySelectorAll('.block').forEach(block => {
             block.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('command', block.dataset.command);
+                e.dataTransfer.setData('game', block.dataset.game);
             });
         });
 
-        programArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            programArea.classList.add('drag-over');
-        });
+        ['mouseProgramArea', 'schoolProgramArea'].forEach(areaId => {
+            const area = document.getElementById(areaId);
+            
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('drag-over');
+            });
 
-        programArea.addEventListener('dragleave', () => {
-            programArea.classList.remove('drag-over');
-        });
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('drag-over');
+            });
 
-        programArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            programArea.classList.remove('drag-over');
-            const command = e.dataTransfer.getData('command');
-            if (command) {
-                addToProgram(command);
-            }
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('drag-over');
+                const command = e.dataTransfer.getData('command');
+                const game = e.dataTransfer.getData('game');
+                
+                if (command && game === 'mouse' && areaId === 'mouseProgramArea') {
+                    addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter');
+                } else if (command && game === 'school' && areaId === 'schoolProgramArea') {
+                    addToProgram(schoolState, command, 'schoolProgramArea', 'schoolCounter');
+                }
+            });
         });
-
-        // Eventos de botones
-        runBtn.addEventListener('click', runProgram);
-        resetBtn.addEventListener('click', resetGame);
 
         // Atajos de teclado
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
-                runProgram();
+                if (document.getElementById('mouseGame').classList.contains('active')) {
+                    runMouseGame();
+                } else if (document.getElementById('schoolGame').classList.contains('active')) {
+                    runSchoolGame();
+                }
             }
             if (e.code === 'KeyR') {
-                resetGame();
+                if (document.getElementById('mouseGame').classList.contains('active')) {
+                    resetMouseGame();
+                } else if (document.getElementById('schoolGame').classList.contains('active')) {
+                    resetSchoolGame();
+                }
             }
         });
 
         // Inicializar
-        draw();
-        updateProgramDisplay();
+        updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
+        updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
     </script>
 </body>
 </html>
