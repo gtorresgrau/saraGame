@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Karts - El Ratón y el Queso</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1400px;
+        }
+        
+        .maze-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        canvas {
+            border-radius: 10px;
+            display: block;
+        }
+        
+        .controls-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            min-width: 300px;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .palette {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .block {
+            padding: 15px 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .block:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .block:active {
+            cursor: grabbing;
+        }
+        
+        .block.adelante { background: linear-gradient(135deg, #4CAF50, #45a049); }
+        .block.atras { background: linear-gradient(135deg, #f44336, #da190b); }
+        .block.izquierda { background: linear-gradient(135deg, #2196F3, #0b7dda); }
+        .block.derecha { background: linear-gradient(135deg, #FF9800, #ef6c00); }
+        
+        .program-area {
+            background: #f5f5f5;
+            border: 3px dashed #ccc;
+            border-radius: 10px;
+            min-height: 300px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .program-area.drag-over {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+        
+        .program-block {
+            padding: 12px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+            cursor: pointer;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .program-block:hover::after {
+            content: '✕';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+        }
+        
+        .program-block.adelante { background: linear-gradient(135deg, #4CAF50, #45a049); }
+        .program-block.atras { background: linear-gradient(135deg, #f44336, #da190b); }
+        .program-block.izquierda { background: linear-gradient(135deg, #2196F3, #0b7dda); }
+        .program-block.derecha { background: linear-gradient(135deg, #FF9800, #ef6c00); }
+        
+        .program-block.executing {
+            animation: pulse 0.5s ease infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+            to { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .btn-run {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+        
+        .btn-reset {
+            background: linear-gradient(135deg, #f44336, #da190b);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 30px 50px;
+            border-radius: 15px;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            z-index: 1000;
+            animation: fadeInOut 3s ease forwards;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        
+        .message.win {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+        
+        .message.lose {
+            background: linear-gradient(135deg, #f44336, #da190b);
+        }
+        
+        .message.info {
+            background: linear-gradient(135deg, #2196F3, #0b7dda);
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            25% { transform: translate(-50%, -50%) scale(1); }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+        
+        .instructions {
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-width: 600px;
+        }
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .instructions li {
+            padding: 5px 0;
+            color: #555;
+        }
+        
+        .instructions li::before {
+            content: '▸ ';
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .counter {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐭 Code Karts - El Ratón y el Queso 🧀</h1>
+    
+    <div class="game-container">
+        <div class="maze-section">
+            <canvas id="gameCanvas" width="600" height="480"></canvas>
+        </div>
+        
+        <div class="controls-section">
+            <div class="section-title">🧩 Bloques de Comandos</div>
+            <div class="palette">
+                <div class="block adelante" draggable="true" data-command="adelante">⬆ ADELANTE</div>
+                <div class="block atras" draggable="true" data-command="atras">⬇ ATRÁS</div>
+                <div class="block izquierda" draggable="true" data-command="izquierda">⬅ IZQUIERDA</div>
+                <div class="block derecha" draggable="true" data-command="derecha">➡ DERECHA</div>
+            </div>
+            
+            <div class="section-title">📋 Programa</div>
+            <div class="program-area" id="programArea">
+                <p style="color: #999; text-align: center; margin-top: 120px;">
+                    Arrastra los bloques aquí
+                </p>
+            </div>
+            <div class="counter" id="counter">0 / 8 comandos</div>
+            
+            <div class="buttons">
+                <button class="btn btn-run" id="runBtn">▶ EJECUTAR</button>
+                <button class="btn btn-reset" id="resetBtn">↺ REINICIAR</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>📖 Instrucciones</h3>
+        <ul>
+            <li>Arrastra los bloques de la paleta al área de programa</li>
+            <li>Haz clic en un bloque del programa para eliminarlo</li>
+            <li>Presiona EJECUTAR para ver al ratón en acción</li>
+            <li>Guía al ratón hasta el queso amarillo para ganar</li>
+            <li>Evita la trampa roja o perderás</li>
+            <li>El ratón no puede atravesar las paredes</li>
+        </ul>
+    </div>
+
+    <script>
+        // Configuración del juego
+        const CELL_SIZE = 60;
+        const GRID_COLS = 10;
+        const GRID_ROWS = 8;
+        const GRID_OFFSET_X = 0;
+        const GRID_OFFSET_Y = 0;
+        const MAX_COMMANDS = 8;
+
+        // Laberinto (1 = pared, 0 = camino)
+        const MAZE = [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 1, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ];
+
+        // Posiciones especiales
+        const MOUSE_START = { x: 1, y: 1 };
+        const CHEESE_POS = { x: 8, y: 5 };
+        const TRAP_POS = { x: 5, y: 3 };
+
+        // Direcciones
+        const DIRECTIONS = {
+            'adelante': { x: 0, y: -1 },
+            'atras': { x: 0, y: 1 },
+            'izquierda': { x: -1, y: 0 },
+            'derecha': { x: 1, y: 0 },
+        };
+
+        // Estado del juego
+        let mousePos = { ...MOUSE_START };
+        let program = [];
+        let executing = false;
+        let currentCommandIndex = 0;
+
+        // Canvas
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Elementos del DOM
+        const programArea = document.getElementById('programArea');
+        const counter = document.getElementById('counter');
+        const runBtn = document.getElementById('runBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Dibujar el juego
+        function draw() {
+            // Limpiar canvas
+            ctx.fillStyle = '#f5f5dc';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar laberinto
+            for (let fila = 0; fila < GRID_ROWS; fila++) {
+                for (let col = 0; col < GRID_COLS; col++) {
+                    const x = GRID_OFFSET_X + col * CELL_SIZE;
+                    const y = GRID_OFFSET_Y + fila * CELL_SIZE;
+
+                    if (MAZE[fila][col] === 1) {
+                        // Pared
+                        ctx.fillStyle = '#464646';
+                        ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeStyle = '#333';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+                    } else {
+                        // Camino
+                        ctx.fillStyle = '#f5f5dc';
+                        ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeStyle = '#ccc';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+                    }
+                }
+            }
+
+            // Dibujar queso
+            const cheeseX = GRID_OFFSET_X + CHEESE_POS.x * CELL_SIZE + CELL_SIZE / 2;
+            const cheeseY = GRID_OFFSET_Y + CHEESE_POS.y * CELL_SIZE + CELL_SIZE / 2;
+            
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.arc(cheeseX, cheeseY, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ff8c00';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Agujeros del queso
+            ctx.fillStyle = '#ff8c00';
+            ctx.beginPath();
+            ctx.arc(cheeseX - 5, cheeseY - 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cheeseX + 7, cheeseY + 3, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(cheeseX - 2, cheeseY + 8, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Dibujar trampa
+            const trapX = GRID_OFFSET_X + TRAP_POS.x * CELL_SIZE + CELL_SIZE / 2;
+            const trapY = GRID_OFFSET_Y + TRAP_POS.y * CELL_SIZE + CELL_SIZE / 2;
+            
+            ctx.fillStyle = '#dc143c';
+            ctx.beginPath();
+            ctx.arc(trapX, trapY, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // X de trampa
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(trapX - 10, trapY - 10);
+            ctx.lineTo(trapX + 10, trapY + 10);
+            ctx.moveTo(trapX + 10, trapY - 10);
+            ctx.lineTo(trapX - 10, trapY + 10);
+            ctx.stroke();
+
+            // Dibujar ratón
+            const mouseX = GRID_OFFSET_X + mousePos.x * CELL_SIZE + CELL_SIZE / 2;
+            const mouseY = GRID_OFFSET_Y + mousePos.y * CELL_SIZE + CELL_SIZE / 2;
+            
+            // Cuerpo
+            ctx.fillStyle = '#808080';
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Orejas
+            ctx.fillStyle = '#808080';
+            ctx.beginPath();
+            ctx.arc(mouseX - 12, mouseY - 12, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(mouseX + 12, mouseY - 12, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffb6c1';
+            ctx.beginPath();
+            ctx.arc(mouseX - 12, mouseY - 12, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(mouseX + 12, mouseY - 12, 4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Ojos
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(mouseX - 5, mouseY - 3, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(mouseX + 5, mouseY - 3, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Nariz
+            ctx.fillStyle = '#ffb6c1';
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY + 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Verificar movimiento válido
+        function isValidMove(x, y) {
+            if (x >= 0 && x < GRID_COLS && y >= 0 && y < GRID_ROWS) {
+                return MAZE[y][x] === 0;
+            }
+            return false;
+        }
+
+        // Mostrar mensaje
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+
+        // Actualizar programa en el DOM
+        function updateProgramDisplay() {
+            programArea.innerHTML = '';
+            
+            if (program.length === 0) {
+                programArea.innerHTML = '<p style="color: #999; text-align: center; margin-top: 120px;">Arrastra los bloques aquí</p>';
+            } else {
+                program.forEach((cmd, index) => {
+                    const block = document.createElement('div');
+                    block.className = `program-block ${cmd}`;
+                    if (executing && index === currentCommandIndex) {
+                        block.classList.add('executing');
+                    }
+                    block.textContent = cmd.toUpperCase();
+                    block.addEventListener('click', () => removeFromProgram(index));
+                    programArea.appendChild(block);
+                });
+            }
+            
+            counter.textContent = `${program.length} / ${MAX_COMMANDS} comandos`;
+        }
+
+        // Añadir al programa
+        function addToProgram(command) {
+            if (program.length < MAX_COMMANDS && !executing) {
+                program.push(command);
+                updateProgramDisplay();
+            }
+        }
+
+        // Eliminar del programa
+        function removeFromProgram(index) {
+            if (!executing) {
+                program.splice(index, 1);
+                updateProgramDisplay();
+            }
+        }
+
+        // Ejecutar programa
+        function runProgram() {
+            if (program.length === 0) {
+                showMessage('¡Añade comandos primero!', 'info');
+                return;
+            }
+            
+            if (executing) return;
+            
+            mousePos = { ...MOUSE_START };
+            executing = true;
+            currentCommandIndex = 0;
+            updateProgramDisplay();
+            
+            executeNextCommand();
+        }
+
+        // Ejecutar siguiente comando
+        function executeNextCommand() {
+            if (currentCommandIndex < program.length) {
+                const cmd = program[currentCommandIndex];
+                const dir = DIRECTIONS[cmd];
+                const newX = mousePos.x + dir.x;
+                const newY = mousePos.y + dir.y;
+                
+                if (isValidMove(newX, newY)) {
+                    mousePos = { x: newX, y: newY };
+                } else {
+                    showMessage('¡El ratón chocó con una pared!', 'info');
+                }
+                
+                currentCommandIndex++;
+                updateProgramDisplay();
+                draw();
+                
+                setTimeout(executeNextCommand, 500);
+            } else {
+                // Verificar condiciones de victoria/derrota
+                executing = false;
+                updateProgramDisplay();
+                
+                if (mousePos.x === CHEESE_POS.x && mousePos.y === CHEESE_POS.y) {
+                    showMessage('¡GANASTE! El ratón llegó al queso', 'win');
+                } else if (mousePos.x === TRAP_POS.x && mousePos.y === TRAP_POS.y) {
+                    showMessage('¡PERDISTE! El ratón cayó en la trampa', 'lose');
+                } else {
+                    showMessage('El ratón no llegó a ningún destino', 'info');
+                }
+            }
+        }
+
+        // Reiniciar juego
+        function resetGame() {
+            mousePos = { ...MOUSE_START };
+            program = [];
+            executing = false;
+            currentCommandIndex = 0;
+            updateProgramDisplay();
+            draw();
+        }
+
+        // Eventos de arrastrar y soltar
+        document.querySelectorAll('.block').forEach(block => {
+            block.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('command', block.dataset.command);
+            });
+        });
+
+        programArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            programArea.classList.add('drag-over');
+        });
+
+        programArea.addEventListener('dragleave', () => {
+            programArea.classList.remove('drag-over');
+        });
+
+        programArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            programArea.classList.remove('drag-over');
+            const command = e.dataTransfer.getData('command');
+            if (command) {
+                addToProgram(command);
+            }
+        });
+
+        // Eventos de botones
+        runBtn.addEventListener('click', runProgram);
+        resetBtn.addEventListener('click', resetGame);
+
+        // Atajos de teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                runProgram();
+            }
+            if (e.code === 'KeyR') {
+                resetGame();
+            }
+        });
+
+        // Inicializar
+        draw();
+        updateProgramDisplay();
+    </script>
+</body>
+</html>
