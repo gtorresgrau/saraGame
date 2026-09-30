@@ -243,6 +243,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 .wipe-btn{font-family:'Fredoka',sans-serif;background:#fff;border:var(--border);border-radius:50%;width:52px;height:52px;font-size:1.3rem;cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .15s ease}
 .wipe-btn:hover{transform:rotate(8deg) scale(1.06)}
 .wipe-btn:focus-visible{outline:4px solid var(--bus);outline-offset:2px}
+#voiceBtn.voice-off{filter:grayscale(1);opacity:.55}
 .confirm-row{display:flex;gap:10px;margin-top:6px}
 .confirm-row .btn{font-size:.95rem;padding:12px 10px}
 .btn-wipe{background:var(--apple);color:#fff}
@@ -298,6 +299,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 </div>
 <div class="top-actions">
 <button class="mute-btn" id="muteBtn" onclick="toggleSound()" title="Activar o silenciar sonido" aria-label="Activar o silenciar sonido">🔊</button>
+<button class="wipe-btn voice-off" id="voiceBtn" onclick="toggleVoice()" title="Activar o desactivar la lectura en voz alta" aria-label="Activar o desactivar la lectura en voz alta">🗣️</button>
 <button class="wipe-btn" onclick="askWipeProgress()" title="Borrar todo el progreso" aria-label="Borrar todo el progreso">🗑️</button>
 </div>
 </div>
@@ -465,7 +467,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 </div>
 </div>
 <footer class="site-foot">
-<p class="made">Hecho con cariño para Sara · tocá, probá y animate a usar menos bloques</p>
+<p class="made">Hecho con cariño para el cole Sara Eccleston · tocá, probá y animate a usar menos bloques</p>
 <p class="author">Gonzalo Torres Grau · 2026 · <a href="https://gonzalotorresgrau.com/" target="_blank" rel="noopener">gonzalotorresgrau.com</a> · <a href="https://github.com/gtorresgrau" target="_blank" rel="noopener">GitHub</a></p>
 </footer>
 </div>
@@ -550,6 +552,23 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // =====================================================================
         let audioCtx = null;
         let soundOn = true;
+        let voiceOn = false;
+
+        function syncVoiceBtn() {
+            document.getElementById('voiceBtn').classList.toggle('voice-off', !voiceOn);
+        }
+
+        function toggleVoice() {
+            voiceOn = !voiceOn;
+            store.set('sara_voice', voiceOn);
+            syncVoiceBtn();
+            if (voiceOn) {
+                sfxClick();
+                speak('Lectura activada. Te voy a leer cada cartel.');
+            } else {
+                try { speechSynthesis.cancel(); } catch (e) {}
+            }
+        }
 
         function ac() {
             if (!audioCtx) {
@@ -2024,9 +2043,9 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             updateProgramDisplay(st, isMouse ? 'mouseProgramArea' : 'schoolProgramArea', isMouse ? 'mouseCounter' : 'schoolCounter', lv.maxCommands);
         }
 
-        // Voz: lee títulos, mensajes y cuentas (usa el interruptor de sonido)
+        // Voz: lee títulos, mensajes y cuentas (apagada por defecto)
         function speak(text) {
-            if (!soundOn) return;
+            if (!soundOn || !voiceOn) return;
             try {
                 if (!('speechSynthesis' in window)) return;
                 speechSynthesis.cancel();
@@ -2549,6 +2568,8 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         updateMouseMenuProgress();
         renderAlbum();
         if (!soundOn) document.getElementById('muteBtn').textContent = '🔇';
+        voiceOn = store.get('sara_voice', false);
+        syncVoiceBtn();
 
         // PWA: registrar el Service Worker para instalar el juego (solo http/https)
         if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
