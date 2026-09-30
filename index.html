@@ -1,843 +1,420 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="icono.jpg">
-    <title>Sara Game - Camino a la Escuela</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        h1 {
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            text-align: center;
-            font-size: clamp(1.5em, 4vw, 2.5em);
-        }
-
-        .mute-btn {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid white;
-            color: white;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.4em;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mute-btn:hover {
-            background: white;
-            transform: scale(1.1);
-        }
-
-        /* Pantalla de selección */
-        .menu-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 80vh;
-            gap: 30px;
-        }
-
-        .game-cards {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .game-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            width: 300px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .game-card:hover {
-            transform: translateY(-10px) scale(1.05);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        .game-card img {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            border: 4px solid #667eea;
-        }
-
-        .game-card h2 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .game-card p {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .game-card .progress {
-            margin-top: 12px;
-            display: inline-block;
-            background: #e8eaf6;
-            color: #5a6fd6;
-            font-weight: bold;
-            font-size: 0.85em;
-            padding: 6px 14px;
-            border-radius: 20px;
-        }
-
-        /* Pantalla de juego */
-        .game-screen {
-            display: none;
-        }
-
-        .game-screen.active {
-            display: block;
-        }
-
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid white;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1em;
-            margin-bottom: 20px;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            background: white;
-            color: #667eea;
-        }
-
-        .game-container {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .maze-section {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            transition: box-shadow 0.5s;
-        }
-
-        .maze-section.graduation {
-            box-shadow: 0 0 0 4px #ffd700, 0 0 40px #ffd700, 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        canvas {
-            border-radius: 10px;
-            display: block;
-            max-width: 100%;
-            height: auto;
-        }
-
-        .controls-section {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            min-width: 300px;
-            max-width: 380px;
-        }
-
-        /* HUD */
-        .hud {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f5f5f5;
-            border-radius: 12px;
-            padding: 8px 12px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .hud img.avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #667eea;
-            flex-shrink: 0;
-        }
-
-        .hud .level-badge {
-            background: #667eea;
-            color: white;
-            font-weight: bold;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            white-space: nowrap;
-        }
-
-        .hud .level-badge.grad {
-            background: linear-gradient(135deg, #f6c90e, #ef6c00);
-        }
-
-        .hud .hud-stars {
-            font-size: 1em;
-            letter-spacing: 2px;
-        }
-
-        .hud .hud-par {
-            margin-left: auto;
-            font-size: 0.8em;
-            color: #666;
-            font-weight: bold;
-        }
-
-        /* Selector de niveles */
-        .level-select {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .lvl-btn {
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 10px;
-            padding: 8px 4px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: all 0.2s;
-            line-height: 1.3;
-        }
-
-        .lvl-btn small {
-            display: block;
-            font-size: 0.75em;
-        }
-
-        .lvl-btn:hover:not(.locked) {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .lvl-btn.current {
-            background: #667eea;
-            color: white;
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.5);
-        }
-
-        .lvl-btn.locked {
-            opacity: 0.4;
-            cursor: not-allowed;
-            border-color: #ccc;
-            color: #999;
-        }
-
-        .lvl-btn.grad-btn {
-            border-color: #f6c90e;
-            color: #b8860b;
-        }
-
-        .lvl-btn.grad-btn:hover:not(.locked),
-        .lvl-btn.grad-btn.current {
-            background: linear-gradient(135deg, #f6c90e, #ef6c00);
-            color: white;
-        }
-
-        .section-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-
-        /* Acordeón de instrucciones */
-        .accordion {
-            margin-bottom: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid #667eea;
-        }
-
-        .accordion-header {
-            background: #667eea;
-            color: white;
-            padding: 12px 15px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        .accordion-header:hover {
-            background: #5a6fd6;
-        }
-
-        .accordion-header .icon {
-            transition: transform 0.3s;
-        }
-
-        .accordion-header.active .icon {
-            transform: rotate(180deg);
-        }
-
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            background: #f8f9fa;
-        }
-
-        .accordion-content.active {
-            max-height: 340px;
-        }
-
-        .accordion-body {
-            padding: 15px;
-        }
-
-        .accordion-body ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .accordion-body li {
-            padding: 5px 0;
-            color: #555;
-            font-size: 0.9em;
-        }
-
-        .accordion-body li::before {
-            content: '▸ ';
-            color: #667eea;
-            font-weight: bold;
-        }
-
-        /* Bloques más grandes */
-        .palette {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .block {
-            padding: 18px 10px;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: bold;
-            color: white;
-            cursor: grab;
-            transition: transform 0.2s, box-shadow 0.2s;
-            user-select: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            font-size: 2em;
-            min-height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            touch-action: manipulation;
-        }
-
-        .block:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.25);
-        }
-
-        .block:active {
-            cursor: grabbing;
-        }
-
-        .block.adelante { background: linear-gradient(135deg, #4CAF50, #45a049); }
-        .block.atras { background: linear-gradient(135deg, #f44336, #da190b); }
-        .block.izquierda { background: linear-gradient(135deg, #2196F3, #0b7dda); }
-        .block.derecha { background: linear-gradient(135deg, #FF9800, #ef6c00); }
-
-        .program-area {
-            background: #f5f5f5;
-            border: 3px dashed #ccc;
-            border-radius: 10px;
-            min-height: 200px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .program-area.drag-over {
-            border-color: #667eea;
-            background: #e8eaf6;
-        }
-
-        .program-block {
-            padding: 12px 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 8px;
-            cursor: pointer;
-            position: relative;
-            animation: slideIn 0.3s ease;
-            font-size: 1em;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .program-block:hover::after {
-            content: '✕';
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.2em;
-        }
-
-        .program-block.adelante { background: linear-gradient(135deg, #4CAF50, #45a049); }
-        .program-block.atras { background: linear-gradient(135deg, #f44336, #da190b); }
-        .program-block.izquierda { background: linear-gradient(135deg, #2196F3, #0b7dda); }
-        .program-block.derecha { background: linear-gradient(135deg, #FF9800, #ef6c00); }
-
-        .program-block.executing {
-            animation: pulse 0.5s ease infinite alternate;
-        }
-
-        @keyframes pulse {
-            from { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
-            to { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
-        }
-
-        .buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 15px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            color: white;
-        }
-
-        .btn-run {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-        }
-
-        .btn-reset {
-            background: linear-gradient(135deg, #f44336, #da190b);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 25px 40px;
-            border-radius: 15px;
-            font-size: clamp(1.2em, 3vw, 1.8em);
-            font-weight: bold;
-            color: white;
-            z-index: 1600;
-            animation: fadeInOut 3s ease forwards;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            text-align: center;
-            max-width: 90%;
-        }
-
-        .message.win {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-        }
-
-        .message.lose {
-            background: linear-gradient(135deg, #f44336, #da190b);
-        }
-
-        .message.info {
-            background: linear-gradient(135deg, #2196F3, #0b7dda);
-        }
-
-        .message.grad {
-            background: linear-gradient(135deg, #f6c90e, #ef6c00);
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-            25% { transform: translate(-50%, -50%) scale(1); }
-            85% { opacity: 1; }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-        }
-
-        /* Overlay de transición de nivel */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.65);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1400;
-            padding: 20px;
-        }
-
-        .overlay.show {
-            display: flex;
-        }
-
-        .overlay-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 480px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            animation: pop 0.4s ease;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .overlay-card.grad-card {
-            border: 4px solid #ffd700;
-            background: linear-gradient(180deg, #fffde7 0%, #ffffff 60%);
-        }
-
-        @keyframes pop {
-            from { opacity: 0; transform: scale(0.7); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .overlay-card img.overlay-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #667eea;
-            margin-bottom: 10px;
-        }
-
-        .overlay-card h2 {
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 1.5em;
-        }
-
-        .overlay-card .overlay-stars {
-            font-size: 2em;
-            letter-spacing: 4px;
-            margin: 8px 0;
-        }
-
-        .overlay-card p {
-            color: #555;
-            margin-bottom: 20px;
-            font-size: 1.05em;
-            line-height: 1.5;
-        }
-
-        .overlay-card .btn {
-            flex: none;
-            padding: 14px 34px;
-            font-size: 1.1em;
-        }
-
-        #confettiCanvas {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 1500;
-        }
-
-        .counter {
-            text-align: center;
-            color: #666;
-            margin-top: 8px;
-            font-size: 0.9em;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .game-container {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .controls-section {
-                width: 100%;
-                max-width: 100%;
-            }
-
-            canvas {
-                width: 100%;
-                height: auto;
-            }
-
-            .game-cards {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .game-card {
-                width: 100%;
-                max-width: 300px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-
-            .palette {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .block {
-                padding: 15px 8px;
-                font-size: 1.8em;
-                min-height: 60px;
-            }
-
-            .level-select {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 6px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="icono.jpg">
+<title>Sara Game — Camino a la Escuela</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a2340;
+  --ink-soft:#3c4767;
+  --night:#0f1730;
+  --paper:#fffefb;
+  --card:#ffffff;
+  --bus:#ffc93c;
+  --bus-deep:#e0a100;
+  --apple:#ff5d5d;
+  --leaf:#00c389;
+  --leaf-deep:#009e6f;
+  --sky:#3e9bff;
+  --sky-deep:#2473d6;
+  --grape:#7a5cff;
+  --mud:#8d6e63;
+  --line:#e9e4d8;
+  --radius:22px;
+  --border:3px solid var(--ink);
+  --shadow:6px 6px 0 var(--ink);
+  --shadow-sm:4px 4px 0 var(--ink);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:var(--night);
+  background-image:
+    radial-gradient(rgba(255,255,255,.14) 1.6px, transparent 1.7px),
+    radial-gradient(ellipse 60% 40% at 12% 8%, #24315e 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 88% 90%, #2a2358 0%, transparent 62%);
+  background-size:26px 26px, auto, auto;
+  min-height:100vh;
+  padding:22px 18px 60px;
+  color:var(--ink);
+}
+body::before, body::after{
+  content:"";position:fixed;pointer-events:none;z-index:0;
+  width:420px;height:420px;border-radius:50%;filter:blur(2px);opacity:.5;
+}
+body::before{left:-140px;top:-120px;background:radial-gradient(circle,#3e9bff55 0%,transparent 65%)}
+body::after{right:-140px;bottom:-120px;background:radial-gradient(circle,#ffc93c44 0%,transparent 65%)}
+.container{max-width:1280px;margin:0 auto;position:relative;z-index:1}
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.logo-badge{
+  font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.02em;
+  background:var(--bus);color:var(--ink);border:var(--border);border-radius:16px;
+  padding:10px 16px;transform:rotate(-2deg);box-shadow:var(--shadow-sm);
+  display:flex;align-items:center;gap:8px;
+}
+.logo-badge .dot{width:12px;height:12px;border-radius:50%;background:var(--apple);border:2.5px solid var(--ink);display:inline-block}
+.brand-text h1{font-family:'Fredoka',sans-serif;font-weight:600;color:#fff;font-size:clamp(1.25rem,2.6vw,1.7rem);line-height:1.1}
+.brand-text h1 em{font-style:normal;background:linear-gradient(transparent 62%, var(--bus) 62%, var(--bus) 92%, transparent 92%)}
+.brand-text p{color:#c9d2ea;font-size:.88rem;font-weight:700;margin-top:2px}
+.mute-btn{
+  font-family:'Fredoka',sans-serif;background:var(--paper);border:var(--border);border-radius:50%;
+  width:52px;height:52px;font-size:1.35rem;cursor:pointer;box-shadow:var(--shadow-sm);
+  transition:transform .15s ease;
+}
+.mute-btn:hover{transform:rotate(-8deg) scale(1.06)}
+.mute-btn:focus-visible,.back-btn:focus-visible,.btn:focus-visible,.lvl-btn:focus-visible,.block:focus-visible{outline:4px solid var(--bus);outline-offset:2px}
+/* ---------- menu ---------- */
+.menu-screen{display:flex;flex-direction:column;gap:22px;min-height:70vh}
+.hero{
+  background:var(--paper);border:var(--border);border-radius:28px;box-shadow:var(--shadow);
+  padding:28px 28px 24px;position:relative;overflow:hidden;
+}
+.hero::after{
+  content:"";position:absolute;right:-30px;top:-30px;width:190px;height:190px;border-radius:50%;
+  background:repeating-linear-gradient(-45deg,var(--bus) 0 12px,#ffd45e 12px 24px);
+  border:var(--border);transform:rotate(12deg);
+}
+.hero-kicker{
+  display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;
+  font-weight:900;font-size:.8rem;border-radius:999px;padding:7px 14px;margin-bottom:12px;
+}
+.hero h2{font-family:'Fredoka',sans-serif;font-size:clamp(1.7rem,4.4vw,2.9rem);line-height:1.02;max-width:16ch}
+.hero h2 .hl{background:var(--bus);border-radius:10px;padding:0 10px;display:inline-block;transform:rotate(-1deg);border:3px solid var(--ink)}
+.hero p{color:var(--ink-soft);font-weight:700;max-width:52ch;margin-top:10px;line-height:1.5}
+.hero-path{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.path-step{display:flex;align-items:center;gap:8px;background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:7px 13px;font-weight:900;font-size:.85rem;box-shadow:3px 3px 0 var(--ink)}
+.path-dots{font-weight:900;letter-spacing:3px;color:var(--bus-deep)}
+.game-cards{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:860px){.game-cards{grid-template-columns:1fr}}
+.game-card{
+  background:var(--card);border:var(--border);border-radius:26px;box-shadow:var(--shadow);
+  overflow:hidden;cursor:pointer;transition:transform .18s ease;text-align:left;
+}
+.game-card:first-child{transform:rotate(-.7deg)}
+.game-card:last-child{transform:rotate(.7deg)}
+.game-card:hover{transform:rotate(0deg) translateY(-6px)}
+.card-art{height:150px;position:relative;display:flex;align-items:flex-end;padding:16px;border-bottom:var(--border)}
+.card-art.mouse{background:#fff4c9;background-image:radial-gradient(#e8c93c 2.5px,transparent 2.6px),radial-gradient(#e8c93c 1.6px,transparent 1.7px);background-size:34px 34px,22px 22px;background-position:0 0,12px 14px}
+.card-art.school{background:#d9ecff;background-image:linear-gradient(#bcd8f5 2px,transparent 2px);background-size:100% 26px}
+.card-emoji{font-size:4.2rem;line-height:1;filter:drop-shadow(3px 3px 0 var(--ink))}
+.card-art img{width:92px;height:92px;border-radius:24px;object-fit:cover;border:var(--border);box-shadow:var(--shadow-sm);background:#fff}
+.card-tag{position:absolute;top:14px;right:14px;background:var(--ink);color:#fff;font-weight:900;font-size:.75rem;border-radius:999px;padding:6px 12px}
+.card-body{padding:20px 22px 22px}
+.card-body h3{font-family:'Fredoka',sans-serif;font-size:1.45rem;line-height:1.1;margin-bottom:6px}
+.card-body>p{color:var(--ink-soft);font-weight:700;font-size:.94rem;line-height:1.5}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;flex-wrap:wrap}
+.progress{display:inline-flex;align-items:center;gap:8px;background:#f2efe4;border:2.5px solid var(--ink);border-radius:999px;padding:7px 14px;font-weight:900;font-size:.85rem}
+.play-pill{font-family:'Fredoka',sans-serif;background:var(--leaf);color:#fff;border:var(--border);border-radius:999px;padding:10px 20px;font-size:1rem;box-shadow:4px 4px 0 var(--ink);transition:transform .15s ease}
+.game-card:hover .play-pill{transform:scale(1.05)}
+.play-pill.alt{background:var(--sky)}
+/* ---------- game screen ---------- */
+.game-screen{display:none}
+.game-screen.active{display:block}
+.back-btn{
+  font-family:'Fredoka',sans-serif;background:var(--paper);border:var(--border);border-radius:999px;
+  padding:10px 18px;font-size:.95rem;cursor:pointer;box-shadow:var(--shadow-sm);margin-bottom:16px;font-weight:600;
+}
+.back-btn:hover{transform:translateX(-3px)}
+.game-container{display:grid;grid-template-columns:minmax(0,640px) minmax(320px,420px);gap:20px;justify-content:center;align-items:start}
+@media(max-width:1080px){.game-container{grid-template-columns:1fr;max-width:680px;margin:0 auto}}
+.maze-section{background:var(--paper);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;position:relative}
+.maze-section::before,.maze-section::after{
+  content:"";position:absolute;width:86px;height:26px;background:#ffd45ecc;border:2.5px solid var(--ink);
+  border-radius:4px;top:-15px;opacity:.95;
+}
+.maze-section::before{left:28px;transform:rotate(-6deg)}
+.maze-section::after{right:28px;transform:rotate(6deg)}
+.maze-section.graduation{box-shadow:6px 6px 0 var(--ink),0 0 0 5px var(--bus),0 0 44px #ffc93c99}
+.board-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 8px 12px;flex-wrap:wrap}
+.board-head .where{font-family:'Fredoka',sans-serif;font-size:1.05rem}
+.board-head .where small{display:block;font-family:'Nunito',sans-serif;font-weight:800;color:var(--ink-soft);font-size:.78rem}
+.canvas-wrap{background:#0e1530;border:var(--border);border-radius:16px;overflow:hidden;line-height:0}
+canvas{width:100%;height:auto;display:block;max-width:100%}
+.controls-section{background:var(--paper);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;position:sticky;top:14px}
+@media(max-width:1080px){.controls-section{position:static}}
+.hud{display:flex;align-items:center;gap:10px;background:#f4f1e4;border:2.5px solid var(--ink);border-radius:16px;padding:9px 11px;margin-bottom:14px;flex-wrap:wrap}
+.hud img.avatar{width:44px;height:44px;border-radius:14px;object-fit:cover;border:2.5px solid var(--ink);flex-shrink:0;background:#fff}
+.level-badge{font-family:'Fredoka',sans-serif;background:var(--ink);color:#fff;font-weight:600;padding:7px 14px;border-radius:999px;font-size:.88rem;white-space:nowrap}
+.level-badge.grad{background:var(--bus);color:var(--ink);border:2px solid var(--ink)}
+.hud-stars{font-size:.95rem;letter-spacing:1px;font-weight:900;color:#b98a00}
+.hud-par{margin-left:auto;font-size:.78rem;color:var(--ink-soft);font-weight:900;background:#fff;border:2px solid var(--ink);padding:4px 10px;border-radius:999px}
+.section-title{font-family:'Fredoka',sans-serif;font-size:1.02rem;margin:16px 0 10px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:"";flex:1;height:3px;background:var(--ink);border-radius:99px;opacity:.14}
+.level-select{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:6px}
+.lvl-btn{
+  border:2.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:13px;
+  padding:8px 2px;font-weight:900;cursor:pointer;font-size:.88rem;transition:transform .12s ease;line-height:1.25;
+  box-shadow:3px 3px 0 var(--ink);font-family:'Nunito',sans-serif;
+}
+.lvl-btn small{display:block;font-size:.72rem;color:inherit;opacity:.85}
+.lvl-btn:hover:not(.locked){transform:translateY(-2px);background:var(--bus)}
+.lvl-btn.current{background:var(--ink);color:#fff}
+.lvl-btn.locked{opacity:.45;cursor:not-allowed;box-shadow:none;background:#eee}
+.lvl-btn.grad-btn{border-color:var(--ink);background:#fff6d6}
+.lvl-btn.grad-btn.current,.lvl-btn.grad-btn:hover:not(.locked){background:var(--bus)}
+.accordion{margin:6px 0 4px;border:var(--border);border-radius:14px;overflow:hidden;background:#fff}
+.accordion-header{background:#eef4ff;padding:11px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:.9rem}
+.accordion-header:hover{background:#d9e8ff}
+.accordion-header .icon{transition:transform .25s;background:var(--ink);color:#fff;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem}
+.accordion-header.active .icon{transform:rotate(180deg)}
+.accordion-content{max-height:0;overflow:hidden;transition:max-height .3s ease;background:#fff}
+.accordion-content.active{max-height:360px}
+.accordion-body{padding:12px 15px 14px}
+.accordion-body ul{list-style:none}
+.accordion-body li{padding:5px 0;color:#4a5578;font-size:.87rem;font-weight:700;padding-left:26px;position:relative;line-height:1.45}
+.accordion-body li::before{content:"✓";position:absolute;left:0;top:5px;width:18px;height:18px;border-radius:50%;background:var(--leaf);color:#fff;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:900}
+.palette{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:6px}
+@media(max-width:480px){.palette{grid-template-columns:1fr 1fr}}
+.block{
+  border:var(--border);border-radius:15px;text-align:center;font-weight:900;color:#fff;cursor:grab;
+  user-select:none;font-size:1.5rem;min-height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;touch-action:manipulation;box-shadow:0 5px 0 var(--ink);transition:transform .12s ease;font-family:'Fredoka',sans-serif;
+}
+.block span{font-size:.62rem;font-family:'Nunito',sans-serif;font-weight:900;letter-spacing:.04em;opacity:.95}
+.block:hover{transform:translateY(-3px)}
+.block:active{cursor:grabbing;transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.block.adelante{background:var(--leaf)}
+.block.atras{background:var(--apple)}
+.block.izquierda{background:var(--sky)}
+.block.derecha{background:var(--grape)}
+.program-area{
+  background:#fbf8ec;border:3px dashed var(--ink);border-radius:14px;min-height:172px;padding:12px;margin-bottom:8px;
+  background-image:linear-gradient(#00000010 1px,transparent 1px);background-size:100% 30px;
+}
+.program-area.drag-over{border-color:var(--leaf);background:#e6f9f1;border-style:solid}
+.program-block{
+  padding:10px 38px 10px 14px;border-radius:11px;font-weight:900;color:#fff;margin-bottom:8px;cursor:pointer;
+  position:relative;animation:slideIn .25s ease;font-size:.86rem;border:2.5px solid var(--ink);
+  box-shadow:3px 3px 0 var(--ink);display:flex;align-items:center;gap:8px;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+.program-block::before{content:attr(data-i);background:#ffffff33;border:2px solid #ffffff88;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
+.program-block:hover::after{content:"✕";position:absolute;right:11px;top:50%;transform:translateY(-50%)}
+.program-block.adelante{background:var(--leaf)}
+.program-block.atras{background:var(--apple)}
+.program-block.izquierda{background:var(--sky)}
+.program-block.derecha{background:var(--grape)}
+.program-block.executing{animation:pulse .5s ease infinite alternate}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.03)}}
+.counter{text-align:left;color:var(--ink-soft);font-size:.82rem;font-weight:900;margin:2px 2px 12px}
+.counter b{color:var(--ink);background:var(--bus);border:2px solid var(--ink);border-radius:999px;padding:1px 9px;margin-right:4px}
+.buttons{display:flex;gap:10px}
+.btn{flex:1;padding:14px 12px;border:var(--border);border-radius:15px;font-size:1rem;font-weight:700;font-family:'Fredoka',sans-serif;cursor:pointer;transition:transform .12s ease;box-shadow:0 5px 0 var(--ink);color:var(--ink)}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn-run{background:var(--bus)}
+.btn-reset{background:#fff}
+.message{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:20px 30px;border:var(--border);
+  border-radius:20px;font-size:clamp(1.05rem,2.6vw,1.5rem);font-family:'Fredoka',sans-serif;color:var(--ink);
+  z-index:1600;animation:fadeInOut 3s ease forwards;box-shadow:8px 8px 0 var(--ink);text-align:center;max-width:90%;background:#fff;
+}
+.message.win{background:#c9f5e2}.message.lose{background:#ffd9dc}.message.info{background:#d9ecff}.message.grad{background:var(--bus)}
+@keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,-50%) scale(.85)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}25%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.94)}}
+.overlay{position:fixed;inset:0;background:rgba(15,23,48,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:1400;padding:20px}
+.overlay.show{display:flex}
+.overlay-card{background:var(--paper);border:var(--border);border-radius:26px;padding:28px;max-width:460px;width:100%;text-align:center;box-shadow:10px 10px 0 var(--ink);animation:pop .35s ease;max-height:90vh;overflow-y:auto;transform:rotate(-.6deg)}
+.overlay-card.grad-card{background:#fff6d0}
+@keyframes pop{from{opacity:0;transform:scale(.88) rotate(2deg)}to{opacity:1;transform:scale(1) rotate(-.6deg)}}
+.overlay-card img.overlay-avatar{width:96px;height:96px;border-radius:28px;object-fit:cover;border:var(--border);margin-bottom:10px;box-shadow:var(--shadow-sm)}
+.overlay-card h2{font-family:'Fredoka',sans-serif;margin-bottom:6px;font-size:1.5rem;line-height:1.15}
+.overlay-card .overlay-stars{font-size:1.9rem;letter-spacing:4px;margin:8px 0;color:#b98a00}
+.overlay-card p{color:#4a5578;margin-bottom:20px;font-size:.98rem;line-height:1.55;font-weight:700}
+.overlay-card .btn{flex:none;padding:13px 30px;font-size:1.05rem;background:var(--leaf);color:#fff}
+#confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:1500}
+.foot{margin-top:22px;text-align:center;color:#8b96b8;font-size:.8rem;font-weight:700}
+@media(max-width:640px){
+  body{padding:14px 12px 44px}
+  .hero{padding:20px}.hero::after{width:120px;height:120px}
+  .controls-section{padding:14px}
+  .level-select{grid-template-columns:repeat(5,1fr);gap:6px}
+  .block{min-height:64px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+}
+</style>
 </head>
 <body>
-    <canvas id="confettiCanvas"></canvas>
-    <div class="container">
-        <div class="topbar">
-            <h1>🎮 Sara Game - Camino a la Escuela</h1>
-            <button class="mute-btn" id="muteBtn" onclick="toggleSound()" title="Activar/silenciar sonido">🔊</button>
-        </div>
+<canvas id="confettiCanvas"></canvas>
+<div class="container">
+<div class="topbar">
+<div class="brand">
+<div class="logo-badge"><span class="dot"></span> SARA GAME</div>
+<div class="brand-text">
+<h1>Camino <em>a la escuela</em></h1>
+<p>Programa con bloques y ayuda a Sara en cada nivel</p>
+</div>
+</div>
+<button class="mute-btn" id="muteBtn" onclick="toggleSound()" title="Activar o silenciar sonido" aria-label="Activar o silenciar sonido">🔊</button>
+</div>
 
-        <!-- Menú principal -->
-        <div class="menu-screen" id="menuScreen">
-            <div class="game-cards">
-                <div class="game-card" onclick="showGame('mouse')">
-                    <div style="font-size: 80px;">🐭</div>
-                    <h2>El Ratón y el Queso</h2>
-                    <p>Guía al ratón hasta el queso en 10 niveles evitando las cajas-trampa</p>
-                    <br>
-                    <span class="progress" id="mouseMenuProgress">Nivel 1/10 · ⭐ 0</span>
-                </div>
-                <div class="game-card" onclick="showGame('school')">
-                    <img src="icono.jpg" alt="Logo Escuela" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
-                    <h2>El Nene a la Escuela</h2>
-                    <p>Ayuda al nene a llegar a la escuela y ¡graduarte en 10 niveles!</p>
-                    <br>
-                    <span class="progress" id="menuProgress">Nivel 1/10 · ⭐ 0</span>
-                </div>
-            </div>
-        </div>
+<!-- Menu principal -->
+<div class="menu-screen" id="menuScreen">
+<section class="hero">
+<span class="hero-kicker">✏️ Cuaderno de aventuras · 2 juegos · 20 niveles</span>
+<h2>Elegí tu <span class="hl">aventura</span> de hoy</h2>
+<p>Arrastrá flechas, tocá para sumar bloques y presioná ejecutar. Cada nivel es un pasito más cerca del queso dorado o de la graduación.</p>
+<div class="hero-path">
+<span class="path-step">🧩 Armá</span><span class="path-dots">•••</span>
+<span class="path-step">▶ Ejecutá</span><span class="path-dots">•••</span>
+<span class="path-step">⭐ Ganá estrellas</span>
+</div>
+</section>
+<div class="game-cards">
+<article class="game-card" onclick="showGame('mouse')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showGame('mouse')">
+<div class="card-art mouse">
+<div class="card-emoji">🐭</div>
+<span class="card-tag">Lógica · 10 niveles</span>
+</div>
+<div class="card-body">
+<h3>El ratón y el queso</h3>
+<p>Guiá al ratón hasta el queso amarillo y esquivá cajas trampa, gatos hambrientos y trampas clásicas.</p>
+<div class="card-foot">
+<span class="progress" id="mouseMenuProgress">Nivel 1/10 ⭐ 0</span>
+<span class="play-pill">Jugar 🧀</span>
+</div>
+</div>
+</article>
+<article class="game-card" onclick="showGame('school')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showGame('school')">
+<div class="card-art school">
+<img src="icono.jpg" alt="Mochila de Sara" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
+<span class="card-tag">Aventura · 10 niveles</span>
+</div>
+<div class="card-body">
+<h3>El nene a la escuela</h3>
+<p>Acompañá al nene entre charcos, colectivos, perros y vecinas charlatanas hasta tu colegio.</p>
+<div class="card-foot">
+<span class="progress" id="menuProgress">Nivel 1/10 ⭐ 0</span>
+<span class="play-pill alt">Jugar 🏫</span>
+</div>
+</div>
+</article>
+</div>
+</div>
 
-        <!-- Juego del Ratón -->
-        <div class="game-screen" id="mouseGame">
-            <button class="back-btn" onclick="showMenu()">← Volver al menú</button>
-            <div class="game-container">
-                <div class="maze-section" id="mouseMazeSection">
-                    <canvas id="mouseCanvas" width="600" height="480"></canvas>
-                </div>
+<!-- Juego del Raton -->
+<div class="game-screen" id="mouseGame">
+<button class="back-btn" onclick="showMenu()">← Volver al cuaderno</button>
+<div class="game-container">
+<div class="maze-section" id="mouseMazeSection">
+<div class="board-head">
+<div class="where">🐭 El tablero del ratón<small>Cajas 📦, gatos 🐱 y trampas 🪤: ¡esquivalas todas!</small></div>
+</div>
+<div class="canvas-wrap"><canvas id="mouseCanvas" width="600" height="480"></canvas></div>
+</div>
+<div class="controls-section">
+<div class="hud">
+<img class="avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
+<span class="level-badge" id="mouseLevelBadge">Nivel 1/10</span>
+<span class="hud-stars" id="mouseStars">☆☆☆</span>
+<span class="hud-par" id="mousePar">Par 11</span>
+<span class="hud-stars" id="mouseWins" title="Veces que el ratón llegó al queso">🧀 0</span>
+</div>
+<div class="accordion">
+<div class="accordion-header" onclick="toggleAccordion('mouseAccordion')"><span>📖 Cómo se juega</span><span class="icon">▼</span></div>
+<div class="accordion-content" id="mouseAccordion"><div class="accordion-body"><ul>
+<li>Arrastrá los bloques al programa o tocalos para agregarlos</li>
+<li>Tocá un bloque del programa para sacarlo</li>
+<li>Presioná Ejecutar o la tecla Espacio</li>
+<li>Llevá al ratón al queso amarillo</li>
+<li>Esquivá las cajas trampa que caen sobre el ratón</li>
+<li>Completá los 10 niveles y ganá el Queso Dorado</li><li>Esquivá gatos 🐱 y trampas clásicas 🪤 además de las cajas</li>
+<li>Menos bloques, más estrellas</li>
+</ul></div></div>
+</div>
+<div class="section-title">🗺️ Mapa de niveles</div>
+<div class="level-select" id="mouseLevelSelect"></div>
+<div class="section-title">🧩 Bloques de movimiento</div>
+<div class="palette">
+<div class="block adelante" draggable="true" tabindex="0" data-command="adelante" data-game="mouse">⬆<span>Arriba</span></div>
+<div class="block atras" draggable="true" tabindex="0" data-command="atras" data-game="mouse">⬇<span>Abajo</span></div>
+<div class="block izquierda" draggable="true" tabindex="0" data-command="izquierda" data-game="mouse">⬅<span>Izquierda</span></div>
+<div class="block derecha" draggable="true" tabindex="0" data-command="derecha" data-game="mouse">➡<span>Derecha</span></div>
+</div>
+<div class="section-title">📋 Mi programa</div>
+<div class="program-area" id="mouseProgramArea"><p style="color:#8b96b8;text-align:center;margin-top:60px;font-weight:800;">Arrastrá los bloques hasta acá</p></div>
+<div class="counter" id="mouseCounter">0 / 15 comandos</div>
+<div class="buttons">
+<button class="btn btn-run" onclick="runMouseGame()">▶ Ejecutar</button>
+<button class="btn btn-reset" onclick="resetMouseGame()">↺ Limpiar</button>
+</div>
+</div>
+</div>
+</div>
 
-                <div class="controls-section">
-                    <div class="hud">
-                        <img class="avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
-                        <span class="level-badge" id="mouseLevelBadge">Nivel 1/10</span>
-                        <span class="hud-stars" id="mouseStars">☆☆☆</span>
-                        <span class="hud-par" id="mousePar">Par 11</span>
-                        <span class="hud-stars" id="mouseWins" title="Veces que el ratón llegó al queso">🧀 0</span>
-                    </div>
-                    <!-- Acordeón de instrucciones -->
-                    <div class="accordion">
-                        <div class="accordion-header" onclick="toggleAccordion('mouseAccordion')">
-                            <span>📖 Instrucciones</span>
-                            <span class="icon">▼</span>
-                        </div>
-                        <div class="accordion-content" id="mouseAccordion">
-                            <div class="accordion-body">
-                                <ul>
-                                    <li>Arrastra los bloques al área de programa (o tócalos para agregarlos)</li>
-                                    <li>Haz clic en un bloque para eliminarlo</li>
-                                    <li>Presiona EJECUTAR o ESPACIO</li>
-                                    <li>Lleva al ratón al queso amarillo</li>
-                                    <li>Evita las cajas-trampa: ¡la caja cae sobre el ratón!</li>
-                                    <li>Completa los 10 niveles ¡y conseguí el Queso Dorado! 🏆</li>
-                                    <li>Menos comandos = más estrellas ⭐</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+<!-- Juego del Nene -->
+<div class="game-screen" id="schoolGame">
+<button class="back-btn" onclick="showMenu()">← Volver al cuaderno</button>
+<div class="game-container">
+<div class="maze-section" id="schoolMazeSection">
+<div class="board-head">
+<div class="where">🏫 El camino a la escuela<small>Charcos, colectivos 🚌, perros 🐕 y vecinas 👵</small></div>
+</div>
+<div class="canvas-wrap"><canvas id="schoolCanvas" width="600" height="480"></canvas></div>
+</div>
+<div class="controls-section">
+<div class="hud">
+<img class="avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
+<span class="level-badge" id="schoolLevelBadge">Nivel 1/10</span>
+<span class="hud-stars" id="schoolStars">☆☆☆</span>
+<span class="hud-par" id="schoolPar">Par 5</span>
+</div>
+<div class="section-title">🗺️ Mapa de niveles</div>
+<div class="level-select" id="levelSelect"></div>
+<div class="accordion">
+<div class="accordion-header" onclick="toggleAccordion('schoolAccordion')"><span>📖 Cómo se juega</span><span class="icon">▼</span></div>
+<div class="accordion-content" id="schoolAccordion"><div class="accordion-body"><ul>
+<li>Arrastrá los bloques al programa o tocalos para agregarlos</li>
+<li>Tocá un bloque del programa para sacarlo</li>
+<li>Presioná Ejecutar o la tecla Espacio</li>
+<li>Llevá al nene hasta la escuela</li>
+<li>Evitá los charcos de barro</li>
+<li>Completá los 10 niveles y graduate</li><li>Esquivá colectivos 🚌, perros 🐕 y señoras charlatanas 👵</li>
+<li>Menos bloques, más estrellas</li>
+</ul></div></div>
+</div>
+<div class="section-title">🧩 Bloques de movimiento</div>
+<div class="palette">
+<div class="block adelante" draggable="true" tabindex="0" data-command="adelante" data-game="school">⬆<span>Arriba</span></div>
+<div class="block atras" draggable="true" tabindex="0" data-command="atras" data-game="school">⬇<span>Abajo</span></div>
+<div class="block izquierda" draggable="true" tabindex="0" data-command="izquierda" data-game="school">⬅<span>Izquierda</span></div>
+<div class="block derecha" draggable="true" tabindex="0" data-command="derecha" data-game="school">➡<span>Derecha</span></div>
+</div>
+<div class="section-title">📋 Mi programa</div>
+<div class="program-area" id="schoolProgramArea"><p style="color:#8b96b8;text-align:center;margin-top:60px;font-weight:800;">Arrastrá los bloques hasta acá</p></div>
+<div class="counter" id="schoolCounter">0 / 10 comandos</div>
+<div class="buttons">
+<button class="btn btn-run" onclick="runSchoolGame()">▶ Ejecutar</button>
+<button class="btn btn-reset" onclick="resetSchoolGame()">↺ Limpiar</button>
+</div>
+</div>
+</div>
+</div>
+<p class="foot">Hecho con cariño para Sara · tocá, probá y animate a usar menos bloques</p>
+</div>
 
-                    <div class="section-title">🗺️ Niveles</div>
-                    <div class="level-select" id="mouseLevelSelect"></div>
+<!-- Overlay -->
+<div class="overlay" id="levelOverlay">
+<div class="overlay-card" id="levelOverlayCard">
+<img class="overlay-avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
+<h2 id="overlayTitle">Nivel 1</h2>
+<div class="overlay-stars" id="overlayStars" style="display:none;">⭐⭐⭐</div>
+<p id="overlayMessage">¡Vamos!</p>
+<button class="btn btn-run" id="overlayButton" onclick="closeLevelOverlay()">¡Jugar!</button>
+</div>
+</div>
 
-                    <div class="section-title">🧩 Bloques</div>
-                    <div class="palette">
-                        <div class="block adelante" draggable="true" data-command="adelante" data-game="mouse">⬆</div>
-                        <div class="block atras" draggable="true" data-command="atras" data-game="mouse">⬇</div>
-                        <div class="block izquierda" draggable="true" data-command="izquierda" data-game="mouse">⬅</div>
-                        <div class="block derecha" draggable="true" data-command="derecha" data-game="mouse">➡</div>
-                    </div>
-
-                    <div class="section-title">📋 Programa</div>
-                    <div class="program-area" id="mouseProgramArea">
-                        <p style="color: #999; text-align: center; margin-top: 80px;">Arrastra los bloques aquí</p>
-                    </div>
-                    <div class="counter" id="mouseCounter">0 / 15 comandos</div>
-
-                    <div class="buttons">
-                        <button class="btn btn-run" onclick="runMouseGame()">▶ EJECUTAR</button>
-                        <button class="btn btn-reset" onclick="resetMouseGame()">↺ REINICIAR</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Juego del Nene a la Escuela (10 niveles) -->
-        <div class="game-screen" id="schoolGame">
-            <button class="back-btn" onclick="showMenu()">← Volver al menú</button>
-            <div class="game-container">
-                <div class="maze-section" id="schoolMazeSection">
-                    <canvas id="schoolCanvas" width="600" height="480"></canvas>
-                </div>
-
-                <div class="controls-section">
-                    <div class="hud">
-                        <img class="avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
-                        <span class="level-badge" id="schoolLevelBadge">Nivel 1/10</span>
-                        <span class="hud-stars" id="schoolStars">☆☆☆</span>
-                        <span class="hud-par" id="schoolPar">Par 5</span>
-                    </div>
-
-                    <div class="section-title">🗺️ Niveles</div>
-                    <div class="level-select" id="levelSelect"></div>
-
-                    <!-- Acordeón de instrucciones -->
-                    <div class="accordion">
-                        <div class="accordion-header" onclick="toggleAccordion('schoolAccordion')">
-                            <span>📖 Instrucciones</span>
-                            <span class="icon">▼</span>
-                        </div>
-                        <div class="accordion-content" id="schoolAccordion">
-                            <div class="accordion-body">
-                                <ul>
-                                    <li>Arrastra los bloques al área de programa (o tócalos para agregarlos)</li>
-                                    <li>Haz clic en un bloque para eliminarlo</li>
-                                    <li>Presiona EJECUTAR o ESPACIO</li>
-                                    <li>Lleva al nene a la escuela</li>
-                                    <li>Evita los charcos de barro</li>
-                                    <li>Completa los 10 niveles ¡y gradúate! 🎓</li>
-                                    <li>Menos comandos = más estrellas ⭐</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section-title">🧩 Bloques</div>
-                    <div class="palette">
-                        <div class="block adelante" draggable="true" data-command="adelante" data-game="school">⬆</div>
-                        <div class="block atras" draggable="true" data-command="atras" data-game="school">⬇</div>
-                        <div class="block izquierda" draggable="true" data-command="izquierda" data-game="school">⬅</div>
-                        <div class="block derecha" draggable="true" data-command="derecha" data-game="school">➡</div>
-                    </div>
-
-                    <div class="section-title">📋 Programa</div>
-                    <div class="program-area" id="schoolProgramArea">
-                        <p style="color: #999; text-align: center; margin-top: 80px;">Arrastra los bloques aquí</p>
-                    </div>
-                    <div class="counter" id="schoolCounter">0 / 10 comandos</div>
-
-                    <div class="buttons">
-                        <button class="btn btn-run" onclick="runSchoolGame()">▶ EJECUTAR</button>
-                        <button class="btn btn-reset" onclick="resetSchoolGame()">↺ REINICIAR</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Overlay de transición entre niveles -->
-    <div class="overlay" id="levelOverlay">
-        <div class="overlay-card" id="levelOverlayCard">
-            <img class="overlay-avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
-            <h2 id="overlayTitle">Nivel 1</h2>
-            <div class="overlay-stars" id="overlayStars" style="display:none;">⭐⭐⭐</div>
-            <p id="overlayMessage">¡Vamos!</p>
-            <button class="btn btn-run" id="overlayButton" onclick="closeLevelOverlay()">¡Jugar!</button>
-        </div>
-    </div>
-
-    <script>
+<script>
         // =====================================================================
         // Configuración general
         // =====================================================================
@@ -862,6 +439,14 @@
         };
 
         const ICONO_FALLBACK = 'https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg';
+
+        // Foto del colegio: se dibuja la imagen real (icono.jpg) en la meta
+        // para que los chicos reconozcan su escuela. Si aún no cargó, se usa
+        // un dibujo simple como respaldo.
+        const SCHOOL_PHOTO = new Image();
+        SCHOOL_PHOTO.src = 'icono.jpg';
+        SCHOOL_PHOTO.onload = () => { try { drawSchoolGame(); } catch (e) {} };
+        SCHOOL_PHOTO.onerror = () => { SCHOOL_PHOTO.src = ICONO_FALLBACK; };
 
         // =====================================================================
         // Sonido (Web Audio API, sin archivos externos)
@@ -930,6 +515,28 @@
             tone(200, 0.15, { type: 'sine', vol: 0.2, delay: 0.08 });
             tone(120, 0.25, { type: 'sine', vol: 0.2, delay: 0.16 });
         }
+        function sfxMeow() {
+            tone(700, 0.18, { type: 'sawtooth', vol: 0.1 });
+            tone(520, 0.3, { type: 'sawtooth', vol: 0.1, delay: 0.14 });
+            tone(380, 0.25, { type: 'sawtooth', vol: 0.08, delay: 0.34 });
+        }
+        function sfxSnap() {
+            tone(1800, 0.05, { type: 'square', vol: 0.16 });
+            tone(220, 0.18, { type: 'square', vol: 0.14, delay: 0.05 });
+        }
+        function sfxHorn() {
+            tone(220, 0.3, { type: 'sawtooth', vol: 0.16 });
+            tone(220, 0.4, { type: 'sawtooth', vol: 0.16, delay: 0.32 });
+            tone(277, 0.3, { type: 'sawtooth', vol: 0.1, delay: 0.02 });
+        }
+        function sfxBark() {
+            tone(300, 0.12, { type: 'square', vol: 0.16 });
+            tone(280, 0.12, { type: 'square', vol: 0.16, delay: 0.15 });
+            tone(320, 0.14, { type: 'square', vol: 0.16, delay: 0.3 });
+        }
+        function sfxChat() {
+            [440, 520, 600].forEach((f, i) => tone(f, 0.18, { delay: i * 0.14, type: 'sine', vol: 0.14 }));
+        }
 
         function toggleSound() {
             soundOn = !soundOn;
@@ -967,16 +574,16 @@
         // spawnRate (cantidad de cajas-trampa), goalScore (par de comandos),
         // maxCommands, maze, start, cheese, traps y theme.
         const MOUSE_LEVELS = [
-        {id: 1, levelTitle: "¡El primer queso! 🧀", message: "El ratón huele queso cerca. ¡Guiálo con cuidado y evitá la caja!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [1, 1, 1, 1, 1, 1, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[5, 3]], speed: 500, spawnRate: 1, maxCommands: 15, goalScore: 11, theme: {floor: "#f5f5dc", line: "#ccc", wall: "#464646", edge: "#333"}},
-        {id: 2, levelTitle: "El queso del vecino 🧀", message: "Hay otro queso esperando. ¡Nivel 2, vamos!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 1, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 1], traps: [[4, 4]], speed: 490, spawnRate: 1, maxCommands: 14, goalScore: 9, theme: {floor: "#faf6e9", line: "#d8cfae", wall: "#5d4037", edge: "#3e2723"}},
-        {id: 3, levelTitle: "Cuidado con las cajas 📦", message: "¡Paso 3 completado! Las cajas están por todos lados.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [4, 6], traps: [[8, 6]], speed: 470, spawnRate: 1, maxCommands: 13, goalScore: 8, theme: {floor: "#f3efe4", line: "#c9c2ab", wall: "#6d4c41", edge: "#4e342e"}},
-        {id: 4, levelTitle: "Doble trampa 📦📦", message: "Ahora hay DOS cajas-trampa. Pensá cada movimiento.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[3, 4], [4, 6]], speed: 450, spawnRate: 2, maxCommands: 15, goalScore: 11, theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#4e342e", edge: "#32241f"}},
-        {id: 5, levelTitle: "Queso de medianoche 🌙", message: "De noche el queso sabe mejor. ¡Pero mirá dónde pisás! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 1, 1], [1, 0, 1, 1, 1, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [6, 4], traps: [[3, 4], [7, 6]], speed: 430, spawnRate: 2, maxCommands: 18, goalScore: 14, theme: {floor: "#e8eaf6", line: "#9fa8da", wall: "#37474f", edge: "#1c262b"}},
-        {id: 6, levelTitle: "El sótano misterioso 🏚️", message: "Bajamos al sótano. ¡El queso está más lejos ahora! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 0, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 0, 1, 1, 1], [1, 0, 1, 0, 1, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [7, 5], traps: [[3, 3], [4, 3]], speed: 410, spawnRate: 2, maxCommands: 18, goalScore: 14, theme: {floor: "#eceff1", line: "#b0bec5", wall: "#455a64", edge: "#263238"}},
-        {id: 7, levelTitle: "La gran reserva 🧀", message: "¡Casi lo lográs! La reserva de queso está protegida. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 1, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [1, 4], traps: [[6, 5], [7, 5]], speed: 390, spawnRate: 2, maxCommands: 16, goalScore: 13, theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#5d4037", edge: "#3e2723"}},
-        {id: 8, levelTitle: "Corre, ratoncito, corre ⚡", message: "¡Más rápido! Tres cajas y poco tiempo para pensar. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [4, 1], traps: [[5, 5], [7, 3], [6, 3]], speed: 370, spawnRate: 3, maxCommands: 18, goalScore: 15, theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#6a1b9a", edge: "#4a148c"}},
-        {id: 9, levelTitle: "El queso del rey 👑", message: "Solo los valientes llegan al queso del rey. ¡Último esfuerzo! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 0, 1, 0, 1], [1, 0, 1, 1, 1, 0, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [7, 3], traps: [[5, 3], [8, 3], [8, 4]], speed: 350, spawnRate: 3, maxCommands: 19, goalScore: 16, theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#4527a0", edge: "#311b92"}},
-        {id: 10, levelTitle: "¡El Gran Queso Dorado! 🏆", message: "¡Último nivel! Conseguí el legendario Queso Dorado. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 0, 0, 0, 1], [1, 1, 0, 0, 1, 0, 0, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [6, 2], traps: [[8, 1], [7, 1], [6, 1]], speed: 380, spawnRate: 3, maxCommands: 19, goalScore: 16, theme: {floor: "#fffde7", line: "#f0d060", wall: "#6d4c41", edge: "#4e342e"}, finale: true}
+        {id: 1, levelTitle: "¡El primer queso! 🧀", message: "El ratón huele queso cerca. ¡Guiálo con cuidado y evitá la caja!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [1, 1, 1, 1, 1, 1, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[5, 3]], cats: [], snaps: [[6, 5]], speed: 500, spawnRate: 1, maxCommands: 15, goalScore: 11, theme: {floor: "#f5f5dc", line: "#ccc", wall: "#464646", edge: "#333"}},
+        {id: 2, levelTitle: "El queso del vecino 🧀", message: "Hay otro queso esperando. ¡Nivel 2, vamos!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 1, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 1], traps: [[4, 4]], cats: [[6, 3]], snaps: [[2, 5]], speed: 490, spawnRate: 1, maxCommands: 14, goalScore: 9, theme: {floor: "#faf6e9", line: "#d8cfae", wall: "#5d4037", edge: "#3e2723"}},
+        {id: 3, levelTitle: "Cuidado con las cajas 📦", message: "¡Paso 3 completado! Las cajas están por todos lados.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [4, 6], traps: [[8, 6]], cats: [[4, 2]], snaps: [[2, 4]], speed: 470, spawnRate: 1, maxCommands: 13, goalScore: 8, theme: {floor: "#f3efe4", line: "#c9c2ab", wall: "#6d4c41", edge: "#4e342e"}},
+        {id: 4, levelTitle: "Doble trampa 📦📦", message: "Ahora hay DOS cajas-trampa. Pensá cada movimiento.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [8, 5], traps: [[3, 4], [4, 6]], cats: [[6, 2]], snaps: [[2, 6]], speed: 450, spawnRate: 2, maxCommands: 15, goalScore: 11, theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#4e342e", edge: "#32241f"}},
+        {id: 5, levelTitle: "Queso de medianoche 🌙", message: "De noche el queso sabe mejor. ¡Pero mirá dónde pisás! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 1, 1], [1, 0, 1, 1, 1, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [6, 4], traps: [[3, 4], [7, 6]], cats: [[3, 2]], snaps: [[7, 5]], speed: 430, spawnRate: 2, maxCommands: 18, goalScore: 14, theme: {floor: "#e8eaf6", line: "#9fa8da", wall: "#37474f", edge: "#1c262b"}},
+        {id: 6, levelTitle: "El sótano misterioso 🏚️", message: "Bajamos al sótano. ¡El queso está más lejos ahora! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 0, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 0, 1, 1, 1], [1, 0, 1, 0, 1, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [7, 5], traps: [[3, 3], [4, 3]], cats: [[6, 4]], snaps: [[3, 5]], speed: 410, spawnRate: 2, maxCommands: 18, goalScore: 14, theme: {floor: "#eceff1", line: "#b0bec5", wall: "#455a64", edge: "#263238"}},
+        {id: 7, levelTitle: "La gran reserva 🧀", message: "¡Casi lo lográs! La reserva de queso está protegida. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 1, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [1, 4], traps: [[6, 5], [7, 5]], cats: [[5, 5]], snaps: [], speed: 390, spawnRate: 2, maxCommands: 16, goalScore: 13, theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#5d4037", edge: "#3e2723"}},
+        {id: 8, levelTitle: "Corre, ratoncito, corre ⚡", message: "¡Más rápido! Tres cajas y poco tiempo para pensar. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [4, 1], traps: [[5, 5], [7, 3], [6, 3]], cats: [[5, 3]], snaps: [[5, 1]], speed: 370, spawnRate: 3, maxCommands: 18, goalScore: 15, theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#6a1b9a", edge: "#4a148c"}},
+        {id: 9, levelTitle: "El queso del rey 👑", message: "Solo los valientes llegan al queso del rey. ¡Último esfuerzo! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 1, 0, 1, 0, 1], [1, 0, 1, 1, 1, 0, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [7, 3], traps: [[5, 3], [8, 3], [8, 4]], cats: [[3, 3]], snaps: [[8, 5]], speed: 350, spawnRate: 3, maxCommands: 19, goalScore: 16, theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#4527a0", edge: "#311b92"}},
+        {id: 10, levelTitle: "¡El Gran Queso Dorado! 🏆", message: "¡Último nivel! Conseguí el legendario Queso Dorado. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 0, 0, 0, 1], [1, 1, 0, 0, 1, 0, 0, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], cheese: [6, 2], traps: [[8, 1], [7, 1], [6, 1]], cats: [[3, 2]], snaps: [[5, 5]], speed: 380, spawnRate: 3, maxCommands: 19, goalScore: 16, theme: {floor: "#fffde7", line: "#f0d060", wall: "#6d4c41", edge: "#4e342e"}, finale: true}
 
         ];
 
@@ -988,16 +595,16 @@
         // Niveles 1-3: fácil · 4-7: intermedio · 8-10: avanzado (10 = graduación)
         // =====================================================================
         const SCHOOL_LEVELS = [
-        {id: 1, levelTitle: "¡A levantarse! 🛏️", message: "Te despertaste a tiempo. ¡Empezamos la aventura hacia la escuela!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [1, 6], muds: [], speed: 600, spawnRate: 0, maxCommands: 10, goalScore: 5, player: "👦", theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#8d6e63", edge: "#5d4037"}},
-        {id: 2, levelTitle: "Preparo mi mochila 🎒", message: "Guardaste tus útiles. ¡Paso 2 completado, sigamos caminando!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 2], muds: [[8, 3]], speed: 580, spawnRate: 1, maxCommands: 11, goalScore: 6, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#5d4037", edge: "#3e2723"}},
-        {id: 3, levelTitle: "Salgo de casa 🚶", message: "¡Paso 3 completado! Nos acercamos al aula.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [4, 6], muds: [[7, 5], [5, 4]], speed: 550, spawnRate: 2, maxCommands: 13, goalScore: 8, player: "👦", theme: {floor: "#e3f2fd", line: "#90caf9", wall: "#546e7a", edge: "#37474f"}},
-        {id: 4, levelTitle: "Cruzando el parque 🌳", message: "Esquivaste las ramas del parque. ¡Excelente!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 1, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [2, 6], muds: [[4, 2], [7, 1]], speed: 500, spawnRate: 2, maxCommands: 12, goalScore: 8, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#33691e", edge: "#1b4312"}},
-        {id: 5, levelTitle: "¡Cuidado con el barro! 💧", message: "El camino está resbaloso, pero vos podés. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 0, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 1, 1], [1, 1, 1, 0, 0, 1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[4, 6], [3, 6], [5, 2]], speed: 480, spawnRate: 3, maxCommands: 18, goalScore: 14, player: "👦", theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#4e342e", edge: "#3e2723"}},
-        {id: 6, levelTitle: "La calle concurrida 🚗", message: "Cruzaste con cuidado. ¡Ya falta menos! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 0, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 0, 1], [1, 1, 1, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 0, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 4], muds: [[6, 3], [8, 4], [8, 3]], speed: 450, spawnRate: 3, maxCommands: 18, goalScore: 14, player: "👦", theme: {floor: "#eceff1", line: "#b0bec5", wall: "#455a64", edge: "#263238"}},
-        {id: 7, levelTitle: "¡A no llegar tarde! 🏃", message: "Rápido pero con cuidado. ¡Casi llegamos! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 0, 1, 1, 1, 1, 1, 0, 1], [1, 1, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 0, 1, 0, 1, 1, 0, 1, 1], [1, 1, 0, 0, 0, 1, 0, 0, 1, 1], [1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 5], muds: [[8, 3], [7, 6], [8, 2], [5, 6]], speed: 420, spawnRate: 4, maxCommands: 18, goalScore: 15, player: "👦", theme: {floor: "#fff3e0", line: "#ffcc80", wall: "#6d4c41", edge: "#4e342e"}},
-        {id: 8, levelTitle: "La puerta de la escuela 🏫", message: "¡La escuela está a la vista! Concentrate. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 0, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 0, 0, 0, 0, 1], [1, 1, 1, 1, 0, 0, 1, 1, 0, 1], [1, 1, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [2, 5], muds: [[8, 4], [4, 6], [7, 3], [8, 3]], speed: 380, spawnRate: 4, maxCommands: 18, goalScore: 15, player: "👦", theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#4527a0", edge: "#311b92"}},
-        {id: 9, levelTitle: "El aula final 📚", message: "Solo falta entrar al aula. ¡Último esfuerzo! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 1, 1, 1, 1], [1, 1, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 0, 1, 1], [1, 0, 1, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 1, 1], [1, 1, 0, 1, 1, 0, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[5, 6], [5, 1], [5, 2], [7, 3], [2, 6]], speed: 350, spawnRate: 5, maxCommands: 19, goalScore: 16, player: "👦", theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#6a1b9a", edge: "#4a148c"}},
-        {id: 10, levelTitle: "¡Graduación! 🎓", message: "¡Último nivel! Llegá a la fiesta de graduación y celebrate como un campeón. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 0, 1], [1, 1, 0, 1, 1, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 1, 1, 1], [1, 0, 1, 1, 0, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 2], muds: [[7, 2], [6, 1], [8, 1], [8, 2], [3, 1]], speed: 400, spawnRate: 5, maxCommands: 19, goalScore: 16, player: "🧑‍🎓", theme: {floor: "#fffde7", line: "#f0d060", wall: "#6d4c41", edge: "#4e342e"}, graduation: true}
+        {id: 1, levelTitle: "¡A levantarse! 🛏️", message: "Te despertaste a tiempo. ¡Empezamos la aventura hacia la escuela!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [1, 6], muds: [], buses: [], dogs: [], grannies: [], speed: 600, spawnRate: 0, maxCommands: 10, goalScore: 5, player: "👦", theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#8d6e63", edge: "#5d4037"}},
+        {id: 2, levelTitle: "Preparo mi mochila 🎒", message: "Guardaste tus útiles. ¡Paso 2 completado, sigamos caminando!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 2], muds: [[8, 3]], buses: [], dogs: [[3, 3]], grannies: [[5, 3]], speed: 580, spawnRate: 1, maxCommands: 11, goalScore: 6, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#5d4037", edge: "#3e2723"}},
+        {id: 3, levelTitle: "Salgo de casa 🚶", message: "¡Paso 3 completado! Nos acercamos al aula.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [4, 6], muds: [[7, 5], [5, 4]], buses: [[6, 3]], dogs: [[5, 2]], grannies: [], speed: 550, spawnRate: 2, maxCommands: 13, goalScore: 8, player: "👦", theme: {floor: "#e3f2fd", line: "#90caf9", wall: "#546e7a", edge: "#37474f"}},
+        {id: 4, levelTitle: "Cruzando el parque 🌳", message: "Esquivaste las ramas del parque. ¡Excelente!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 1, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [2, 6], muds: [[4, 2], [7, 1]], buses: [[5, 3]], dogs: [[2, 4]], grannies: [[4, 4]], speed: 500, spawnRate: 2, maxCommands: 12, goalScore: 8, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#33691e", edge: "#1b4312"}},
+        {id: 5, levelTitle: "¡Cuidado con el barro! 💧", message: "El camino está resbaloso, pero vos podés. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 0, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 1, 1], [1, 1, 1, 0, 0, 1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[4, 6], [3, 6], [5, 2]], buses: [[4, 2]], dogs: [[5, 3]], grannies: [], speed: 480, spawnRate: 3, maxCommands: 18, goalScore: 14, player: "👦", theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#4e342e", edge: "#3e2723"}},
+        {id: 6, levelTitle: "La calle concurrida 🚗", message: "Cruzaste con cuidado. ¡Ya falta menos! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 0, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 0, 1], [1, 1, 1, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 0, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 4], muds: [[6, 3], [8, 4], [8, 3]], buses: [[1, 3]], dogs: [[2, 3]], grannies: [], speed: 450, spawnRate: 3, maxCommands: 18, goalScore: 14, player: "👦", theme: {floor: "#eceff1", line: "#b0bec5", wall: "#455a64", edge: "#263238"}},
+        {id: 7, levelTitle: "¡A no llegar tarde! 🏃", message: "Rápido pero con cuidado. ¡Casi llegamos! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 0, 1, 1, 1, 1, 1, 0, 1], [1, 1, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 0, 1, 0, 1, 1, 0, 1, 1], [1, 1, 0, 0, 0, 1, 0, 0, 1, 1], [1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 5], muds: [[8, 3], [7, 6], [8, 2], [5, 6]], buses: [[8, 1]], dogs: [], grannies: [[4, 6]], speed: 420, spawnRate: 4, maxCommands: 18, goalScore: 15, player: "👦", theme: {floor: "#fff3e0", line: "#ffcc80", wall: "#6d4c41", edge: "#4e342e"}},
+        {id: 8, levelTitle: "La puerta de la escuela 🏫", message: "¡La escuela está a la vista! Concentrate. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 0, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 0, 0, 0, 0, 1], [1, 1, 1, 1, 0, 0, 1, 1, 0, 1], [1, 1, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [2, 5], muds: [[8, 4], [4, 6], [7, 3], [8, 3]], buses: [], dogs: [[2, 6]], grannies: [[5, 6]], speed: 380, spawnRate: 4, maxCommands: 18, goalScore: 15, player: "👦", theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#4527a0", edge: "#311b92"}},
+        {id: 9, levelTitle: "El aula final 📚", message: "Solo falta entrar al aula. ¡Último esfuerzo! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 1, 1, 1, 1], [1, 1, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 0, 1, 1], [1, 0, 1, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 1, 1], [1, 1, 0, 1, 1, 0, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[5, 6], [5, 1], [5, 2], [7, 3], [2, 6]], buses: [[4, 2]], dogs: [[7, 4]], grannies: [], speed: 350, spawnRate: 5, maxCommands: 19, goalScore: 16, player: "👦", theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#6a1b9a", edge: "#4a148c"}},
+        {id: 10, levelTitle: "¡Graduación! 🎓", message: "¡Último nivel! Llegá a la fiesta de graduación y celebrate como un campeón. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 0, 1], [1, 1, 0, 1, 1, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 1, 1, 1], [1, 0, 1, 1, 0, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 2], muds: [[7, 2], [6, 1], [8, 1], [8, 2], [3, 1]], buses: [[4, 1]], dogs: [[3, 3]], grannies: [], speed: 400, spawnRate: 5, maxCommands: 19, goalScore: 16, player: "🧑‍🎓", theme: {floor: "#fffde7", line: "#f0d060", wall: "#6d4c41", edge: "#4e342e"}, graduation: true}
 
         ];
 
@@ -1015,6 +622,10 @@
             fxToken: 0,
             boxT: -1,      // progreso de la animación de la caja (-1 = inactiva)
             hitTrap: null, // [x, y] de la caja que atrapo al raton
+            catT: -1,      // animación del gato (-1 = inactiva)
+            hitCat: null,  // [x, y] del gato que atrapó al ratón
+            snapT: -1,     // animación de la trampa clásica (-1 = inactiva)
+            hitSnap: null, // [x, y] de la trampa que se cerró
             winFx: -1,     // progreso del destello de victoria
             wins: store.get('sara_mouse_wins', 0),
             stars: store.get('sara_mouse_stars', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
@@ -1039,6 +650,12 @@
             runToken: 0,
             fxToken: 0,
             splashT: -1,
+            busT: -1,     // animación del colectivo (-1 = inactiva)
+            hitBus: null,
+            dogT: -1,     // animación del perro (-1 = inactiva)
+            hitDog: null,
+            granT: -1,    // animación de la señora mayor (-1 = inactiva)
+            hitGran: null,
             winFx: -1,
             stars: store.get('sara_stars', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
             unlocked: store.get('sara_unlocked', 1)
@@ -1081,7 +698,7 @@
         function updateMenuProgress() {
             const total = schoolState.stars.reduce((a, b) => a + b, 0);
             const lvl = Math.min(schoolState.unlocked, 10);
-            document.getElementById('menuProgress').textContent = 'Nivel ' + lvl + '/10 · ⭐ ' + total;
+            document.getElementById('menuProgress').textContent = 'Nivel ' + lvl + '/10 ⭐ ' + total;
         }
 
         // Acordeón
@@ -1152,8 +769,51 @@
             ctx.restore();
         }
 
+        // Dibuja la meta del nene con la foto real del colegio (icono.jpg).
+        function drawSchoolPhoto(ctx, gx, gy, isGrad) {
+            const cx = gx * CELL_SIZE + CELL_SIZE / 2;
+            const cy = gy * CELL_SIZE + CELL_SIZE / 2;
+            const r = 24;
+            ctx.save();
+            if (isGrad) {
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.clip();
+            if (SCHOOL_PHOTO.complete && SCHOOL_PHOTO.naturalWidth > 0) {
+                const sw = SCHOOL_PHOTO.naturalWidth, sh = SCHOOL_PHOTO.naturalHeight;
+                const s = Math.min(sw, sh);
+                ctx.drawImage(SCHOOL_PHOTO,
+                    (sw - s) / 2, (sh - s) / 2, s, s,
+                    cx - r, cy - r, r * 2, r * 2);
+            } else {
+                ctx.fillStyle = '#1565c0';
+                ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 11px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('SARA', cx, cy);
+            }
+            ctx.restore();
+            ctx.save();
+            ctx.strokeStyle = '#1a2340';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
         // =====================================================================
-        // Juego del ratón (con animación de caja-trampa)
+        // Juego del ratón (con animaciones de caja, gato y trampa clásica)
         // =====================================================================
         function drawMouseGame() {
             const canvas = document.getElementById('mouseCanvas');
@@ -1170,13 +830,31 @@
                 drawEmoji(ctx, '🧀', ch[0], ch[1]);
             }
 
+            const cats = lv.cats || [];
+            const snaps = lv.snaps || [];
             const hit = mouseState.hitTrap;
             const animating = mouseState.boxT >= 0 && hit;
+            const catAnim = mouseState.catT >= 0 && mouseState.hitCat;
+            const snapAnim = mouseState.snapT >= 0 && mouseState.hitSnap;
 
             // Cajas-trampa fijas (todas menos la que esta cayendo)
             lv.traps.forEach(tr => {
                 if (!(animating && tr[0] === hit[0] && tr[1] === hit[1])) {
                     drawEmoji(ctx, '📦', tr[0], tr[1], { scale: 1.1 });
+                }
+            });
+
+            // Trampas clásicas fijas (todas menos la que se está cerrando)
+            snaps.forEach(tr => {
+                if (!(snapAnim && tr[0] === mouseState.hitSnap[0] && tr[1] === mouseState.hitSnap[1])) {
+                    drawEmoji(ctx, '\U0001FAA4', tr[0], tr[1], { scale: 1.1 });
+                }
+            });
+
+            // Gatos fijos (todos menos el que está saltando)
+            cats.forEach(c => {
+                if (!(catAnim && c[0] === mouseState.hitCat[0] && c[1] === mouseState.hitCat[1])) {
+                    drawEmoji(ctx, '🐱', c[0], c[1], { scale: 1.1 });
                 }
             });
 
@@ -1210,6 +888,38 @@
                     drawEmoji(ctx, '🐭', mouseState.pos.x, mouseState.pos.y);
                 } else {
                     drawEmoji(ctx, '😵', mouseState.pos.x, mouseState.pos.y - 0.55, { scale: 0.8 });
+                }
+            } else if (catAnim) {
+                // El gato salta sobre el ratón: entra desde arriba y lo atrapa
+                const t = mouseState.catT;
+                const hc = mouseState.hitCat;
+                const dy = -150 * (1 - t) * (1 - t);
+                const pounce = 0.6 + t * 0.8;
+                drawEmoji(ctx, '🐱', hc[0], hc[1], { scale: pounce, dy: dy });
+                if (t > 0.55) {
+                    drawEmoji(ctx, '💥', hc[0] + 0.45, hc[1] - 0.3, { scale: 0.7 + (t - 0.55) });
+                }
+                if (t < 0.7) {
+                    drawEmoji(ctx, '😱', mouseState.pos.x, mouseState.pos.y - 0.5, { scale: 0.85 });
+                } else {
+                    drawEmoji(ctx, '😵', mouseState.pos.x, mouseState.pos.y - 0.4, { scale: 0.85 });
+                }
+            } else if (snapAnim) {
+                // La trampa clásica se cierra de golpe: sacudida + destello
+                const t = mouseState.snapT;
+                const hs = mouseState.hitSnap;
+                const shakeX = Math.sin(t * 55) * 5 * (1 - t);
+                ctx.save();
+                ctx.translate(shakeX, 0);
+                drawEmoji(ctx, '\U0001FAA4', hs[0], hs[1], { scale: 1 + t * 0.6 });
+                ctx.restore();
+                if (t > 0.2) {
+                    drawEmoji(ctx, '💥', hs[0], hs[1] - 0.55, { scale: 0.6 + t * 0.8, alpha: 1 - t * 0.5 });
+                }
+                if (t < 0.5) {
+                    drawEmoji(ctx, '😱', mouseState.pos.x, mouseState.pos.y - 0.4, { scale: 0.85 });
+                } else {
+                    drawEmoji(ctx, '😵', mouseState.pos.x, mouseState.pos.y - 0.4, { scale: 0.85 });
                 }
             } else {
                 drawEmoji(ctx, '🐭', mouseState.pos.x, mouseState.pos.y);
@@ -1255,6 +965,66 @@
             requestAnimationFrame(frame);
         }
 
+        // Animación: el gato salta sobre el ratón
+        function triggerCatPounce(hit) {
+            mouseState.executing = 'trap';
+            mouseState.catT = 0;
+            mouseState.hitCat = hit;
+            const token = ++mouseState.fxToken;
+            sfxMeow();
+            const start = performance.now();
+            const DUR = 1100;
+            function frame(now) {
+                if (token !== mouseState.fxToken) return;
+                const t = Math.min(1, (now - start) / DUR);
+                mouseState.catT = t;
+                drawMouseGame();
+                if (t < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    mouseState.executing = false;
+                    mouseState.catT = -1;
+                    mouseState.hitCat = null;
+                    const lv = mouseLevel();
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
+                    sfxLose();
+                    showMessage('¡El gato atrapó al ratón! 🐱', 'lose');
+                    drawMouseGame();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        // Animación: la trampa clásica se cierra de golpe
+        function triggerSnapTrap(hit) {
+            mouseState.executing = 'trap';
+            mouseState.snapT = 0;
+            mouseState.hitSnap = hit;
+            const token = ++mouseState.fxToken;
+            sfxSnap();
+            const start = performance.now();
+            const DUR = 850;
+            function frame(now) {
+                if (token !== mouseState.fxToken) return;
+                const t = Math.min(1, (now - start) / DUR);
+                mouseState.snapT = t;
+                drawMouseGame();
+                if (t < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    mouseState.executing = false;
+                    mouseState.snapT = -1;
+                    mouseState.hitSnap = null;
+                    const lv = mouseLevel();
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
+                    sfxLose();
+                    showMessage('¡La trampa se cerró de golpe! \U0001FAA4', 'lose');
+                    drawMouseGame();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
         function mouseWinEffect(done) {
             mouseState.executing = 'win';
             const token = ++mouseState.fxToken;
@@ -1293,28 +1063,16 @@
             drawGrid(ctx, canvas, lv.maze, lv.theme);
 
             const gx = lv.goal[0], gy = lv.goal[1];
-            const schoolX = gx * CELL_SIZE + CELL_SIZE / 2;
-            const schoolY = gy * CELL_SIZE + CELL_SIZE / 2;
             const isGrad = !!lv.graduation;
+            const buses = lv.buses || [];
+            const dogs = lv.dogs || [];
+            const grans = lv.grannies || [];
+            const busAnim = schoolState.busT >= 0 && schoolState.hitBus;
+            const dogAnim = schoolState.dogT >= 0 && schoolState.hitDog;
+            const granAnim = schoolState.granT >= 0 && schoolState.hitGran;
 
-            // Edificio de la escuela
-            ctx.fillStyle = isGrad ? '#8a6d00' : '#1565c0';
-            ctx.fillRect(schoolX - 25, schoolY - 20, 50, 40);
-            ctx.fillStyle = isGrad ? '#5c4700' : '#0d47a1';
-            ctx.fillRect(schoolX - 20, schoolY - 15, 40, 30);
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(isGrad ? 'GRADÚO' : 'SARA', schoolX, schoolY + 4);
-
-            // Techo
-            ctx.fillStyle = isGrad ? '#ffd700' : '#b71c1c';
-            ctx.beginPath();
-            ctx.moveTo(schoolX - 30, schoolY - 20);
-            ctx.lineTo(schoolX, schoolY - 35);
-            ctx.lineTo(schoolX + 30, schoolY - 20);
-            ctx.closePath();
-            ctx.fill();
+            // Meta: la foto real del colegio para que los chicos la reconozcan
+            drawSchoolPhoto(ctx, gx, gy, isGrad);
 
             if (isGrad) {
                 // Birretes de graduación alrededor de la escuela
@@ -1326,6 +1084,27 @@
 
             // Charcos de barro
             lv.muds.forEach(m => drawMud(ctx, m[0], m[1]));
+
+            // Colectivos (todos menos el que está pasando)
+            buses.forEach(b => {
+                if (!(busAnim && b[0] === schoolState.hitBus[0] && b[1] === schoolState.hitBus[1])) {
+                    drawEmoji(ctx, '🚌', b[0], b[1], { scale: 1.15 });
+                }
+            });
+
+            // Perros (todos menos el que está ladrando)
+            dogs.forEach(d => {
+                if (!(dogAnim && d[0] === schoolState.hitDog[0] && d[1] === schoolState.hitDog[1])) {
+                    drawEmoji(ctx, '🐕', d[0], d[1], { scale: 1.1 });
+                }
+            });
+
+            // Señoras mayores (todas menos la que está charlando)
+            grans.forEach(g => {
+                if (!(granAnim && g[0] === schoolState.hitGran[0] && g[1] === schoolState.hitGran[1])) {
+                    drawEmoji(ctx, '👵', g[0], g[1], { scale: 1.1 });
+                }
+            });
 
             // Nene (birrete en la graduación)
             if (schoolState.splashT >= 0) {
@@ -1339,6 +1118,47 @@
                     schoolState.pos.x * CELL_SIZE + CELL_SIZE / 2,
                     schoolState.pos.y * CELL_SIZE + CELL_SIZE / 2 - t * 20);
                 ctx.restore();
+            } else if (busAnim) {
+                // El colectivo cruza por delante del nene tocando bocina
+                const t = schoolState.busT;
+                const hb = schoolState.hitBus;
+                const dx = -90 * (1 - t) * (1 - t);
+                drawEmoji(ctx, '🚌', hb[0], hb[1], { scale: 1.15, dy: 0 });
+                ctx.save();
+                ctx.globalAlpha = 1;
+                ctx.font = '26px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('📯',
+                    hb[0] * CELL_SIZE + CELL_SIZE / 2 + 22,
+                    hb[1] * CELL_SIZE + CELL_SIZE / 2 - 18 - Math.sin(t * Math.PI) * 6);
+                ctx.restore();
+                drawEmoji(ctx, '😨', schoolState.pos.x, schoolState.pos.y - 0.45, { scale: 0.85 });
+            } else if (dogAnim) {
+                // El perro salta ladrando alrededor del nene
+                const t = schoolState.dogT;
+                const hd = schoolState.hitDog;
+                const jump = -26 * Math.abs(Math.sin(t * Math.PI * 3));
+                drawEmoji(ctx, '🐕', hd[0], hd[1], { scale: 1 + t * 0.35, dy: jump });
+                drawEmoji(ctx, '💢', hd[0] + 0.4, hd[1] - 0.45, { scale: 0.7 + t * 0.4 });
+                if (t < 0.6) {
+                    drawEmoji(ctx, '😱', schoolState.pos.x, schoolState.pos.y - 0.45, { scale: 0.85 });
+                } else {
+                    drawEmoji(ctx, '😢', schoolState.pos.x, schoolState.pos.y - 0.45, { scale: 0.85 });
+                }
+            } else if (granAnim) {
+                // La señora se acerca a charlar: bocadillos y corazones
+                const t = schoolState.granT;
+                const hg = schoolState.hitGran;
+                const lean = Math.sin(t * Math.PI * 2) * 4;
+                ctx.save();
+                ctx.translate(lean, 0);
+                drawEmoji(ctx, '👵', hg[0], hg[1], { scale: 1.1 });
+                ctx.restore();
+                drawEmoji(ctx, '💬', hg[0] + 0.45, hg[1] - 0.6 * t - 0.2, { scale: 0.6 + t * 0.5, alpha: 0.4 + t * 0.6 });
+                if (t > 0.4) {
+                    drawEmoji(ctx, '💗', hg[0] - 0.4, hg[1] - 0.5 * t, { scale: 0.6, alpha: 1 - t * 0.4 });
+                }
+                drawEmoji(ctx, '😅', schoolState.pos.x, schoolState.pos.y - 0.45, { scale: 0.85 });
             } else {
                 drawEmoji(ctx, lv.player, schoolState.pos.x, schoolState.pos.y);
             }
@@ -1373,6 +1193,96 @@
                     updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
                     sfxLose();
                     showMessage('¡Al barro! El nene se ensució 💦', 'lose');
+                    drawSchoolGame();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        // Animación: el colectivo cruza tocando bocina
+        function triggerBusBlock(hit) {
+            schoolState.executing = 'bus';
+            schoolState.busT = 0;
+            schoolState.hitBus = hit;
+            const token = ++schoolState.fxToken;
+            sfxHorn();
+            const start = performance.now();
+            const DUR = 1100;
+            function frame(now) {
+                if (token !== schoolState.fxToken) return;
+                const t = Math.min(1, (now - start) / DUR);
+                schoolState.busT = t;
+                drawSchoolGame();
+                if (t < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    schoolState.executing = false;
+                    schoolState.busT = -1;
+                    schoolState.hitBus = null;
+                    const lv = schoolLevel();
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    sfxLose();
+                    showMessage('¡El colectivo no te dejó pasar! 🚌', 'lose');
+                    drawSchoolGame();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        // Animación: el perro ladra y asusta al nene
+        function triggerDogBark(hit) {
+            schoolState.executing = 'dog';
+            schoolState.dogT = 0;
+            schoolState.hitDog = hit;
+            const token = ++schoolState.fxToken;
+            sfxBark();
+            const start = performance.now();
+            const DUR = 950;
+            function frame(now) {
+                if (token !== schoolState.fxToken) return;
+                const t = Math.min(1, (now - start) / DUR);
+                schoolState.dogT = t;
+                drawSchoolGame();
+                if (t < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    schoolState.executing = false;
+                    schoolState.dogT = -1;
+                    schoolState.hitDog = null;
+                    const lv = schoolLevel();
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    sfxLose();
+                    showMessage('¡El perro te ladró y te asustó! 🐕', 'lose');
+                    drawSchoolGame();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        // Animación: la señora mayor te detiene a charlar
+        function triggerGranChat(hit) {
+            schoolState.executing = 'gran';
+            schoolState.granT = 0;
+            schoolState.hitGran = hit;
+            const token = ++schoolState.fxToken;
+            sfxChat();
+            const start = performance.now();
+            const DUR = 1250;
+            function frame(now) {
+                if (token !== schoolState.fxToken) return;
+                const t = Math.min(1, (now - start) / DUR);
+                schoolState.granT = t;
+                drawSchoolGame();
+                if (t < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    schoolState.executing = false;
+                    schoolState.granT = -1;
+                    schoolState.hitGran = null;
+                    const lv = schoolLevel();
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    sfxLose();
+                    showMessage('¡La señora te detuvo a charlar! 👵💬', 'lose');
                     drawSchoolGame();
                 }
             }
@@ -1421,6 +1331,10 @@
             mouseState.fxToken++;
             mouseState.boxT = -1;
             mouseState.hitTrap = null;
+            mouseState.catT = -1;
+            mouseState.hitCat = null;
+            mouseState.snapT = -1;
+            mouseState.hitSnap = null;
             mouseState.winFx = -1;
             updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
             updateMouseHUD();
@@ -1478,7 +1392,7 @@
         function updateMouseMenuProgress() {
             const total = mouseState.stars.reduce((a, b) => a + b, 0);
             const lvl = Math.min(mouseState.unlocked, 10);
-            document.getElementById('mouseMenuProgress').textContent = 'Nivel ' + lvl + '/10 · ⭐ ' + total;
+            document.getElementById('mouseMenuProgress').textContent = 'Nivel ' + lvl + '/10 ⭐ ' + total;
         }
 
         function onMouseWin(used) {
@@ -1546,6 +1460,12 @@
             schoolState.runToken++;
             schoolState.fxToken++;
             schoolState.splashT = -1;
+            schoolState.busT = -1;
+            schoolState.hitBus = null;
+            schoolState.dogT = -1;
+            schoolState.hitDog = null;
+            schoolState.granT = -1;
+            schoolState.hitGran = null;
             schoolState.winFx = -1;
             updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
             updateSchoolHUD();
@@ -1810,7 +1730,7 @@
                     if (state.executing && index === state.currentIndex) {
                         block.classList.add('executing');
                     }
-                    block.textContent = CMD_LABEL[cmd] || cmd.toUpperCase();
+                    block.dataset.i = (index+1); block.textContent = CMD_LABEL[cmd] || cmd.toUpperCase();
                     block.addEventListener('click', () => {
                         if (!state.executing) {
                             sfxClick();
@@ -1894,6 +1814,22 @@
                     triggerBoxTrap(hit);
                     return;
                 }
+                const hitCat = (lv.cats || []).find(t => t[0] === mouseState.pos.x && t[1] === mouseState.pos.y);
+                if (hitCat) {
+                    mouseState.currentIndex++;
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
+                    drawMouseGame();
+                    triggerCatPounce(hitCat);
+                    return;
+                }
+                const hitSnap = (lv.snaps || []).find(t => t[0] === mouseState.pos.x && t[1] === mouseState.pos.y);
+                if (hitSnap) {
+                    mouseState.currentIndex++;
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
+                    drawMouseGame();
+                    triggerSnapTrap(hitSnap);
+                    return;
+                }
 
                 mouseState.currentIndex++;
                 updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
@@ -1915,6 +1851,10 @@
             mouseState.currentIndex = 0;
             mouseState.boxT = -1;
             mouseState.hitTrap = null;
+            mouseState.catT = -1;
+            mouseState.hitCat = null;
+            mouseState.snapT = -1;
+            mouseState.hitSnap = null;
             mouseState.winFx = -1;
             mouseState.runToken++;
             mouseState.fxToken++;
@@ -1979,6 +1919,33 @@
                     triggerMudSplash();
                     return;
                 }
+                // ¡Colectivo inmediato!
+                if ((lv.buses || []).some(p => p[0] === schoolState.pos.x && p[1] === schoolState.pos.y)) {
+                    const hb = lv.buses.find(p => p[0] === schoolState.pos.x && p[1] === schoolState.pos.y);
+                    schoolState.currentIndex++;
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    drawSchoolGame();
+                    triggerBusBlock(hb);
+                    return;
+                }
+                // ¡Perro inmediato!
+                if ((lv.dogs || []).some(p => p[0] === schoolState.pos.x && p[1] === schoolState.pos.y)) {
+                    const hd = lv.dogs.find(p => p[0] === schoolState.pos.x && p[1] === schoolState.pos.y);
+                    schoolState.currentIndex++;
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    drawSchoolGame();
+                    triggerDogBark(hd);
+                    return;
+                }
+                // ¡Señora mayor inmediato!
+                if ((lv.grannies || []).some(p => p[0] === schoolState.pos.x && p[1] === schoolState.pos.y)) {
+                    const hg = lv.grannies.find(p => p[0] === schoolState.pos.x && p[1] === schoolState.pos.y);
+                    schoolState.currentIndex++;
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    drawSchoolGame();
+                    triggerGranChat(hg);
+                    return;
+                }
 
                 schoolState.currentIndex++;
                 updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
@@ -1999,6 +1966,12 @@
             schoolState.executing = false;
             schoolState.currentIndex = 0;
             schoolState.splashT = -1;
+            schoolState.busT = -1;
+            schoolState.hitBus = null;
+            schoolState.dogT = -1;
+            schoolState.hitDog = null;
+            schoolState.granT = -1;
+            schoolState.hitGran = null;
             schoolState.winFx = -1;
             schoolState.runToken++;
             schoolState.fxToken++;
