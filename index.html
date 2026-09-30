@@ -179,7 +179,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 .accordion-body ul{list-style:none}
 .accordion-body li{padding:5px 0;color:#4a5578;font-size:.87rem;font-weight:700;padding-left:26px;position:relative;line-height:1.45}
 .accordion-body li::before{content:"✓";position:absolute;left:0;top:5px;width:18px;height:18px;border-radius:50%;background:var(--leaf);color:#fff;font-size:.65rem;display:flex;align-items:center;justify-content:center;font-weight:900}
-.palette{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:6px}
+.palette{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
 @media(max-width:480px){.palette{grid-template-columns:1fr 1fr}}
 .block{
   border:var(--border);border-radius:15px;text-align:center;font-weight:900;color:#fff;cursor:grab;
@@ -251,6 +251,27 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 .site-foot .author{color:var(--ink);font-size:.85rem;font-weight:900}
 .site-foot .author a{color:var(--sky-deep);text-decoration:none;border-bottom:2px solid var(--bus)}
 .site-foot .author a:hover{color:var(--ink)}
+.tools{display:flex;gap:8px;margin-top:8px}
+.tool-btn{flex:1;background:#fff;border:2.5px solid var(--ink);border-radius:12px;padding:9px 4px;font-weight:900;font-size:.8rem;cursor:pointer;box-shadow:3px 3px 0 var(--ink);font-family:'Nunito',sans-serif;color:var(--ink)}
+.tool-btn:hover{transform:translateY(-2px);background:var(--bus)}
+.tool-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.tool-btn:focus-visible{outline:4px solid var(--bus);outline-offset:2px}
+.block.repeat{background:#1a2340}
+.program-block.x2,.program-block.x3{background:#1a2340}
+.album{background:var(--paper);border:var(--border);border-radius:26px;box-shadow:var(--shadow);padding:20px 22px}
+.album-head{font-family:'Fredoka',sans-serif;font-size:1.2rem}
+.album-head .count{background:var(--bus);border:2.5px solid var(--ink);border-radius:999px;padding:1px 12px;font-size:.9rem;margin-left:6px}
+.album-sub{color:var(--ink-soft);font-weight:700;font-size:.85rem;margin:4px 0 6px}
+.album-row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.album-name{font-weight:900;font-size:.85rem;white-space:nowrap;min-width:110px}
+.stickers{flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.sticker{background:#f2efe4;border:2.5px solid var(--ink);border-radius:12px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:1.25rem}
+.sticker.locked{opacity:.5}
+.task-kicker{display:inline-block;background:var(--ink);color:#fff;font-weight:900;font-size:.78rem;border-radius:999px;padding:6px 14px;margin-bottom:10px}
+#taskInput{font-family:'Fredoka',sans-serif;font-size:2rem;text-align:center;border:var(--border);border-radius:16px;padding:10px;width:190px;max-width:100%;margin:8px auto 4px;display:block;box-shadow:var(--shadow-sm);color:var(--ink)}
+#taskInput:focus{outline:4px solid var(--bus)}
+.btn-listen{background:#fff;flex:.8}
+@media(max-width:640px){.stickers{grid-template-columns:repeat(5,1fr)}.album-row{flex-direction:column;align-items:stretch;gap:6px}.album-name{min-width:0}}
 @media(max-width:640px){
   body{padding:14px 12px 44px}
   .hero{padding:20px}.hero::after{width:120px;height:120px}
@@ -323,6 +344,12 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 </div>
 </article>
 </div>
+<section class="album">
+<div class="album-head">🏅 Mi álbum de figuritas<span class="count" id="albumCount">0/20</span></div>
+<p class="album-sub">Ganate una figurita por cada nivel con estrellas. ¡Completá la colección!</p>
+<div class="album-row"><span class="album-name">🐭 Ratón y queso</span><div class="stickers" id="albumMouse"></div></div>
+<div class="album-row"><span class="album-name">🏫 Camino a la escuela</span><div class="stickers" id="albumSchool"></div></div>
+</section>
 </div>
 
 <!-- Juego del Raton -->
@@ -352,7 +379,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <li>Llevá al ratón al queso amarillo</li>
 <li>Esquivá las cajas trampa que caen sobre el ratón</li>
 <li>Completá los 10 niveles y ganá el Queso Dorado</li><li>Esquivá gatos 🐱 y trampas clásicas 🪤 además de las cajas</li>
-<li>Menos bloques, más estrellas</li>
+<li>El 🔁 repite la flecha anterior ×2 o ×3</li><li>Usá ↩ Deshacer, 👣 Paso, 💡 Pista y las flechas del teclado</li><li>Menos bloques, más estrellas</li>
 </ul></div></div>
 </div>
 <div class="section-title">🗺️ Mapa de niveles</div>
@@ -363,6 +390,8 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="block atras" draggable="true" tabindex="0" data-command="atras" data-game="mouse">⬇<span>Abajo</span></div>
 <div class="block izquierda" draggable="true" tabindex="0" data-command="izquierda" data-game="mouse">⬅<span>Izquierda</span></div>
 <div class="block derecha" draggable="true" tabindex="0" data-command="derecha" data-game="mouse">➡<span>Derecha</span></div>
+<div class="block repeat" draggable="true" tabindex="0" data-command="x2" data-game="mouse">🔁<span>Repetir ×2</span></div>
+<div class="block repeat" draggable="true" tabindex="0" data-command="x3" data-game="mouse">🔁<span>Repetir ×3</span></div>
 </div>
 <div class="section-title">📋 Mi programa</div>
 <div class="program-area" id="mouseProgramArea"><p style="color:#8b96b8;text-align:center;margin-top:60px;font-weight:800;">Arrastrá los bloques hasta acá</p></div>
@@ -370,6 +399,11 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="buttons">
 <button class="btn btn-run" onclick="runMouseGame()">▶ Ejecutar</button>
 <button class="btn btn-reset" onclick="resetMouseGame()">↺ Limpiar</button>
+</div>
+<div class="tools">
+<button class="tool-btn" onclick="undoLast('mouse')">↩ Deshacer</button>
+<button class="tool-btn" onclick="stepMouseGame()">👣 Paso</button>
+<button class="tool-btn" onclick="hintGame('mouse')">💡 Pista</button>
 </div>
 </div>
 </div>
@@ -381,7 +415,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="game-container">
 <div class="maze-section" id="schoolMazeSection">
 <div class="board-head">
-<div class="where">🏫 El camino a la escuela<small>Charcos, colectivos 🚌, perros 🐕 y vecinas 👵</small></div>
+<div class="where">🏫 El camino a la escuela<small>Charcos, colectivos 🚌, perros 🐕, vecinas 👵 y tareas 📝</small></div>
 </div>
 <div class="canvas-wrap"><canvas id="schoolCanvas" width="600" height="480"></canvas></div>
 </div>
@@ -402,8 +436,8 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <li>Presioná Ejecutar o la tecla Espacio</li>
 <li>Llevá al nene hasta la escuela</li>
 <li>Evitá los charcos de barro</li>
-<li>Completá los 10 niveles y graduate</li><li>Esquivá colectivos 🚌, perros 🐕 y señoras charlatanas 👵</li>
-<li>Menos bloques, más estrellas</li>
+<li>Completá los 10 niveles y graduate</li><li>Esquivá colectivos 🚌, perros 🐕 y señoras charlatanas 👵</li><li>Resolvé la tarea 📝 para seguir caminando</li>
+<li>El 🔁 repite la flecha anterior ×2 o ×3</li><li>Usá ↩ Deshacer, 👣 Paso, 💡 Pista y las flechas del teclado</li><li>Menos bloques, más estrellas</li>
 </ul></div></div>
 </div>
 <div class="section-title">🧩 Bloques de movimiento</div>
@@ -412,6 +446,8 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="block atras" draggable="true" tabindex="0" data-command="atras" data-game="school">⬇<span>Abajo</span></div>
 <div class="block izquierda" draggable="true" tabindex="0" data-command="izquierda" data-game="school">⬅<span>Izquierda</span></div>
 <div class="block derecha" draggable="true" tabindex="0" data-command="derecha" data-game="school">➡<span>Derecha</span></div>
+<div class="block repeat" draggable="true" tabindex="0" data-command="x2" data-game="school">🔁<span>Repetir ×2</span></div>
+<div class="block repeat" draggable="true" tabindex="0" data-command="x3" data-game="school">🔁<span>Repetir ×3</span></div>
 </div>
 <div class="section-title">📋 Mi programa</div>
 <div class="program-area" id="schoolProgramArea"><p style="color:#8b96b8;text-align:center;margin-top:60px;font-weight:800;">Arrastrá los bloques hasta acá</p></div>
@@ -419,6 +455,11 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="buttons">
 <button class="btn btn-run" onclick="runSchoolGame()">▶ Ejecutar</button>
 <button class="btn btn-reset" onclick="resetSchoolGame()">↺ Limpiar</button>
+</div>
+<div class="tools">
+<button class="tool-btn" onclick="undoLast('school')">↩ Deshacer</button>
+<button class="tool-btn" onclick="stepSchoolGame()">👣 Paso</button>
+<button class="tool-btn" onclick="hintGame('school')">💡 Pista</button>
 </div>
 </div>
 </div>
@@ -436,7 +477,10 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <h2 id="overlayTitle">Nivel 1</h2>
 <div class="overlay-stars" id="overlayStars" style="display:none;">⭐⭐⭐</div>
 <p id="overlayMessage">¡Vamos!</p>
+<div class="confirm-row">
+<button class="btn btn-listen" onclick="replayOverlayVoice()">👂 Escuchar</button>
 <button class="btn btn-run" id="overlayButton" onclick="closeLevelOverlay()">¡Jugar!</button>
+</div>
 </div>
 </div>
 
@@ -448,6 +492,19 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="confirm-row">
 <button class="btn btn-reset" onclick="closeWipeOverlay()">Cancelar</button>
 <button class="btn btn-wipe" onclick="wipeAllProgress()">Sí, borrar todo</button>
+</div>
+</div>
+</div>
+
+<!-- Tarea de matemática en el camino -->
+<div class="overlay" id="taskOverlay">
+<div class="overlay-card task-card">
+<span class="task-kicker">📝 ¡Tarea en el camino!</span>
+<h2 id="taskText">12 + 30 = ?</h2>
+<p id="taskError">Resolvé la cuenta para seguir caminando.</p>
+<input id="taskInput" type="number" inputmode="numeric" min="0" max="300" placeholder="?" aria-label="Tu respuesta">
+<div class="confirm-row">
+<button class="btn btn-run" onclick="answerTask()">Responder ✔</button>
 </div>
 </div>
 </div>
@@ -474,6 +531,8 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             'atras': 'ABAJO',
             'izquierda': 'IZQUIERDA',
             'derecha': 'DERECHA',
+            'x2': 'REPETIR ×2',
+            'x3': 'REPETIR ×3',
         };
 
         const ICONO_FALLBACK = 'https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg';
@@ -633,16 +692,16 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // Niveles 1-3: fácil · 4-7: intermedio · 8-10: avanzado (10 = graduación)
         // =====================================================================
         const SCHOOL_LEVELS = [
-        {id: 1, levelTitle: "¡A levantarse! 🛏️", message: "Te despertaste a tiempo. ¡Empezamos la aventura hacia la escuela!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [1, 6], muds: [], buses: [], dogs: [[4, 2]], grannies: [], speed: 600, spawnRate: 0, maxCommands: 10, goalScore: 5, player: "👦", theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#8d6e63", edge: "#5d4037"}},
-        {id: 2, levelTitle: "Preparo mi mochila 🎒", message: "Guardaste tus útiles. ¡Paso 2 completado, sigamos caminando!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 3], muds: [[8, 3]], buses: [], dogs: [[3, 3]], grannies: [[5, 3]], speed: 580, spawnRate: 1, maxCommands: 11, goalScore: 7, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#5d4037", edge: "#3e2723"}},
-        {id: 3, levelTitle: "Salgo de casa 🚶", message: "¡Paso 3 completado! Nos acercamos al aula.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [4, 6], muds: [[7, 5], [5, 4]], buses: [[6, 3]], dogs: [[5, 2]], grannies: [[5, 6]], speed: 550, spawnRate: 2, maxCommands: 13, goalScore: 8, player: "👦", theme: {floor: "#e3f2fd", line: "#90caf9", wall: "#546e7a", edge: "#37474f"}},
-        {id: 4, levelTitle: "Cruzando el parque 🌳", message: "Esquivaste las ramas del parque. ¡Excelente!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 1, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [2, 6], muds: [[4, 2], [7, 1]], buses: [[5, 3]], dogs: [[2, 4]], grannies: [[4, 4]], speed: 500, spawnRate: 2, maxCommands: 12, goalScore: 8, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#33691e", edge: "#1b4312"}},
-        {id: 5, levelTitle: "¡Cuidado con el barro! 💧", message: "El camino está resbaloso, pero vos podés. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 0, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 1, 1], [1, 1, 1, 0, 0, 1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[4, 6], [3, 6], [5, 2]], buses: [[4, 2]], dogs: [[5, 3]], grannies: [], speed: 480, spawnRate: 3, maxCommands: 18, goalScore: 14, player: "👦", theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#4e342e", edge: "#3e2723"}},
-        {id: 6, levelTitle: "La calle concurrida 🚗", message: "Cruzaste con cuidado. ¡Ya falta menos! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 0, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 0, 1], [1, 1, 1, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 0, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 4], muds: [[6, 3], [8, 4], [8, 3]], buses: [[1, 3]], dogs: [[2, 3]], grannies: [], speed: 450, spawnRate: 3, maxCommands: 18, goalScore: 14, player: "👦", theme: {floor: "#eceff1", line: "#b0bec5", wall: "#455a64", edge: "#263238"}},
-        {id: 7, levelTitle: "¡A no llegar tarde! 🏃", message: "Rápido pero con cuidado. ¡Casi llegamos! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 0, 1, 1, 1, 1, 1, 0, 1], [1, 1, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 0, 1, 0, 1, 1, 0, 1, 1], [1, 1, 0, 0, 0, 1, 0, 0, 1, 1], [1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 5], muds: [[8, 3], [7, 6], [8, 2], [5, 6]], buses: [[8, 1]], dogs: [], grannies: [[4, 6]], speed: 420, spawnRate: 4, maxCommands: 18, goalScore: 15, player: "👦", theme: {floor: "#fff3e0", line: "#ffcc80", wall: "#6d4c41", edge: "#4e342e"}},
-        {id: 8, levelTitle: "La puerta de la escuela 🏫", message: "¡La escuela está a la vista! Concentrate. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 0, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 0, 0, 0, 0, 1], [1, 1, 1, 1, 0, 0, 1, 1, 0, 1], [1, 1, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [2, 5], muds: [[8, 4], [4, 6], [7, 3], [8, 3]], buses: [], dogs: [[2, 6]], grannies: [[5, 6]], speed: 380, spawnRate: 4, maxCommands: 18, goalScore: 15, player: "👦", theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#4527a0", edge: "#311b92"}},
-        {id: 9, levelTitle: "El aula final 📚", message: "Solo falta entrar al aula. ¡Último esfuerzo! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 1, 1, 1, 1], [1, 1, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 0, 1, 1], [1, 0, 1, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 1, 1], [1, 1, 0, 1, 1, 0, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[5, 6], [5, 1], [5, 2], [7, 3], [2, 6]], buses: [[4, 2]], dogs: [[7, 4]], grannies: [], speed: 350, spawnRate: 5, maxCommands: 19, goalScore: 16, player: "👦", theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#6a1b9a", edge: "#4a148c"}},
-        {id: 10, levelTitle: "¡Graduación! 🎓", message: "¡Último nivel! Llegá a la fiesta de graduación y celebrate como un campeón. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 0, 1], [1, 1, 0, 1, 1, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 1, 1, 1], [1, 0, 1, 1, 0, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 2], muds: [[7, 2], [6, 1], [8, 1], [8, 2], [3, 1]], buses: [[4, 1]], dogs: [[3, 3]], grannies: [], speed: 400, spawnRate: 5, maxCommands: 19, goalScore: 16, player: "🧑‍🎓", theme: {floor: "#fffde7", line: "#f0d060", wall: "#6d4c41", edge: "#4e342e"}, graduation: true}
+        {id: 1, levelTitle: "¡A levantarse! 🛏️", message: "Te despertaste a tiempo. ¡Empezamos la aventura hacia la escuela!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [1, 6], muds: [], buses: [], dogs: [[4, 2]], grannies: [], tasks: [[1, 4]], speed: 600, spawnRate: 0, maxCommands: 10, goalScore: 5, player: "👦", theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#8d6e63", edge: "#5d4037"}},
+        {id: 2, levelTitle: "Preparo mi mochila 🎒", message: "Guardaste tus útiles. ¡Paso 2 completado, sigamos caminando!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 3], muds: [[8, 3]], buses: [], dogs: [[3, 3]], grannies: [[5, 3]], tasks: [[4, 2]], speed: 580, spawnRate: 1, maxCommands: 11, goalScore: 7, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#5d4037", edge: "#3e2723"}},
+        {id: 3, levelTitle: "Salgo de casa 🚶", message: "¡Paso 3 completado! Nos acercamos al aula.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [4, 6], muds: [[7, 5], [5, 4]], buses: [[6, 3]], dogs: [[5, 2]], grannies: [[5, 6]], tasks: [[1, 5]], speed: 550, spawnRate: 2, maxCommands: 13, goalScore: 8, player: "👦", theme: {floor: "#e3f2fd", line: "#90caf9", wall: "#546e7a", edge: "#37474f"}},
+        {id: 4, levelTitle: "Cruzando el parque 🌳", message: "Esquivaste las ramas del parque. ¡Excelente!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 1, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [2, 6], muds: [[4, 2], [7, 1]], buses: [[5, 3]], dogs: [[2, 4]], grannies: [[4, 4]], tasks: [[3, 3]], speed: 500, spawnRate: 2, maxCommands: 12, goalScore: 8, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#33691e", edge: "#1b4312"}},
+        {id: 5, levelTitle: "¡Cuidado con el barro! 💧", message: "El camino está resbaloso, pero vos podés. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 0, 0, 1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 0, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 1, 1], [1, 1, 1, 0, 0, 1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[4, 6], [3, 6], [5, 2]], buses: [[4, 2]], dogs: [[5, 3]], grannies: [], tasks: [[2, 5]], speed: 480, spawnRate: 3, maxCommands: 18, goalScore: 14, player: "👦", theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#4e342e", edge: "#3e2723"}},
+        {id: 6, levelTitle: "La calle concurrida 🚗", message: "Cruzaste con cuidado. ¡Ya falta menos! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 0, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 0, 1, 0, 1], [1, 1, 1, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 0, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 4], muds: [[6, 3], [8, 4], [8, 3]], buses: [[1, 3]], dogs: [[2, 3]], grannies: [], tasks: [[4, 5]], speed: 450, spawnRate: 3, maxCommands: 18, goalScore: 14, player: "👦", theme: {floor: "#eceff1", line: "#b0bec5", wall: "#455a64", edge: "#263238"}},
+        {id: 7, levelTitle: "¡A no llegar tarde! 🏃", message: "Rápido pero con cuidado. ¡Casi llegamos! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1, 1, 0, 1], [1, 0, 0, 1, 1, 1, 1, 1, 0, 1], [1, 1, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 0, 1, 0, 1, 1, 0, 1, 1], [1, 1, 0, 0, 0, 1, 0, 0, 1, 1], [1, 1, 1, 1, 0, 0, 1, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 5], muds: [[8, 3], [7, 6], [8, 2], [5, 6]], buses: [[8, 1]], dogs: [], grannies: [[4, 6]], tasks: [[4, 4]], speed: 420, spawnRate: 4, maxCommands: 18, goalScore: 15, player: "👦", theme: {floor: "#fff3e0", line: "#ffcc80", wall: "#6d4c41", edge: "#4e342e"}},
+        {id: 8, levelTitle: "La puerta de la escuela 🏫", message: "¡La escuela está a la vista! Concentrate. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 0, 0, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 0, 0, 0, 0, 1], [1, 1, 1, 1, 0, 0, 1, 1, 0, 1], [1, 1, 0, 0, 0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 0, 0, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [2, 5], muds: [[8, 4], [4, 6], [7, 3], [8, 3]], buses: [], dogs: [[2, 6]], grannies: [[5, 6]], tasks: [[6, 2]], speed: 380, spawnRate: 4, maxCommands: 18, goalScore: 15, player: "👦", theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#4527a0", edge: "#311b92"}},
+        {id: 9, levelTitle: "El aula final 📚", message: "Solo falta entrar al aula. ¡Último esfuerzo! 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 1, 1, 1, 1], [1, 1, 1, 0, 0, 0, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 0, 1, 1], [1, 0, 1, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 1, 1], [1, 1, 0, 1, 1, 0, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[5, 6], [5, 1], [5, 2], [7, 3], [2, 6]], buses: [[4, 2]], dogs: [[7, 4]], grannies: [], tasks: [[1, 5]], speed: 350, spawnRate: 5, maxCommands: 19, goalScore: 16, player: "👦", theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#6a1b9a", edge: "#4a148c"}},
+        {id: 10, levelTitle: "¡Graduación! 🎓", message: "¡Último nivel! Llegá a la fiesta de graduación y celebrate como un campeón. 💡 Tip: este nivel necesita ARRIBA, ABAJO, IZQUIERDA y DERECHA.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 1, 0, 1], [1, 1, 0, 1, 1, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 1, 1, 1], [1, 0, 1, 1, 0, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 2], muds: [[7, 2], [6, 1], [8, 1], [8, 2], [3, 1]], buses: [[4, 1]], dogs: [[3, 3]], grannies: [], tasks: [[2, 6]], speed: 400, spawnRate: 5, maxCommands: 19, goalScore: 16, player: "🧑‍🎓", theme: {floor: "#fffde7", line: "#f0d060", wall: "#6d4c41", edge: "#4e342e"}, graduation: true}
 
         ];
 
@@ -667,7 +726,11 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             winFx: -1,     // progreso del destello de victoria
             wins: store.get('sara_mouse_wins', 0),
             stars: store.get('sara_mouse_stars', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-            unlocked: store.get('sara_mouse_unlocked', 1)
+            unlocked: store.get('sara_mouse_unlocked', 1),
+            hints: 0,
+            manual: false,
+            expanded: [],
+            expIdx: 0
         };
         // Normalizar estrellas por si cambió el formato guardado
         if (!Array.isArray(mouseState.stars) || mouseState.stars.length !== 10) {
@@ -696,7 +759,12 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             hitGran: null,
             winFx: -1,
             stars: store.get('sara_stars', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-            unlocked: store.get('sara_unlocked', 1)
+            unlocked: store.get('sara_unlocked', 1),
+            hints: 0,
+            manual: false,
+            expanded: [],
+            expIdx: 0,
+            solved: {}
         };
         // Normalizar estrellas por si cambió el formato guardado
         if (!Array.isArray(schoolState.stars) || schoolState.stars.length !== 10) {
@@ -731,6 +799,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             hideLevelOverlay();
             updateMenuProgress();
             updateMouseMenuProgress();
+            renderAlbum();
         }
 
         function updateMenuProgress() {
@@ -1185,6 +1254,13 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                 }
             });
 
+            // Tareas de matemática (resueltas se ven tildadas)
+            (lv.tasks || []).forEach(tt => {
+                const done = schoolState.solved[tt[0] + ',' + tt[1]];
+                drawEmoji(ctx, '📝', tt[0], tt[1], { scale: 1.1, alpha: done ? 0.35 : 1 });
+                if (done) drawEmoji(ctx, '✔️', tt[0] + 0.32, tt[1] + 0.32, { scale: 0.55 });
+            });
+
             // Nene (birrete en la graduación)
             if (schoolState.splashT >= 0) {
                 const t = schoolState.splashT;
@@ -1410,6 +1486,10 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             mouseState.fxToken++;
             mouseState.boxT = -1;
             mouseState.hitTrap = null;
+            mouseState.hints = 0;
+            mouseState.manual = false;
+            mouseState.expanded = [];
+            mouseState.expIdx = 0;
             mouseState.catT = -1;
             mouseState.hitCat = null;
             mouseState.snapT = -1;
@@ -1492,6 +1572,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             updateMouseHUD();
             buildMouseLevelSelect();
             updateMouseMenuProgress();
+            renderAlbum();
             mouseWinEffect(() => {
                 const lvNow = mouseLevel();
                 updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lvNow.maxCommands);
@@ -1539,6 +1620,11 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             schoolState.runToken++;
             schoolState.fxToken++;
             schoolState.splashT = -1;
+            schoolState.hints = 0;
+            schoolState.manual = false;
+            schoolState.expanded = [];
+            schoolState.expIdx = 0;
+            schoolState.solved = {};
             schoolState.busT = -1;
             schoolState.hitBus = null;
             schoolState.dogT = -1;
@@ -1565,7 +1651,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             document.getElementById('schoolStars').textContent = '★'.repeat(best) + '☆'.repeat(3 - best);
             document.getElementById('schoolPar').textContent = 'Par ' + lv.goalScore;
             document.getElementById('schoolCounter').textContent =
-                schoolState.program.length + ' / ' + lv.maxCommands + ' comandos';
+                schoolState.program.length + ' / ' + lv.maxCommands + ' comandos' + (schoolState.hints ? ' · 💡' + schoolState.hints : '');
         }
 
         function buildLevelSelect() {
@@ -1615,6 +1701,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             updateSchoolHUD();
             buildLevelSelect();
             updateMenuProgress();
+            renderAlbum();
             schoolWinEffect(() => {
                 if (last) {
                     showGraduation(stars);
@@ -1657,6 +1744,8 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         function showLevelOverlay(o) {
             document.getElementById('overlayTitle').textContent = o.title;
             document.getElementById('overlayMessage').textContent = o.message;
+            overlayVoice = o.title + '. ' + o.message;
+            speak(overlayVoice);
             const starsEl = document.getElementById('overlayStars');
             if (o.stars) {
                 starsEl.style.display = 'block';
@@ -1821,7 +1910,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                 });
             }
 
-            document.getElementById(counterId).textContent = state.program.length + ' / ' + maxCommands + ' comandos';
+            document.getElementById(counterId).textContent = state.program.length + ' / ' + maxCommands + ' comandos' + (state.hints ? ' · 💡' + state.hints : '');
         }
 
         function addToProgram(state, command, areaId, counterId, maxCommands) {
@@ -1839,9 +1928,234 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         }
 
         // =====================================================================
+        // Ayudas: repetir, BFS para pistas, deshacer, voz, álbum y tareas
+        // =====================================================================
+        // Expande el programa: x2/x3 repiten la flecha anterior.
+        // Devuelve [{cmd, orig}] donde orig es el bloque original (para resaltar).
+        function expandProgram(prog) {
+            const out = [];
+            prog.forEach((c, i) => {
+                if (c === 'x2' || c === 'x3') {
+                    const n = c === 'x2' ? 2 : 3;
+                    const prev = out.length ? out[out.length - 1].cmd : null;
+                    if (prev && DIRECTIONS[prev]) {
+                        for (let k = 1; k < n; k++) out.push({ cmd: prev, orig: i });
+                    }
+                } else if (DIRECTIONS[c]) {
+                    out.push({ cmd: c, orig: i });
+                }
+            });
+            return out.slice(0, 80);
+        }
+
+        // BFS: primer paso desde (sx,sy) hasta la meta evitando obstáculos.
+        function bfsStep(maze, sx, sy, gx, gy, blocked) {
+            const key = (x, y) => x + ',' + y;
+            const bs = new Set(blocked.map(p => p[0] + ',' + p[1]));
+            if (bs.has(key(sx, sy)) || bs.has(key(gx, gy))) return null;
+            const prev = {};
+            prev[key(sx, sy)] = null;
+            const q = [[sx, sy]];
+            const DIRS = [['adelante', 0, -1], ['atras', 0, 1], ['izquierda', -1, 0], ['derecha', 1, 0]];
+            while (q.length) {
+                const cur = q.shift();
+                if (cur[0] === gx && cur[1] === gy) break;
+                for (let d = 0; d < DIRS.length; d++) {
+                    const nx = cur[0] + DIRS[d][1], ny = cur[1] + DIRS[d][2];
+                    if (nx < 0 || nx >= GRID_COLS || ny < 0 || ny >= GRID_ROWS) continue;
+                    if (maze[ny][nx] !== 0 || bs.has(key(nx, ny)) || (key(nx, ny) in prev)) continue;
+                    prev[key(nx, ny)] = { x: cur[0], y: cur[1], cmd: DIRS[d][0] };
+                    q.push([nx, ny]);
+                }
+            }
+            if (!(key(gx, gy) in prev)) return null;
+            let cur = { x: gx, y: gy }, first = null;
+            let step = prev[key(cur.x, cur.y)];
+            while (step) {
+                first = step.cmd;
+                cur = { x: step.x, y: step.y };
+                step = prev[key(cur.x, cur.y)];
+            }
+            return first;
+        }
+
+        function mouseBlocked(lv) { return (lv.traps || []).concat(lv.cats || [], lv.snaps || []); }
+        function schoolBlocked(lv) { return (lv.muds || []).concat(lv.buses || [], lv.dogs || [], lv.grannies || []); }
+
+        // Pista: agrega el próximo bloque correcto según tu programa actual.
+        // Cada pista suma 1 al par (las estrellas cuestan).
+        function hintGame(which) {
+            const isMouse = which === 'mouse';
+            const st = isMouse ? mouseState : schoolState;
+            const lv = isMouse ? mouseLevel() : schoolLevel();
+            const area = isMouse ? 'mouseProgramArea' : 'schoolProgramArea';
+            const counter = isMouse ? 'mouseCounter' : 'schoolCounter';
+            if (st.executing || overlayVisible() || taskOpen()) return;
+            if (document.getElementById('wipeOverlay').classList.contains('show')) return;
+            const exp = expandProgram(st.program).map(e => e.cmd);
+            let x = lv.start[0], y = lv.start[1];
+            exp.forEach(c => {
+                const d = DIRECTIONS[c];
+                const nx = x + d.x, ny = y + d.y;
+                if (isValidMove(lv.maze, nx, ny)) { x = nx; y = ny; }
+            });
+            const gx = isMouse ? lv.cheese[0] : lv.goal[0];
+            const gy = isMouse ? lv.cheese[1] : lv.goal[1];
+            if (x === gx && y === gy) { showMessage('¡Ya está! Presioná Ejecutar ▶', 'info'); return; }
+            const step = bfsStep(lv.maze, x, y, gx, gy, isMouse ? mouseBlocked(lv) : schoolBlocked(lv));
+            if (!step) { showMessage('Ese camino no llega: sacá algún bloque ↩', 'info'); return; }
+            if (st.program.length >= lv.maxCommands) { showMessage('¡Máximo de comandos alcanzado!', 'info'); return; }
+            st.program.push(step);
+            st.hints = (st.hints || 0) + 1;
+            sfxClick();
+            updateProgramDisplay(st, area, counter, lv.maxCommands);
+            showMessage('Pista agregada 💡 (+1 al par)', 'info');
+        }
+
+        // Deshacer el último bloque del programa
+        function undoLast(which) {
+            const isMouse = which === 'mouse';
+            const st = isMouse ? mouseState : schoolState;
+            const lv = isMouse ? mouseLevel() : schoolLevel();
+            if (st.executing || overlayVisible() || taskOpen()) return;
+            if (!st.program.length) { showMessage('No hay bloques para sacar', 'info'); return; }
+            st.program.pop();
+            sfxClick();
+            updateProgramDisplay(st, isMouse ? 'mouseProgramArea' : 'schoolProgramArea', isMouse ? 'mouseCounter' : 'schoolCounter', lv.maxCommands);
+        }
+
+        // Voz: lee títulos, mensajes y cuentas (usa el interruptor de sonido)
+        function speak(text) {
+            if (!soundOn) return;
+            try {
+                if (!('speechSynthesis' in window)) return;
+                speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'es-ES';
+                u.rate = 0.95;
+                u.pitch = 1.1;
+                speechSynthesis.speak(u);
+            } catch (e) {}
+        }
+
+        let overlayVoice = '';
+        function replayOverlayVoice() {
+            sfxClick();
+            if (overlayVoice) speak(overlayVoice);
+        }
+
+        function sfxCorrect() {
+            [660, 880, 1100].forEach((f, i) => tone(f, 0.18, { delay: i * 0.11, type: 'triangle', vol: 0.2 }));
+        }
+        function sfxWrong() {
+            tone(180, 0.28, { type: 'sawtooth', vol: 0.12 });
+        }
+
+        // Álbum de figuritas: un nivel con estrellas = figurita ganada
+        const STICKERS_MOUSE = ['🧀', '🐭', '📦', '🐱', '🪤', '⭐', '🧀', '🐭', '🏆', '👑'];
+        const STICKERS_SCHOOL = ['🛏️', '🎒', '🚶', '🌳', '💧', '🚗', '🏃', '🏫', '📚', '🎓'];
+
+        function stickerCell(emoji, got, title) {
+            const d = document.createElement('div');
+            d.className = 'sticker' + (got ? '' : ' locked');
+            d.textContent = got ? emoji : '❔';
+            d.title = title;
+            return d;
+        }
+
+        function renderAlbum() {
+            const m = document.getElementById('albumMouse');
+            const s = document.getElementById('albumSchool');
+            if (!m || !s) return;
+            m.innerHTML = '';
+            s.innerHTML = '';
+            let got = 0;
+            mouseState.stars.forEach((n, i) => {
+                if (n > 0) got++;
+                m.appendChild(stickerCell(STICKERS_MOUSE[i], n > 0, 'Ratón nivel ' + (i + 1)));
+            });
+            schoolState.stars.forEach((n, i) => {
+                if (n > 0) got++;
+                s.appendChild(stickerCell(STICKERS_SCHOOL[i], n > 0, 'Escuela nivel ' + (i + 1)));
+            });
+            const c = document.getElementById('albumCount');
+            if (c) c.textContent = got + '/20';
+        }
+
+        // Tarea de matemática en el camino (sumas y restas de 2 dígitos)
+        let currentTask = null;
+
+        function taskOpen() {
+            return document.getElementById('taskOverlay').classList.contains('show');
+        }
+
+        function genEquation() {
+            let a, b, op, ans;
+            if (Math.random() < 0.5) {
+                a = 10 + Math.floor(Math.random() * 80);
+                b = 10 + Math.floor(Math.random() * (89 - a));
+                op = '+';
+                ans = a + b;
+            } else {
+                a = 20 + Math.floor(Math.random() * 80);
+                b = 10 + Math.floor(Math.random() * (a - 10));
+                op = '−';
+                ans = a - b;
+            }
+            return { a, b, op, ans };
+        }
+
+        function newTaskEquation() {
+            currentTask.eq = genEquation();
+            document.getElementById('taskText').textContent = currentTask.eq.a + ' ' + currentTask.eq.op + ' ' + currentTask.eq.b + ' = ?';
+            const inp = document.getElementById('taskInput');
+            inp.value = '';
+            setTimeout(() => { try { inp.focus({ preventScroll: true }); } catch (e) { try { inp.focus(); } catch (e2) {} } }, 80);
+        }
+
+        function triggerTaskPopup(hit) {
+            schoolState.executing = 'task';
+            currentTask = { x: hit[0], y: hit[1], eq: null };
+            document.getElementById('taskError').textContent = 'Resolvé la cuenta para seguir caminando.';
+            newTaskEquation();
+            document.getElementById('taskOverlay').classList.add('show');
+            speak('Tarea en el camino. ¿Cuánto es ' + currentTask.eq.a + (currentTask.eq.op === '+' ? ' más ' : ' menos ') + currentTask.eq.b + '?');
+        }
+
+        function answerTask() {
+            if (!currentTask) return;
+            const v = parseInt(document.getElementById('taskInput').value, 10);
+            if (v === currentTask.eq.ans) {
+                sfxCorrect();
+                schoolState.solved[currentTask.x + ',' + currentTask.y] = true;
+                currentTask = null;
+                document.getElementById('taskOverlay').classList.remove('show');
+                showMessage('¡Correcto! A seguir 🎉', 'win');
+                speak('¡Correcto! A seguir.');
+                schoolState.executing = true;
+                updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', schoolLevel().maxCommands);
+                drawSchoolGame();
+                if (!schoolState.manual) {
+                    const tk = schoolState.runToken;
+                    const lv = schoolLevel();
+                    setTimeout(() => executeSchoolCommand(tk), lv.speed);
+                }
+            } else {
+                sfxWrong();
+                document.getElementById('taskError').textContent = 'Mmm, esa no... probá con esta otra 💪';
+                newTaskEquation();
+            }
+        }
+
+        document.getElementById('taskInput').addEventListener('keydown', (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') { e.preventDefault(); answerTask(); }
+        });
+
+        // =====================================================================
         // Juego del Ratón: ejecución
         // =====================================================================
-        function runMouseGame() {
+        function runMouseGame(manual) {
             const lv = mouseLevel();
             if (mouseState.program.length === 0) {
                 showMessage('¡Añade comandos primero!', 'info');
@@ -1849,37 +2163,66 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             }
             if (mouseState.executing) return;
 
+            const exp = expandProgram(mouseState.program);
+            if (!exp.length) {
+                showMessage('Agregá flechas: el 🔁 solo repite una flecha anterior', 'info');
+                return;
+            }
             mouseState.pos = { x: lv.start[0], y: lv.start[1] };
             mouseState.executing = true;
-            mouseState.currentIndex = 0;
+            mouseState.manual = !!manual;
+            mouseState.expanded = exp;
+            mouseState.expIdx = 0;
+            mouseState.currentIndex = exp[0].orig;
             const token = ++mouseState.runToken;
             updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
             drawMouseGame();
-            setTimeout(() => executeMouseCommand(token), lv.speed);
+            if (manual) {
+                executeMouseCommand(token);
+            } else {
+                setTimeout(() => executeMouseCommand(token), lv.speed);
+            }
+        }
+
+        // Modo paso a paso: un movimiento por cada toque
+        function stepMouseGame() {
+            if (overlayVisible() || taskOpen()) return;
+            if (document.getElementById('wipeOverlay').classList.contains('show')) return;
+            if (!document.getElementById('mouseGame').classList.contains('active')) return;
+            if (!mouseState.executing) {
+                runMouseGame(true);
+                return;
+            }
+            if (mouseState.executing !== true) return;
+            mouseState.manual = true;
+            const token = ++mouseState.runToken;
+            executeMouseCommand(token);
         }
 
         function executeMouseCommand(token) {
             const lv = mouseLevel();
             if (token !== mouseState.runToken || !mouseState.executing) return;
-            if (mouseState.currentIndex < mouseState.program.length) {
-                const cmd = mouseState.program[mouseState.currentIndex];
-                const dir = DIRECTIONS[cmd];
+            const exp = mouseState.expanded || [];
+            if (mouseState.expIdx < exp.length) {
+                const step = exp[mouseState.expIdx];
+                const dir = DIRECTIONS[step.cmd];
                 const newX = mouseState.pos.x + dir.x;
                 const newY = mouseState.pos.y + dir.y;
 
                 if (isValidMove(lv.maze, newX, newY)) {
                     mouseState.pos = { x: newX, y: newY };
-                    sfxStep(mouseState.currentIndex);
+                    sfxStep(mouseState.expIdx);
                 } else {
                     sfxBump();
                     showMessage('¡El ratón chocó con una pared!', 'info');
                 }
 
-                const used = mouseState.currentIndex + 1;
+                const used = mouseState.expIdx + 1 + (mouseState.hints || 0);
+                mouseState.currentIndex = step.orig;
 
                 // ¡Victoria o trampa inmediata al pisar la casilla!
                 if (mouseState.pos.x === lv.cheese[0] && mouseState.pos.y === lv.cheese[1]) {
-                    mouseState.currentIndex++;
+                    mouseState.expIdx++;
                     updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                     drawMouseGame();
                     onMouseWin(used);
@@ -1887,7 +2230,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                 }
                 const hit = lv.traps.find(t => t[0] === mouseState.pos.x && t[1] === mouseState.pos.y);
                 if (hit) {
-                    mouseState.currentIndex++;
+                    mouseState.expIdx++;
                     updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                     drawMouseGame();
                     triggerBoxTrap(hit);
@@ -1895,7 +2238,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                 }
                 const hitCat = (lv.cats || []).find(t => t[0] === mouseState.pos.x && t[1] === mouseState.pos.y);
                 if (hitCat) {
-                    mouseState.currentIndex++;
+                    mouseState.expIdx++;
                     updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                     drawMouseGame();
                     triggerCatPounce(hitCat);
@@ -1903,20 +2246,21 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                 }
                 const hitSnap = (lv.snaps || []).find(t => t[0] === mouseState.pos.x && t[1] === mouseState.pos.y);
                 if (hitSnap) {
-                    mouseState.currentIndex++;
+                    mouseState.expIdx++;
                     updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                     drawMouseGame();
                     triggerSnapTrap(hitSnap);
                     return;
                 }
 
-                mouseState.currentIndex++;
+                mouseState.expIdx++;
                 updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                 drawMouseGame();
 
-                setTimeout(() => executeMouseCommand(token), lv.speed);
+                if (!mouseState.manual) setTimeout(() => executeMouseCommand(token), lv.speed);
             } else {
                 mouseState.executing = false;
+                mouseState.manual = false;
                 updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', lv.maxCommands);
                 showMessage('El ratón no llegó a ningún destino', 'info');
             }
@@ -1930,6 +2274,10 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             mouseState.currentIndex = 0;
             mouseState.boxT = -1;
             mouseState.hitTrap = null;
+            mouseState.hints = 0;
+            mouseState.manual = false;
+            mouseState.expanded = [];
+            mouseState.expIdx = 0;
             mouseState.catT = -1;
             mouseState.hitCat = null;
             mouseState.snapT = -1;
@@ -1946,7 +2294,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // =====================================================================
         // Juego del Nene: ejecución
         // =====================================================================
-        function runSchoolGame() {
+        function runSchoolGame(manual) {
             const lv = schoolLevel();
             if (schoolState.program.length === 0) {
                 showMessage('¡Añade comandos primero!', 'info');
@@ -1954,40 +2302,79 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             }
             if (schoolState.executing) return;
 
+            const exp = expandProgram(schoolState.program);
+            if (!exp.length) {
+                showMessage('Agregá flechas: el 🔁 solo repite una flecha anterior', 'info');
+                return;
+            }
             schoolState.pos = { x: lv.start[0], y: lv.start[1] };
             schoolState.executing = true;
-            schoolState.currentIndex = 0;
+            schoolState.manual = !!manual;
+            schoolState.expanded = exp;
+            schoolState.expIdx = 0;
+            schoolState.currentIndex = exp[0].orig;
+            schoolState.solved = {};
             const token = ++schoolState.runToken;
             updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
             drawSchoolGame();
-            setTimeout(() => executeSchoolCommand(token), lv.speed);
+            if (manual) {
+                executeSchoolCommand(token);
+            } else {
+                setTimeout(() => executeSchoolCommand(token), lv.speed);
+            }
+        }
+
+        // Modo paso a paso: un movimiento por cada toque
+        function stepSchoolGame() {
+            if (overlayVisible() || taskOpen()) return;
+            if (document.getElementById('wipeOverlay').classList.contains('show')) return;
+            if (!document.getElementById('schoolGame').classList.contains('active')) return;
+            if (!schoolState.executing) {
+                runSchoolGame(true);
+                return;
+            }
+            if (schoolState.executing !== true) return;
+            schoolState.manual = true;
+            const token = ++schoolState.runToken;
+            executeSchoolCommand(token);
         }
 
         function executeSchoolCommand(token) {
             const lv = schoolLevel();
             if (token !== schoolState.runToken || !schoolState.executing) return;
-            if (schoolState.currentIndex < schoolState.program.length) {
-                const cmd = schoolState.program[schoolState.currentIndex];
-                const dir = DIRECTIONS[cmd];
+            const exp = schoolState.expanded || [];
+            if (schoolState.expIdx < exp.length) {
+                const step = exp[schoolState.expIdx];
+                const dir = DIRECTIONS[step.cmd];
                 const newX = schoolState.pos.x + dir.x;
                 const newY = schoolState.pos.y + dir.y;
 
                 if (isValidMove(lv.maze, newX, newY)) {
                     schoolState.pos = { x: newX, y: newY };
-                    sfxStep(schoolState.currentIndex);
+                    sfxStep(schoolState.expIdx);
                 } else {
                     sfxBump();
                     showMessage('¡El nene chocó con una pared!', 'info');
                 }
 
-                const used = schoolState.currentIndex + 1;
+                const used = schoolState.expIdx + 1 + (schoolState.hints || 0);
+                schoolState.currentIndex = step.orig;
 
                 // ¡Llegada a la escuela inmediata!
                 if (schoolState.pos.x === lv.goal[0] && schoolState.pos.y === lv.goal[1]) {
-                    schoolState.currentIndex++;
+                    schoolState.expIdx++;
                     updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
                     drawSchoolGame();
                     onSchoolWin(used);
+                    return;
+                }
+                // ¡Tarea inmediata! Se pausa hasta resolver la cuenta
+                const tk = (lv.tasks || []).find(p => p[0] === schoolState.pos.x && p[1] === schoolState.pos.y && !schoolState.solved[p[0] + ',' + p[1]]);
+                if (tk) {
+                    schoolState.expIdx++;
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    drawSchoolGame();
+                    triggerTaskPopup(tk);
                     return;
                 }
                 // ¡Charco de barro inmediato!
@@ -2026,13 +2413,14 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                     return;
                 }
 
-                schoolState.currentIndex++;
+                schoolState.expIdx++;
                 updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
                 drawSchoolGame();
 
-                setTimeout(() => executeSchoolCommand(token), lv.speed);
+                if (!schoolState.manual) setTimeout(() => executeSchoolCommand(token), lv.speed);
             } else {
                 schoolState.executing = false;
+                schoolState.manual = false;
                 updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
                 showMessage('El nene no llegó a ningún destino', 'info');
             }
@@ -2052,6 +2440,11 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             schoolState.granT = -1;
             schoolState.hitGran = null;
             schoolState.winFx = -1;
+            schoolState.hints = 0;
+            schoolState.manual = false;
+            schoolState.expanded = [];
+            schoolState.expIdx = 0;
+            schoolState.solved = {};
             schoolState.runToken++;
             schoolState.fxToken++;
             sfxClick();
@@ -2117,6 +2510,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // Atajos de teclado
         document.addEventListener('keydown', (e) => {
             if (overlayVisible()) return;
+            if (taskOpen()) return;
             if (document.getElementById('wipeOverlay').classList.contains('show')) {
                 if (e.code === 'Escape') closeWipeOverlay();
                 return;
@@ -2136,6 +2530,15 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                     resetSchoolGame();
                 }
             }
+            const arrowMap = { ArrowUp: 'adelante', ArrowDown: 'atras', ArrowLeft: 'izquierda', ArrowRight: 'derecha' };
+            if (arrowMap[e.code]) {
+                e.preventDefault();
+                if (document.getElementById('mouseGame').classList.contains('active')) {
+                    addToProgram(mouseState, arrowMap[e.code], 'mouseProgramArea', 'mouseCounter', mouseLevel().maxCommands);
+                } else if (document.getElementById('schoolGame').classList.contains('active')) {
+                    addToProgram(schoolState, arrowMap[e.code], 'schoolProgramArea', 'schoolCounter', schoolLevel().maxCommands);
+                }
+            }
         });
 
         // Inicializar
@@ -2144,6 +2547,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         updateMouseHUD();
         updateMenuProgress();
         updateMouseMenuProgress();
+        renderAlbum();
         if (!soundOn) document.getElementById('muteBtn').textContent = '🔇';
 
         // PWA: registrar el Service Worker para instalar el juego (solo http/https)
