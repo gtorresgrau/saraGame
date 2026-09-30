@@ -259,6 +259,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 .tool-btn:focus-visible{outline:4px solid var(--bus);outline-offset:2px}
 .block.repeat{background:#1a2340}
 .program-block.x2,.program-block.x3{background:#1a2340}
+.program-block.rep{box-shadow:3px 3px 0 var(--ink),inset 0 0 0 2px rgba(255,255,255,.55)}
 .album{background:var(--paper);border:var(--border);border-radius:26px;box-shadow:var(--shadow);padding:20px 22px}
 .album-head{font-family:'Fredoka',sans-serif;font-size:1.2rem}
 .album-head .count{background:var(--bus);border:2.5px solid var(--ink);border-radius:999px;padding:1px 12px;font-size:.9rem;margin-left:6px}
@@ -381,7 +382,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <li>Llevá al ratón al queso amarillo</li>
 <li>Esquivá las cajas trampa que caen sobre el ratón</li>
 <li>Completá los 10 niveles y ganá el Queso Dorado</li><li>Esquivá gatos 🐱 y trampas clásicas 🪤 además de las cajas</li>
-<li>El 🔁 repite la flecha anterior ×2 o ×3</li><li>Usá ↩ Deshacer, 👣 Paso, 💡 Pista y las flechas del teclado</li><li>Menos bloques, más estrellas</li>
+<li>El 🔁 se suma a la última flecha: DERECHA ×2 avanza 2 casilleros</li><li>Usá ↩ Deshacer, 👣 Paso, 💡 Pista y las flechas del teclado</li><li>Menos bloques, más estrellas</li>
 </ul></div></div>
 </div>
 <div class="section-title">🗺️ Mapa de niveles</div>
@@ -439,7 +440,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <li>Llevá al nene hasta la escuela</li>
 <li>Evitá los charcos de barro</li>
 <li>Completá los 10 niveles y graduate</li><li>Esquivá colectivos 🚌, perros 🐕 y señoras charlatanas 👵</li><li>Resolvé la tarea 📝 para seguir caminando</li>
-<li>El 🔁 repite la flecha anterior ×2 o ×3</li><li>Usá ↩ Deshacer, 👣 Paso, 💡 Pista y las flechas del teclado</li><li>Menos bloques, más estrellas</li>
+<li>El 🔁 se suma a la última flecha: DERECHA ×2 avanza 2 casilleros</li><li>Usá ↩ Deshacer, 👣 Paso, 💡 Pista y las flechas del teclado</li><li>Menos bloques, más estrellas</li>
 </ul></div></div>
 </div>
 <div class="section-title">🧩 Bloques de movimiento</div>
@@ -1911,13 +1912,15 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             if (state.program.length === 0) {
                 area.innerHTML = '<p style="color: #999; text-align: center; margin-top: 60px;">Arrastra los bloques aquí</p>';
             } else {
-                state.program.forEach((cmd, index) => {
+                state.program.forEach((entry, index) => {
+                    const cmd = (entry && entry.cmd) ? entry.cmd : entry;
+                    const repN = (entry && entry.rep) ? entry.rep : 1;
                     const block = document.createElement('div');
-                    block.className = 'program-block ' + cmd;
+                    block.className = 'program-block ' + cmd + (repN > 1 ? ' rep' : '');
                     if (state.executing && index === state.currentIndex) {
                         block.classList.add('executing');
                     }
-                    block.dataset.i = (index+1); block.textContent = CMD_LABEL[cmd] || cmd.toUpperCase();
+                    block.dataset.i = (index+1); block.textContent = (CMD_LABEL[cmd] || String(cmd).toUpperCase()) + (repN > 1 ? ' \u00d7' + repN : '');
                     block.addEventListener('click', () => {
                         if (!state.executing) {
                             sfxClick();
@@ -1934,7 +1937,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 
         function addToProgram(state, command, areaId, counterId, maxCommands) {
             if (state.program.length < maxCommands && !state.executing) {
-                state.program.push(command);
+                state.program.push((command && command.cmd) ? command : { cmd: command, rep: 1 });
                 sfxClick();
                 updateProgramDisplay(state, areaId, counterId, maxCommands);
             } else if (state.program.length >= maxCommands) {
@@ -1949,22 +1952,41 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // =====================================================================
         // Ayudas: repetir, BFS para pistas, deshacer, voz, álbum y tareas
         // =====================================================================
-        // Expande el programa: x2/x3 repiten la flecha anterior.
+        // Expande el programa: cada bloque {cmd, rep} genera 1 a 3 movimientos.
         // Devuelve [{cmd, orig}] donde orig es el bloque original (para resaltar).
         function expandProgram(prog) {
             const out = [];
-            prog.forEach((c, i) => {
-                if (c === 'x2' || c === 'x3') {
-                    const n = c === 'x2' ? 2 : 3;
-                    const prev = out.length ? out[out.length - 1].cmd : null;
-                    if (prev && DIRECTIONS[prev]) {
-                        for (let k = 1; k < n; k++) out.push({ cmd: prev, orig: i });
-                    }
-                } else if (DIRECTIONS[c]) {
-                    out.push({ cmd: c, orig: i });
+            prog.forEach((entry, i) => {
+                const c = (entry && entry.cmd) ? entry.cmd : entry;
+                const r = (entry && entry.rep) ? entry.rep : 1;
+                if (DIRECTIONS[c]) {
+                    for (let k = 0; k < Math.min(r, 4); k++) out.push({ cmd: c, orig: i });
                 }
             });
             return out.slice(0, 80);
+        }
+
+        // Repetir sobre el último bloque: DERECHA ×2 avanza 2 casilleros.
+        // No agrega bloques: modifica el último (tocar de nuevo alterna).
+        function applyRepeat(which, n) {
+            const isMouse = which === 'mouse';
+            const st = isMouse ? mouseState : schoolState;
+            const lv = isMouse ? mouseLevel() : schoolLevel();
+            if (st.executing || overlayVisible() || taskOpen()) return;
+            if (document.getElementById('wipeOverlay').classList.contains('show')) return;
+            const last = st.program[st.program.length - 1];
+            const lastCmd = (last && last.cmd) ? last.cmd : last;
+            if (!last || !DIRECTIONS[lastCmd]) {
+                showMessage('Agregá una flecha primero y después tocá 🔁', 'info');
+                return;
+            }
+            if (!st.program[st.program.length - 1].cmd) {
+                st.program[st.program.length - 1] = { cmd: lastCmd, rep: 1 };
+            }
+            const entry = st.program[st.program.length - 1];
+            entry.rep = n;
+            sfxClick();
+            updateProgramDisplay(st, isMouse ? 'mouseProgramArea' : 'schoolProgramArea', isMouse ? 'mouseCounter' : 'schoolCounter', lv.maxCommands);
         }
 
         // BFS: primer paso desde (sx,sy) hasta la meta evitando obstáculos.
@@ -2024,7 +2046,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             const step = bfsStep(lv.maze, x, y, gx, gy, isMouse ? mouseBlocked(lv) : schoolBlocked(lv));
             if (!step) { showMessage('Ese camino no llega: sacá algún bloque ↩', 'info'); return; }
             if (st.program.length >= lv.maxCommands) { showMessage('¡Máximo de comandos alcanzado!', 'info'); return; }
-            st.program.push(step);
+            st.program.push({ cmd: step, rep: 1 });
             st.hints = (st.hints || 0) + 1;
             sfxClick();
             updateProgramDisplay(st, area, counter, lv.maxCommands);
@@ -2489,6 +2511,10 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                 if (Date.now() - justDraggedAt < 350) return;
                 const command = block.dataset.command;
                 const game = block.dataset.game;
+                if (command === 'x2' || command === 'x3') {
+                    applyRepeat(game, command === 'x2' ? 2 : 3);
+                    return;
+                }
                 if (game === 'mouse') {
                     addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter', mouseLevel().maxCommands);
                 } else {
@@ -2517,9 +2543,14 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
                 const command = e.dataTransfer.getData('command');
                 const game = e.dataTransfer.getData('game');
 
-                if (command && game === 'mouse' && areaId === 'mouseProgramArea') {
+                if (!command) return;
+                if (command === 'x2' || command === 'x3') {
+                    applyRepeat(game, command === 'x2' ? 2 : 3);
+                    return;
+                }
+                if (game === 'mouse' && areaId === 'mouseProgramArea') {
                     addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter', mouseLevel().maxCommands);
-                } else if (command && game === 'school' && areaId === 'schoolProgramArea') {
+                } else if (game === 'school' && areaId === 'schoolProgramArea') {
                     const lv = schoolLevel();
                     addToProgram(schoolState, command, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
                 }
@@ -2553,9 +2584,9 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
             if (arrowMap[e.code]) {
                 e.preventDefault();
                 if (document.getElementById('mouseGame').classList.contains('active')) {
-                    addToProgram(mouseState, arrowMap[e.code], 'mouseProgramArea', 'mouseCounter', mouseLevel().maxCommands);
+                    addToProgram(mouseState, { cmd: arrowMap[e.code], rep: 1 }, 'mouseProgramArea', 'mouseCounter', mouseLevel().maxCommands);
                 } else if (document.getElementById('schoolGame').classList.contains('active')) {
-                    addToProgram(schoolState, arrowMap[e.code], 'schoolProgramArea', 'schoolCounter', schoolLevel().maxCommands);
+                    addToProgram(schoolState, { cmd: arrowMap[e.code], rep: 1 }, 'schoolProgramArea', 'schoolCounter', schoolLevel().maxCommands);
                 }
             }
         });

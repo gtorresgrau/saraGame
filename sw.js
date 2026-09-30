@@ -1,5 +1,5 @@
 /* Sara Game — Service Worker para instalar como PWA y jugar sin conexión */
-const CACHE = 'sara-game-v1';
+const CACHE = 'sara-game-v2';
 const ASSETS = [
   './',
   './index.html',
