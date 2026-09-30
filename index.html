@@ -3,34 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Karts - Juegos de Programación</title>
+    <link rel="icon" href="icono.jpg">
+    <title>Sara Game - Camino a la Escuela</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
         }
-        
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
         h1 {
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             text-align: center;
-            margin-bottom: 20px;
             font-size: clamp(1.5em, 4vw, 2.5em);
         }
-        
+
+        .mute-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.4em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mute-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
         /* Pantalla de selección */
         .menu-screen {
             display: flex;
@@ -40,14 +69,14 @@
             min-height: 80vh;
             gap: 30px;
         }
-        
+
         .game-cards {
             display: flex;
             gap: 30px;
             flex-wrap: wrap;
             justify-content: center;
         }
-        
+
         .game-card {
             background: white;
             border-radius: 20px;
@@ -58,38 +87,51 @@
             transition: all 0.3s;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        
+
         .game-card:hover {
             transform: translateY(-10px) scale(1.05);
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
-        
+
         .game-card img {
             width: 120px;
             height: 120px;
-            object-fit: contain;
+            object-fit: cover;
+            border-radius: 50%;
             margin-bottom: 15px;
+            border: 4px solid #667eea;
         }
-        
+
         .game-card h2 {
             color: #333;
             margin-bottom: 10px;
         }
-        
+
         .game-card p {
             color: #666;
             font-size: 0.9em;
         }
-        
+
+        .game-card .progress {
+            margin-top: 12px;
+            display: inline-block;
+            background: #e8eaf6;
+            color: #5a6fd6;
+            font-weight: bold;
+            font-size: 0.85em;
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+
         /* Pantalla de juego */
         .game-screen {
             display: none;
         }
-        
+
         .game-screen.active {
             display: block;
         }
-        
+
         .back-btn {
             background: rgba(255,255,255,0.2);
             border: 2px solid white;
@@ -101,33 +143,38 @@
             margin-bottom: 20px;
             transition: all 0.3s;
         }
-        
+
         .back-btn:hover {
             background: white;
             color: #667eea;
         }
-        
+
         .game-container {
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
             justify-content: center;
         }
-        
+
         .maze-section {
             background: white;
             border-radius: 15px;
             padding: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: box-shadow 0.5s;
         }
-        
+
+        .maze-section.graduation {
+            box-shadow: 0 0 0 4px #ffd700, 0 0 40px #ffd700, 0 10px 30px rgba(0,0,0,0.3);
+        }
+
         canvas {
             border-radius: 10px;
             display: block;
             max-width: 100%;
             height: auto;
         }
-        
+
         .controls-section {
             background: white;
             border-radius: 15px;
@@ -136,7 +183,110 @@
             min-width: 300px;
             max-width: 380px;
         }
-        
+
+        /* HUD */
+        .hud {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hud img.avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #667eea;
+            flex-shrink: 0;
+        }
+
+        .hud .level-badge {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .hud .level-badge.grad {
+            background: linear-gradient(135deg, #f6c90e, #ef6c00);
+        }
+
+        .hud .hud-stars {
+            font-size: 1em;
+            letter-spacing: 2px;
+        }
+
+        .hud .hud-par {
+            margin-left: auto;
+            font-size: 0.8em;
+            color: #666;
+            font-weight: bold;
+        }
+
+        /* Selector de niveles */
+        .level-select {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .lvl-btn {
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            padding: 8px 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+            line-height: 1.3;
+        }
+
+        .lvl-btn small {
+            display: block;
+            font-size: 0.75em;
+        }
+
+        .lvl-btn:hover:not(.locked) {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .lvl-btn.current {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .lvl-btn.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #ccc;
+            color: #999;
+        }
+
+        .lvl-btn.grad-btn {
+            border-color: #f6c90e;
+            color: #b8860b;
+        }
+
+        .lvl-btn.grad-btn:hover:not(.locked),
+        .lvl-btn.grad-btn.current {
+            background: linear-gradient(135deg, #f6c90e, #ef6c00);
+            color: white;
+        }
+
         .section-title {
             font-size: 1.2em;
             font-weight: bold;
@@ -145,7 +295,7 @@
             padding-bottom: 10px;
             border-bottom: 2px solid #667eea;
         }
-        
+
         /* Acordeón de instrucciones */
         .accordion {
             margin-bottom: 20px;
@@ -153,7 +303,7 @@
             overflow: hidden;
             border: 2px solid #667eea;
         }
-        
+
         .accordion-header {
             background: #667eea;
             color: white;
@@ -165,51 +315,51 @@
             font-weight: bold;
             transition: background 0.3s;
         }
-        
+
         .accordion-header:hover {
             background: #5a6fd6;
         }
-        
+
         .accordion-header .icon {
             transition: transform 0.3s;
         }
-        
+
         .accordion-header.active .icon {
             transform: rotate(180deg);
         }
-        
+
         .accordion-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease;
             background: #f8f9fa;
         }
-        
+
         .accordion-content.active {
-            max-height: 300px;
+            max-height: 340px;
         }
-        
+
         .accordion-body {
             padding: 15px;
         }
-        
+
         .accordion-body ul {
             list-style: none;
             padding-left: 0;
         }
-        
+
         .accordion-body li {
             padding: 5px 0;
             color: #555;
             font-size: 0.9em;
         }
-        
+
         .accordion-body li::before {
             content: '▸ ';
             color: #667eea;
             font-weight: bold;
         }
-        
+
         /* Bloques más grandes */
         .palette {
             display: grid;
@@ -217,7 +367,7 @@
             gap: 12px;
             margin-bottom: 20px;
         }
-        
+
         .block {
             padding: 18px 10px;
             border-radius: 12px;
@@ -233,22 +383,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            touch-action: manipulation;
         }
-        
+
         .block:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 16px rgba(0,0,0,0.25);
         }
-        
+
         .block:active {
             cursor: grabbing;
         }
-        
+
         .block.adelante { background: linear-gradient(135deg, #4CAF50, #45a049); }
         .block.atras { background: linear-gradient(135deg, #f44336, #da190b); }
         .block.izquierda { background: linear-gradient(135deg, #2196F3, #0b7dda); }
         .block.derecha { background: linear-gradient(135deg, #FF9800, #ef6c00); }
-        
+
         .program-area {
             background: #f5f5f5;
             border: 3px dashed #ccc;
@@ -257,12 +408,12 @@
             padding: 15px;
             margin-bottom: 15px;
         }
-        
+
         .program-area.drag-over {
             border-color: #667eea;
             background: #e8eaf6;
         }
-        
+
         .program-block {
             padding: 12px 15px;
             border-radius: 8px;
@@ -275,7 +426,7 @@
             animation: slideIn 0.3s ease;
             font-size: 1em;
         }
-        
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -286,7 +437,7 @@
                 transform: translateX(0);
             }
         }
-        
+
         .program-block:hover::after {
             content: '✕';
             position: absolute;
@@ -295,26 +446,26 @@
             transform: translateY(-50%);
             font-size: 1.2em;
         }
-        
+
         .program-block.adelante { background: linear-gradient(135deg, #4CAF50, #45a049); }
         .program-block.atras { background: linear-gradient(135deg, #f44336, #da190b); }
         .program-block.izquierda { background: linear-gradient(135deg, #2196F3, #0b7dda); }
         .program-block.derecha { background: linear-gradient(135deg, #FF9800, #ef6c00); }
-        
+
         .program-block.executing {
             animation: pulse 0.5s ease infinite alternate;
         }
-        
+
         @keyframes pulse {
             from { transform: scale(1); box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
             to { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
         }
-        
+
         .buttons {
             display: flex;
             gap: 10px;
         }
-        
+
         .btn {
             flex: 1;
             padding: 15px 20px;
@@ -326,24 +477,24 @@
             transition: all 0.3s;
             color: white;
         }
-        
+
         .btn-run {
             background: linear-gradient(135deg, #4CAF50, #45a049);
         }
-        
+
         .btn-reset {
             background: linear-gradient(135deg, #f44336, #da190b);
         }
-        
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0,0,0,0.3);
         }
-        
+
         .btn:active {
             transform: translateY(0);
         }
-        
+
         .message {
             position: fixed;
             top: 50%;
@@ -354,25 +505,29 @@
             font-size: clamp(1.2em, 3vw, 1.8em);
             font-weight: bold;
             color: white;
-            z-index: 1000;
+            z-index: 1600;
             animation: fadeInOut 3s ease forwards;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
             text-align: center;
             max-width: 90%;
         }
-        
+
         .message.win {
             background: linear-gradient(135deg, #4CAF50, #45a049);
         }
-        
+
         .message.lose {
             background: linear-gradient(135deg, #f44336, #da190b);
         }
-        
+
         .message.info {
             background: linear-gradient(135deg, #2196F3, #0b7dda);
         }
-        
+
+        .message.grad {
+            background: linear-gradient(135deg, #f6c90e, #ef6c00);
+        }
+
         @keyframes fadeInOut {
             0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
             15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
@@ -380,79 +535,170 @@
             85% { opacity: 1; }
             100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
         }
-        
+
+        /* Overlay de transición de nivel */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1400;
+            padding: 20px;
+        }
+
+        .overlay.show {
+            display: flex;
+        }
+
+        .overlay-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            animation: pop 0.4s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .overlay-card.grad-card {
+            border: 4px solid #ffd700;
+            background: linear-gradient(180deg, #fffde7 0%, #ffffff 60%);
+        }
+
+        @keyframes pop {
+            from { opacity: 0; transform: scale(0.7); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .overlay-card img.overlay-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #667eea;
+            margin-bottom: 10px;
+        }
+
+        .overlay-card h2 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.5em;
+        }
+
+        .overlay-card .overlay-stars {
+            font-size: 2em;
+            letter-spacing: 4px;
+            margin: 8px 0;
+        }
+
+        .overlay-card p {
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+            line-height: 1.5;
+        }
+
+        .overlay-card .btn {
+            flex: none;
+            padding: 14px 34px;
+            font-size: 1.1em;
+        }
+
+        #confettiCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1500;
+        }
+
         .counter {
             text-align: center;
             color: #666;
             margin-top: 8px;
             font-size: 0.9em;
         }
-        
+
         /* Responsive */
         @media (max-width: 768px) {
             .game-container {
                 flex-direction: column;
                 align-items: center;
             }
-            
+
             .controls-section {
                 width: 100%;
                 max-width: 100%;
             }
-            
+
             canvas {
                 width: 100%;
                 height: auto;
             }
-            
+
             .game-cards {
                 flex-direction: column;
                 align-items: center;
             }
-            
+
             .game-card {
                 width: 100%;
                 max-width: 300px;
             }
         }
-        
+
         @media (max-width: 480px) {
             body {
                 padding: 10px;
             }
-            
+
             .palette {
                 grid-template-columns: 1fr 1fr;
             }
-            
+
             .block {
                 padding: 15px 8px;
                 font-size: 1.8em;
                 min-height: 60px;
             }
+
+            .level-select {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6px;
+            }
         }
     </style>
 </head>
 <body>
+    <canvas id="confettiCanvas"></canvas>
     <div class="container">
-        <h1>🎮 Code Karts - Juegos de Programación</h1>
-        
+        <div class="topbar">
+            <h1>🎮 Sara Game - Camino a la Escuela</h1>
+            <button class="mute-btn" id="muteBtn" onclick="toggleSound()" title="Activar/silenciar sonido">🔊</button>
+        </div>
+
         <!-- Menú principal -->
         <div class="menu-screen" id="menuScreen">
             <div class="game-cards">
                 <div class="game-card" onclick="showGame('mouse')">
                     <div style="font-size: 80px;">🐭</div>
                     <h2>El Ratón y el Queso</h2>
-                    <p>Guía al ratón hasta el queso evitando la trampa</p>
+                    <p>Guía al ratón hasta el queso evitando la caja-trampa</p>
                 </div>
                 <div class="game-card" onclick="showGame('school')">
-                    <img src="https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg" alt="Logo Escuela">
+                    <img src="icono.jpg" alt="Logo Escuela" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
                     <h2>El Nene a la Escuela</h2>
-                    <p>Ayuda al nene a llegar a la escuela esquivando obstáculos</p>
+                    <p>Ayuda al nene a llegar a la escuela y ¡graduarte en 10 niveles!</p>
+                    <br>
+                    <span class="progress" id="menuProgress">Nivel 1/10 · ⭐ 0</span>
                 </div>
             </div>
         </div>
-        
+
         <!-- Juego del Ratón -->
         <div class="game-screen" id="mouseGame">
             <button class="back-btn" onclick="showMenu()">← Volver al menú</button>
@@ -460,8 +706,13 @@
                 <div class="maze-section">
                     <canvas id="mouseCanvas" width="600" height="480"></canvas>
                 </div>
-                
+
                 <div class="controls-section">
+                    <div class="hud">
+                        <img class="avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
+                        <span class="level-badge">🐭 Nivel único</span>
+                        <span class="hud-stars" id="mouseWins" title="Veces que el ratón llegó al queso">🧀 0</span>
+                    </div>
                     <!-- Acordeón de instrucciones -->
                     <div class="accordion">
                         <div class="accordion-header" onclick="toggleAccordion('mouseAccordion')">
@@ -471,16 +722,16 @@
                         <div class="accordion-content" id="mouseAccordion">
                             <div class="accordion-body">
                                 <ul>
-                                    <li>Arrastra los bloques al área de programa</li>
+                                    <li>Arrastra los bloques al área de programa (o tócalos para agregarlos)</li>
                                     <li>Haz clic en un bloque para eliminarlo</li>
                                     <li>Presiona EJECUTAR o ESPACIO</li>
                                     <li>Lleva al ratón al queso amarillo</li>
-                                    <li>Evita la trampa roja</li>
+                                    <li>Evita la caja-trampa: ¡la caja cae sobre el ratón!</li>
                                 </ul>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="section-title">🧩 Bloques</div>
                     <div class="palette">
                         <div class="block adelante" draggable="true" data-command="adelante" data-game="mouse">⬆</div>
@@ -488,13 +739,13 @@
                         <div class="block izquierda" draggable="true" data-command="izquierda" data-game="mouse">⬅</div>
                         <div class="block derecha" draggable="true" data-command="derecha" data-game="mouse">➡</div>
                     </div>
-                    
+
                     <div class="section-title">📋 Programa</div>
                     <div class="program-area" id="mouseProgramArea">
                         <p style="color: #999; text-align: center; margin-top: 80px;">Arrastra los bloques aquí</p>
                     </div>
                     <div class="counter" id="mouseCounter">0 / 15 comandos</div>
-                    
+
                     <div class="buttons">
                         <button class="btn btn-run" onclick="runMouseGame()">▶ EJECUTAR</button>
                         <button class="btn btn-reset" onclick="resetMouseGame()">↺ REINICIAR</button>
@@ -502,16 +753,26 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Juego del Nene a la Escuela -->
+
+        <!-- Juego del Nene a la Escuela (10 niveles) -->
         <div class="game-screen" id="schoolGame">
             <button class="back-btn" onclick="showMenu()">← Volver al menú</button>
             <div class="game-container">
-                <div class="maze-section">
+                <div class="maze-section" id="schoolMazeSection">
                     <canvas id="schoolCanvas" width="600" height="480"></canvas>
                 </div>
-                
+
                 <div class="controls-section">
+                    <div class="hud">
+                        <img class="avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
+                        <span class="level-badge" id="schoolLevelBadge">Nivel 1/10</span>
+                        <span class="hud-stars" id="schoolStars">☆☆☆</span>
+                        <span class="hud-par" id="schoolPar">Par 5</span>
+                    </div>
+
+                    <div class="section-title">🗺️ Niveles</div>
+                    <div class="level-select" id="levelSelect"></div>
+
                     <!-- Acordeón de instrucciones -->
                     <div class="accordion">
                         <div class="accordion-header" onclick="toggleAccordion('schoolAccordion')">
@@ -521,16 +782,18 @@
                         <div class="accordion-content" id="schoolAccordion">
                             <div class="accordion-body">
                                 <ul>
-                                    <li>Arrastra los bloques al área de programa</li>
+                                    <li>Arrastra los bloques al área de programa (o tócalos para agregarlos)</li>
                                     <li>Haz clic en un bloque para eliminarlo</li>
                                     <li>Presiona EJECUTAR o ESPACIO</li>
                                     <li>Lleva al nene a la escuela</li>
                                     <li>Evita los charcos de barro</li>
+                                    <li>Completa los 10 niveles ¡y gradúate! 🎓</li>
+                                    <li>Menos comandos = más estrellas ⭐</li>
                                 </ul>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="section-title">🧩 Bloques</div>
                     <div class="palette">
                         <div class="block adelante" draggable="true" data-command="adelante" data-game="school">⬆</div>
@@ -538,13 +801,13 @@
                         <div class="block izquierda" draggable="true" data-command="izquierda" data-game="school">⬅</div>
                         <div class="block derecha" draggable="true" data-command="derecha" data-game="school">➡</div>
                     </div>
-                    
+
                     <div class="section-title">📋 Programa</div>
                     <div class="program-area" id="schoolProgramArea">
                         <p style="color: #999; text-align: center; margin-top: 80px;">Arrastra los bloques aquí</p>
                     </div>
-                    <div class="counter" id="schoolCounter">0 / 15 comandos</div>
-                    
+                    <div class="counter" id="schoolCounter">0 / 10 comandos</div>
+
                     <div class="buttons">
                         <button class="btn btn-run" onclick="runSchoolGame()">▶ EJECUTAR</button>
                         <button class="btn btn-reset" onclick="resetSchoolGame()">↺ REINICIAR</button>
@@ -554,12 +817,24 @@
         </div>
     </div>
 
+    <!-- Overlay de transición entre niveles -->
+    <div class="overlay" id="levelOverlay">
+        <div class="overlay-card" id="levelOverlayCard">
+            <img class="overlay-avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
+            <h2 id="overlayTitle">Nivel 1</h2>
+            <div class="overlay-stars" id="overlayStars" style="display:none;">⭐⭐⭐</div>
+            <p id="overlayMessage">¡Vamos!</p>
+            <button class="btn btn-run" id="overlayButton" onclick="closeLevelOverlay()">¡Jugar!</button>
+        </div>
+    </div>
+
     <script>
+        // =====================================================================
         // Configuración general
+        // =====================================================================
         const CELL_SIZE = 60;
         const GRID_COLS = 10;
         const GRID_ROWS = 8;
-        const MAX_COMMANDS = 15;
 
         // Direcciones
         const DIRECTIONS = {
@@ -569,7 +844,107 @@
             'derecha': { x: 1, y: 0 },
         };
 
-        // Laberinto del Ratón - REDISEÑADO para ser ganable
+        const ICONO_FALLBACK = 'https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg';
+
+        // =====================================================================
+        // Sonido (Web Audio API, sin archivos externos)
+        // =====================================================================
+        let audioCtx = null;
+        let soundOn = true;
+
+        function ac() {
+            if (!audioCtx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return null;
+                audioCtx = new AC();
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function tone(freq, dur, opts) {
+            if (!soundOn) return;
+            const ctx = ac();
+            if (!ctx) return;
+            const o = opts || {};
+            const type = o.type || 'sine';
+            const delay = o.delay || 0;
+            const vol = o.vol || 0.18;
+            const t0 = ctx.currentTime + delay;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(0.0001, t0);
+            gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + dur + 0.05);
+        }
+
+        function sfxClick() { tone(600, 0.08, { type: 'triangle' }); }
+        function sfxStep(n) { tone(380 + (n % 8) * 40, 0.09, { type: 'square', vol: 0.08 }); }
+        function sfxBump() { tone(140, 0.15, { type: 'sawtooth', vol: 0.12 }); }
+        function sfxWin() {
+            [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, { delay: i * 0.12, type: 'triangle', vol: 0.2 }));
+        }
+        function sfxLose() {
+            [400, 320, 240, 160].forEach((f, i) => tone(f, 0.22, { delay: i * 0.13, type: 'sawtooth', vol: 0.12 }));
+        }
+        function sfxLevel() {
+            [659, 784, 1047].forEach((f, i) => tone(f, 0.2, { delay: i * 0.1, type: 'sine', vol: 0.2 }));
+        }
+        function sfxFanfare() {
+            [523, 523, 523, 659, 784, 784, 1047, 784, 1047].forEach((f, i) =>
+                tone(f, 0.28, { delay: i * 0.16, type: 'triangle', vol: 0.2 }));
+        }
+        function sfxThud() {
+            tone(90, 0.3, { type: 'sine', vol: 0.3 });
+            tone(60, 0.4, { type: 'sine', vol: 0.25, delay: 0.05 });
+        }
+        function sfxCreak() {
+            tone(220, 0.35, { type: 'sawtooth', vol: 0.06 });
+            tone(180, 0.35, { type: 'sawtooth', vol: 0.06, delay: 0.1 });
+        }
+        function sfxSplash() {
+            tone(300, 0.12, { type: 'sine', vol: 0.2 });
+            tone(200, 0.15, { type: 'sine', vol: 0.2, delay: 0.08 });
+            tone(120, 0.25, { type: 'sine', vol: 0.2, delay: 0.16 });
+        }
+
+        function toggleSound() {
+            soundOn = !soundOn;
+            document.getElementById('muteBtn').textContent = soundOn ? '🔊' : '🔇';
+            if (soundOn) sfxClick();
+        }
+
+        // =====================================================================
+        // Almacenamiento seguro (localStorage con fallback en memoria)
+        // =====================================================================
+        const memStore = {};
+        const store = {
+            get(k, d) {
+                try {
+                    const v = localStorage.getItem(k);
+                    return v === null ? d : JSON.parse(v);
+                } catch (e) {
+                    return (k in memStore) ? memStore[k] : d;
+                }
+            },
+            set(k, v) {
+                try {
+                    localStorage.setItem(k, JSON.stringify(v));
+                } catch (e) {
+                    memStore[k] = v;
+                }
+            }
+        };
+
+        // =====================================================================
+        // Laberinto del Ratón (nivel único, ya validado como ganable)
+        // =====================================================================
         const MOUSE_MAZE = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -584,50 +959,83 @@
         const MOUSE_START = { x: 1, y: 1 };
         const CHEESE_POS = { x: 8, y: 5 };
         const TRAP_POS = { x: 5, y: 3 };
+        const MOUSE_MAX_COMMANDS = 15;
+        const MOUSE_SPEED = 500;
 
-        // Laberinto del Nene - REDISEÑADO para ser ganable
-        const SCHOOL_MAZE = [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-            [1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        // =====================================================================
+        // Niveles del Nene a la Escuela (10 niveles, dificultad escalada).
+        // Cada nivel es ajustable: levelTitle, message, speed (ms por paso),
+        // spawnRate (cantidad de charcos), goalScore (par de comandos),
+        // maxCommands, maze, start, goal, muds y theme.
+        // Niveles 1-3: fácil · 4-7: intermedio · 8-10: avanzado (10 = graduación)
+        // =====================================================================
+        const SCHOOL_LEVELS = [
+        {id: 1, levelTitle: "¡A levantarse! 🛏️", message: "Te despertaste a tiempo. ¡Empezamos la aventura hacia la escuela!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [1, 6], muds: [], speed: 600, spawnRate: 0, maxCommands: 10, goalScore: 5, player: "👦", theme: {floor: "#fff8e1", line: "#e0cfa0", wall: "#8d6e63", edge: "#5d4037"}},
+        {id: 2, levelTitle: "Preparo mi mochila 🎒", message: "Guardaste tus útiles. ¡Paso 2 completado, sigamos caminando!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 2], muds: [[8, 3]], speed: 580, spawnRate: 1, maxCommands: 11, goalScore: 6, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#5d4037", edge: "#3e2723"}},
+        {id: 3, levelTitle: "Salgo de casa 🚶", message: "¡Paso 3 completado! Nos acercamos al aula.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [4, 6], muds: [[7, 5], [5, 4]], speed: 550, spawnRate: 2, maxCommands: 13, goalScore: 8, player: "👦", theme: {floor: "#e3f2fd", line: "#90caf9", wall: "#546e7a", edge: "#37474f"}},
+        {id: 4, levelTitle: "Cruzando el parque 🌳", message: "Esquivaste las ramas del parque. ¡Excelente!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 0, 1, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 1, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [2, 6], muds: [[4, 2], [7, 1]], speed: 500, spawnRate: 2, maxCommands: 12, goalScore: 8, player: "👦", theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#33691e", edge: "#1b4312"}},
+        {id: 5, levelTitle: "¡Cuidado con el barro! 💧", message: "El camino está resbaloso, pero vos podés.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 1, 0, 0, 1, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 1, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [8, 6], muds: [[7, 1], [6, 1], [8, 2]], speed: 480, spawnRate: 3, maxCommands: 16, goalScore: 12, player: "👦", theme: {floor: "#efebe9", line: "#bcaaa4", wall: "#4e342e", edge: "#3e2723"}},
+        {id: 6, levelTitle: "La calle concurrida 🚗", message: "Cruzaste con cuidado. ¡Ya falta menos!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 1, 0, 1], [1, 0, 0, 0, 0, 1, 1, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [8, 4], muds: [[6, 1], [3, 5], [3, 1]], speed: 450, spawnRate: 3, maxCommands: 14, goalScore: 10, player: "👦", theme: {floor: "#eceff1", line: "#b0bec5", wall: "#455a64", edge: "#263238"}},
+        {id: 7, levelTitle: "¡A no llegar tarde! 🏃", message: "Rápido pero con cuidado. ¡Casi llegamos!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 1, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 1, 0, 0, 1, 0, 1], [1, 0, 1, 1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [7, 6], muds: [[1, 5], [8, 2], [6, 1], [5, 1]], speed: 420, spawnRate: 4, maxCommands: 14, goalScore: 11, player: "👦", theme: {floor: "#fff3e0", line: "#ffcc80", wall: "#6d4c41", edge: "#4e342e"}},
+        {id: 8, levelTitle: "La puerta de la escuela 🏫", message: "¡La escuela está a la vista! Concentrate.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 1, 1, 0, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 1, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 0, 1, 0, 0, 1], [1, 1, 0, 0, 0, 1, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[3, 3], [8, 3], [2, 6], [3, 6]], speed: 380, spawnRate: 4, maxCommands: 15, goalScore: 12, player: "👦", theme: {floor: "#ede7f6", line: "#b39ddb", wall: "#4527a0", edge: "#311b92"}},
+        {id: 9, levelTitle: "El aula final 📚", message: "Solo falta entrar al aula. ¡Último esfuerzo!", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 0, 0, 1, 1, 0, 1, 0, 0, 1], [1, 0, 0, 1, 0, 0, 0, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 1, 0, 1], [1, 0, 1, 0, 0, 1, 1, 0, 0, 1], [1, 0, 0, 0, 0, 1, 0, 0, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [6, 6], muds: [[1, 3], [3, 6], [2, 6], [1, 5], [4, 4]], speed: 350, spawnRate: 5, maxCommands: 17, goalScore: 14, player: "👦", theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#6a1b9a", edge: "#4a148c"}},
+        {id: 10, levelTitle: "¡Graduación! 🎓", message: "¡Último nivel! Llegá a la fiesta de graduación y celebrate como un campeón.", maze: [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 0, 1, 0, 1, 0, 1, 0, 0, 1], [1, 0, 0, 0, 0, 0, 0, 0, 1, 1], [1, 0, 0, 0, 0, 0, 1, 1, 1, 1], [1, 0, 1, 0, 0, 0, 0, 0, 0, 1], [1, 1, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], start: [1, 1], goal: [8, 6], muds: [[7, 2], [5, 5], [8, 1], [1, 5], [3, 3]], speed: 400, spawnRate: 5, maxCommands: 16, goalScore: 12, player: "🧑‍🎓", theme: {floor: "#fffde7", line: "#f0d060", wall: "#6d4c41", edge: "#4e342e"}, graduation: true}
+
         ];
 
-        const SCHOOL_START = { x: 1, y: 1 };
-        const SCHOOL_POS = { x: 8, y: 5 };
-        const MUD_PUDDLES = [{ x: 4, y: 2 }, { x: 6, y: 4 }, { x: 3, y: 5 }];
-
+        // =====================================================================
         // Estados de los juegos
+        // =====================================================================
         let mouseState = {
             pos: { ...MOUSE_START },
             program: [],
             executing: false,
-            currentIndex: 0
+            currentIndex: 0,
+            runToken: 0,
+            fxToken: 0,
+            boxT: -1,      // progreso de la animación de la caja (-1 = inactiva)
+            winFx: -1,     // progreso del destello de victoria
+            wins: store.get('sara_mouse_wins', 0)
         };
 
         let schoolState = {
-            pos: { ...SCHOOL_START },
+            // Si ya completo todo antes, arranca en el nivel 1 (puede elegir otro en el selector)
+            levelIdx: (() => { const u = store.get('sara_unlocked', 1); return (u >= 10) ? 0 : Math.min(Math.max(u - 1, 0), 9); })(),
+            pos: { x: 1, y: 1 },
             program: [],
             executing: false,
-            currentIndex: 0
+            currentIndex: 0,
+            runToken: 0,
+            fxToken: 0,
+            splashT: -1,
+            winFx: -1,
+            stars: store.get('sara_stars', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+            unlocked: store.get('sara_unlocked', 1)
         };
+        // Normalizar estrellas por si cambió el formato guardado
+        if (!Array.isArray(schoolState.stars) || schoolState.stars.length !== 10) {
+            schoolState.stars = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        }
 
+        function schoolLevel() {
+            return SCHOOL_LEVELS[schoolState.levelIdx];
+        }
+
+        // =====================================================================
         // Navegación
+        // =====================================================================
         function showGame(game) {
             document.getElementById('menuScreen').style.display = 'none';
             document.getElementById('mouseGame').classList.remove('active');
             document.getElementById('schoolGame').classList.remove('active');
-            
+
             if (game === 'mouse') {
                 document.getElementById('mouseGame').classList.add('active');
+                updateMouseHUD();
                 drawMouseGame();
             } else {
                 document.getElementById('schoolGame').classList.add('active');
-                drawSchoolGame();
+                loadSchoolLevel(schoolState.levelIdx, { intro: true });
             }
         }
 
@@ -635,6 +1043,14 @@
             document.getElementById('menuScreen').style.display = 'flex';
             document.getElementById('mouseGame').classList.remove('active');
             document.getElementById('schoolGame').classList.remove('active');
+            hideLevelOverlay();
+            updateMenuProgress();
+        }
+
+        function updateMenuProgress() {
+            const total = schoolState.stars.reduce((a, b) => a + b, 0);
+            const lvl = Math.min(schoolState.unlocked, 10);
+            document.getElementById('menuProgress').textContent = 'Nivel ' + lvl + '/10 · ⭐ ' + total;
         }
 
         // Acordeón
@@ -645,85 +1061,200 @@
             header.classList.toggle('active');
         }
 
-        // Dibujar juego del ratón
+        // =====================================================================
+        // Dibujado base
+        // =====================================================================
+        function drawEmoji(ctx, emoji, gridX, gridY, opts) {
+            const o = opts || {};
+            const scale = o.scale || 1;
+            const alpha = (o.alpha === undefined) ? 1 : o.alpha;
+            const dy = o.dy || 0;
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.font = Math.round(30 * scale) + 'px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emoji, gridX * CELL_SIZE + CELL_SIZE / 2, gridY * CELL_SIZE + CELL_SIZE / 2 + dy);
+            ctx.restore();
+        }
+
+        function drawGrid(ctx, canvas, maze, theme) {
+            ctx.fillStyle = theme.floor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < GRID_ROWS; y++) {
+                for (let x = 0; x < GRID_COLS; x++) {
+                    if (maze[y][x] === 1) {
+                        ctx.fillStyle = theme.wall;
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeStyle = theme.edge;
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    } else {
+                        ctx.fillStyle = theme.floor;
+                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                        ctx.strokeStyle = theme.line;
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    }
+                }
+            }
+        }
+
+        const MOUSE_THEME = { floor: '#f5f5dc', line: '#ccc', wall: '#464646', edge: '#333' };
+
+        // Charco de barro dibujado en canvas
+        function drawMud(ctx, gx, gy, scale) {
+            const s = scale || 1;
+            const cx = gx * CELL_SIZE + CELL_SIZE / 2;
+            const cy = gy * CELL_SIZE + CELL_SIZE / 2;
+            ctx.save();
+            ctx.fillStyle = 'rgba(93, 64, 55, 0.9)';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 22 * s, 14 * s, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(141, 110, 99, 0.9)';
+            ctx.beginPath();
+            ctx.ellipse(cx - 5 * s, cy - 3 * s, 10 * s, 6 * s, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(215, 204, 200, 0.9)';
+            ctx.beginPath();
+            ctx.ellipse(cx - 7 * s, cy - 4 * s, 4 * s, 2.5 * s, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // =====================================================================
+        // Juego del ratón (con animación de caja-trampa)
+        // =====================================================================
         function drawMouseGame() {
             const canvas = document.getElementById('mouseCanvas');
             const ctx = canvas.getContext('2d');
-            
-            ctx.fillStyle = '#f5f5dc';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Laberinto
-            for (let y = 0; y < GRID_ROWS; y++) {
-                for (let x = 0; x < GRID_COLS; x++) {
-                    if (MOUSE_MAZE[y][x] === 1) {
-                        ctx.fillStyle = '#464646';
-                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                        ctx.strokeStyle = '#333';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    } else {
-                        ctx.fillStyle = '#f5f5dc';
-                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                        ctx.strokeStyle = '#ccc';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    }
-                }
-            }
+            drawGrid(ctx, canvas, MOUSE_MAZE, MOUSE_THEME);
 
             // Queso
             drawEmoji(ctx, '🧀', CHEESE_POS.x, CHEESE_POS.y);
-            
-            // Trampa
-            drawEmoji(ctx, '🪤', TRAP_POS.x, TRAP_POS.y);
-            
-            // Ratón
-            drawEmoji(ctx, '🐭', mouseState.pos.x, mouseState.pos.y);
+
+            // Caja-trampa (o animación de caída)
+            if (mouseState.boxT >= 0) {
+                const t = mouseState.boxT;
+                // Caída con aceleración + aplastamiento al final + sacudida
+                const fall = Math.min(1, t * 1.25);
+                const dy = -170 * (1 - fall) * (1 - fall);
+                const squash = t > 0.8 ? 1 + 0.25 * Math.sin((t - 0.8) / 0.2 * Math.PI) : 1;
+                const shakeX = t > 0.8 ? Math.sin(t * 60) * 3 * (1 - t) : 0;
+                ctx.save();
+                ctx.translate(shakeX, 0);
+                drawEmoji(ctx, '📦', TRAP_POS.x, TRAP_POS.y, { scale: squash, dy: dy });
+                // Polvo al aterrizar
+                if (t > 0.75) {
+                    ctx.globalAlpha = Math.min(1, (t - 0.75) * 4) * (1 - (t - 0.75) * 2);
+                    ctx.font = '24px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('💨',
+                        TRAP_POS.x * CELL_SIZE + CELL_SIZE / 2 - 25,
+                        TRAP_POS.y * CELL_SIZE + CELL_SIZE / 2 + 15);
+                    ctx.fillText('💨',
+                        TRAP_POS.x * CELL_SIZE + CELL_SIZE / 2 + 25,
+                        TRAP_POS.y * CELL_SIZE + CELL_SIZE / 2 + 15);
+                    ctx.globalAlpha = 1;
+                }
+                ctx.restore();
+                // El ratón queda oculto bajo la caja al final
+                if (t < 0.8) {
+                    drawEmoji(ctx, '🐭', mouseState.pos.x, mouseState.pos.y);
+                } else {
+                    drawEmoji(ctx, '😵', mouseState.pos.x, mouseState.pos.y - 0.55, { scale: 0.8 });
+                }
+            } else {
+                drawEmoji(ctx, '📦', TRAP_POS.x, TRAP_POS.y, { scale: 1.1 });
+                drawEmoji(ctx, '🐭', mouseState.pos.x, mouseState.pos.y);
+            }
+
+            // Destello de victoria
+            if (mouseState.winFx >= 0) {
+                const t = mouseState.winFx;
+                drawEmoji(ctx, '⭐', CHEESE_POS.x, CHEESE_POS.y - 0.4 * t, {
+                    scale: 1 + t * 1.2, alpha: 1 - t * 0.6
+                });
+            }
         }
 
-        // Dibujar juego del nene
+        // Animación: la caja cae sobre el ratón (efecto "atrapado")
+        function triggerBoxTrap() {
+            mouseState.executing = 'trap';
+            mouseState.boxT = 0;
+            const token = ++mouseState.fxToken;
+            sfxCreak();
+            setTimeout(() => { if (token === mouseState.fxToken) sfxThud(); }, 450);
+            const start = performance.now();
+            const DUR = 950;
+            function frame(now) {
+                if (token !== mouseState.fxToken) return;
+                const t = Math.min(1, (now - start) / DUR);
+                mouseState.boxT = t;
+                drawMouseGame();
+                if (t < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    mouseState.executing = false;
+                    mouseState.boxT = -1;
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                    sfxLose();
+                    showMessage('¡PERDISTE! La caja atrapó al ratón 📦', 'lose');
+                    drawMouseGame();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        function mouseWinEffect(done) {
+            mouseState.executing = 'win';
+            const token = ++mouseState.fxToken;
+            sfxWin();
+            const start = performance.now();
+            const DUR = 700;
+            function frame(now) {
+                if (token !== mouseState.fxToken) return;
+                const t = Math.min(1, (now - start) / DUR);
+                mouseState.winFx = t;
+                drawMouseGame();
+                if (t < 1) requestAnimationFrame(frame);
+                else {
+                    mouseState.winFx = -1;
+                    mouseState.executing = false;
+                    drawMouseGame();
+                    done();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        // =====================================================================
+        // Juego del nene (10 niveles + graduación)
+        // =====================================================================
         function drawSchoolGame() {
             const canvas = document.getElementById('schoolCanvas');
             const ctx = canvas.getContext('2d');
-            
-            ctx.fillStyle = '#e8f5e9';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const lv = schoolLevel();
+            drawGrid(ctx, canvas, lv.maze, lv.theme);
 
-            // Laberinto
-            for (let y = 0; y < GRID_ROWS; y++) {
-                for (let x = 0; x < GRID_COLS; x++) {
-                    if (SCHOOL_MAZE[y][x] === 1) {
-                        ctx.fillStyle = '#5d4037';
-                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                        ctx.strokeStyle = '#3e2723';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    } else {
-                        ctx.fillStyle = '#e8f5e9';
-                        ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                        ctx.strokeStyle = '#a5d6a7';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                    }
-                }
-            }
+            const gx = lv.goal[0], gy = lv.goal[1];
+            const schoolX = gx * CELL_SIZE + CELL_SIZE / 2;
+            const schoolY = gy * CELL_SIZE + CELL_SIZE / 2;
+            const isGrad = !!lv.graduation;
 
-            // Escuela (usando el logo)
-            const schoolX = SCHOOL_POS.x * CELL_SIZE + CELL_SIZE / 2;
-            const schoolY = SCHOOL_POS.y * CELL_SIZE + CELL_SIZE / 2;
-            
-            ctx.fillStyle = '#1565c0';
+            // Edificio de la escuela
+            ctx.fillStyle = isGrad ? '#8a6d00' : '#1565c0';
             ctx.fillRect(schoolX - 25, schoolY - 20, 50, 40);
-            ctx.fillStyle = '#0d47a1';
+            ctx.fillStyle = isGrad ? '#5c4700' : '#0d47a1';
             ctx.fillRect(schoolX - 20, schoolY - 15, 40, 30);
             ctx.fillStyle = 'white';
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('ESCUELA', schoolX, schoolY + 4);
-            
+            ctx.fillText(isGrad ? 'GRADÚO' : 'ESCUELA', schoolX, schoolY + 4);
+
             // Techo
-            ctx.fillStyle = '#b71c1c';
+            ctx.fillStyle = isGrad ? '#ffd700' : '#b71c1c';
             ctx.beginPath();
             ctx.moveTo(schoolX - 30, schoolY - 20);
             ctx.lineTo(schoolX, schoolY - 35);
@@ -731,120 +1262,469 @@
             ctx.closePath();
             ctx.fill();
 
+            if (isGrad) {
+                // Birretes de graduación alrededor de la escuela
+                drawEmoji(ctx, '🎓', gx - 0.7, gy - 0.7, { scale: 0.9 });
+                drawEmoji(ctx, '🎓', gx + 0.7, gy - 0.7, { scale: 0.9 });
+                drawEmoji(ctx, '🎉', gx - 0.7, gy + 0.6, { scale: 0.9 });
+                drawEmoji(ctx, '🎉', gx + 0.7, gy + 0.6, { scale: 0.9 });
+            }
+
             // Charcos de barro
-            MUD_PUDDLES.forEach(puddle => {
-                drawEmoji(ctx, '💧', puddle.x, puddle.y);
+            lv.muds.forEach(m => drawMud(ctx, m[0], m[1]));
+
+            // Nene (birrete en la graduación)
+            if (schoolState.splashT >= 0) {
+                const t = schoolState.splashT;
+                drawEmoji(ctx, lv.player, schoolState.pos.x, schoolState.pos.y);
+                ctx.save();
+                ctx.globalAlpha = Math.min(1, t * 3);
+                ctx.font = Math.round(30 + t * 30) + 'px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('💦',
+                    schoolState.pos.x * CELL_SIZE + CELL_SIZE / 2,
+                    schoolState.pos.y * CELL_SIZE + CELL_SIZE / 2 - t * 20);
+                ctx.restore();
+            } else {
+                drawEmoji(ctx, lv.player, schoolState.pos.x, schoolState.pos.y);
+            }
+
+            // Destello de victoria
+            if (schoolState.winFx >= 0) {
+                const t = schoolState.winFx;
+                drawEmoji(ctx, isGrad ? '🎓' : '⭐', gx, gy - 0.4 * t, {
+                    scale: 1 + t * 1.2, alpha: 1 - t * 0.6
+                });
+            }
+        }
+
+        function triggerMudSplash() {
+            schoolState.executing = 'splash';
+            schoolState.splashT = 0;
+            const token = ++schoolState.fxToken;
+            sfxSplash();
+            const start = performance.now();
+            const DUR = 650;
+            function frame(now) {
+                if (token !== schoolState.fxToken) return;
+                const t = Math.min(1, (now - start) / DUR);
+                schoolState.splashT = t;
+                drawSchoolGame();
+                if (t < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    schoolState.executing = false;
+                    schoolState.splashT = -1;
+                    const lv = schoolLevel();
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    sfxLose();
+                    showMessage('¡Al barro! El nene se ensució 💦', 'lose');
+                    drawSchoolGame();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        function schoolWinEffect(done) {
+            schoolState.executing = 'win';
+            const token = ++schoolState.fxToken;
+            const lv = schoolLevel();
+            if (lv.graduation) {
+                sfxFanfare();
+                launchConfetti(4500);
+            } else {
+                sfxWin();
+            }
+            const start = performance.now();
+            const DUR = lv.graduation ? 1400 : 700;
+            function frame(now) {
+                if (token !== schoolState.fxToken) return;
+                const t = Math.min(1, (now - start) / DUR);
+                schoolState.winFx = t;
+                drawSchoolGame();
+                if (t < 1) requestAnimationFrame(frame);
+                else {
+                    schoolState.winFx = -1;
+                    schoolState.executing = false;
+                    drawSchoolGame();
+                    done();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+
+        // =====================================================================
+        // Niveles: carga, HUD, selector y progresión
+        // =====================================================================
+        function loadSchoolLevel(i, opts) {
+            schoolState.levelIdx = i;
+            const lv = schoolLevel();
+            schoolState.pos = { x: lv.start[0], y: lv.start[1] };
+            schoolState.program = [];
+            schoolState.executing = false;
+            schoolState.currentIndex = 0;
+            schoolState.runToken++;
+            schoolState.fxToken++;
+            schoolState.splashT = -1;
+            schoolState.winFx = -1;
+            updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+            updateSchoolHUD();
+            buildLevelSelect();
+            document.getElementById('schoolMazeSection').classList.toggle('graduation', !!lv.graduation);
+            drawSchoolGame();
+            if (opts && opts.intro) {
+                showLevelIntro(lv);
+            }
+        }
+
+        function updateSchoolHUD() {
+            const lv = schoolLevel();
+            const badge = document.getElementById('schoolLevelBadge');
+            badge.textContent = 'Nivel ' + lv.id + '/10';
+            badge.classList.toggle('grad', !!lv.graduation);
+            const best = schoolState.stars[schoolState.levelIdx] || 0;
+            document.getElementById('schoolStars').textContent = '★'.repeat(best) + '☆'.repeat(3 - best);
+            document.getElementById('schoolPar').textContent = 'Par ' + lv.goalScore;
+            document.getElementById('schoolCounter').textContent =
+                schoolState.program.length + ' / ' + lv.maxCommands + ' comandos';
+        }
+
+        function buildLevelSelect() {
+            const box = document.getElementById('levelSelect');
+            box.innerHTML = '';
+            SCHOOL_LEVELS.forEach((lv, idx) => {
+                const b = document.createElement('button');
+                const locked = idx + 1 > schoolState.unlocked;
+                const best = schoolState.stars[idx] || 0;
+                b.className = 'lvl-btn' + (locked ? ' locked' : '') +
+                    (idx === schoolState.levelIdx ? ' current' : '') +
+                    (lv.graduation ? ' grad-btn' : '');
+                b.innerHTML = (locked ? '🔒 ' : '') + lv.id +
+                    '<small>' + (locked ? '···' : ('★'.repeat(best) + '☆'.repeat(3 - best))) + '</small>';
+                if (!locked) {
+                    b.addEventListener('click', () => {
+                        if (schoolState.executing) return;
+                        sfxClick();
+                        loadSchoolLevel(idx, { intro: true });
+                    });
+                } else {
+                    b.addEventListener('click', () => showMessage('Completa el nivel anterior para desbloquear', 'info'));
+                }
+                box.appendChild(b);
             });
-            
-            // Nene
-            drawEmoji(ctx, '👦', schoolState.pos.x, schoolState.pos.y);
         }
 
-        // Dibujar emoji en el canvas
-        function drawEmoji(ctx, emoji, gridX, gridY) {
-            ctx.font = '30px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(emoji, gridX * CELL_SIZE + CELL_SIZE / 2, gridY * CELL_SIZE + CELL_SIZE / 2);
+        function starsFor(used, par) {
+            if (used <= par) return 3;
+            if (used <= par + 2) return 2;
+            return 1;
         }
 
-        // Verificar movimiento válido
+        function onSchoolWin(used) {
+            const lv = schoolLevel();
+            const stars = starsFor(used, lv.goalScore);
+            const prev = schoolState.stars[schoolState.levelIdx] || 0;
+            if (stars > prev) {
+                schoolState.stars[schoolState.levelIdx] = stars;
+                store.set('sara_stars', schoolState.stars);
+            }
+            const last = schoolState.levelIdx === SCHOOL_LEVELS.length - 1;
+            if (!last && schoolState.unlocked < schoolState.levelIdx + 2) {
+                schoolState.unlocked = schoolState.levelIdx + 2;
+                store.set('sara_unlocked', schoolState.unlocked);
+            }
+            updateSchoolHUD();
+            buildLevelSelect();
+            updateMenuProgress();
+            schoolWinEffect(() => {
+                if (last) {
+                    showGraduation(stars);
+                } else {
+                    sfxLevel();
+                    const next = SCHOOL_LEVELS[schoolState.levelIdx + 1];
+                    showLevelOverlay({
+                        title: '¡Nivel ' + lv.id + ' completado! 🎉',
+                        stars: stars,
+                        message: next.message,
+                        button: 'Siguiente: Nivel ' + next.id + ' ▶',
+                        grad: false,
+                        onGo: () => loadSchoolLevel(schoolState.levelIdx + 1, { intro: false })
+                            || showLevelIntro(SCHOOL_LEVELS[schoolState.levelIdx])
+                    });
+                }
+            });
+        }
+
+        function showGraduation(stars) {
+            showLevelOverlay({
+                title: '🎓 ¡TE GRADUASTE! 🎓',
+                stars: stars,
+                message: '¡FELICITACIONES! El nene llegó a la escuela, aprobó todos los niveles y se graduó con éxito. ¡Sos un programador increíble! 🎉',
+                button: '🎓 Jugar de nuevo',
+                grad: true,
+                onGo: () => {
+                    schoolState.unlocked = 10;
+                    store.set('sara_unlocked', 10);
+                    loadSchoolLevel(0, { intro: true });
+                }
+            });
+        }
+
+        // =====================================================================
+        // Overlay de niveles (intro + completado)
+        // =====================================================================
+        let overlayAction = null;
+
+        function showLevelOverlay(o) {
+            document.getElementById('overlayTitle').textContent = o.title;
+            document.getElementById('overlayMessage').textContent = o.message;
+            const starsEl = document.getElementById('overlayStars');
+            if (o.stars) {
+                starsEl.style.display = 'block';
+                starsEl.textContent = '★'.repeat(o.stars) + '☆'.repeat(3 - o.stars);
+            } else {
+                starsEl.style.display = 'none';
+            }
+            document.getElementById('overlayButton').textContent = o.button;
+            document.getElementById('levelOverlayCard').classList.toggle('grad-card', !!o.grad);
+            overlayAction = o.onGo || null;
+            document.getElementById('levelOverlay').classList.add('show');
+        }
+
+        function showLevelIntro(lv) {
+            showLevelOverlay({
+                title: 'Nivel ' + lv.id + ': ' + lv.levelTitle,
+                stars: 0,
+                message: lv.message,
+                button: '¡Jugar! ▶',
+                grad: !!lv.graduation,
+                onGo: null
+            });
+        }
+
+        function closeLevelOverlay() {
+            sfxClick();
+            hideLevelOverlay();
+            if (overlayAction) {
+                const fn = overlayAction;
+                overlayAction = null;
+                fn();
+            }
+        }
+
+        function hideLevelOverlay() {
+            document.getElementById('levelOverlay').classList.remove('show');
+        }
+
+        function overlayVisible() {
+            return document.getElementById('levelOverlay').classList.contains('show');
+        }
+
+        // =====================================================================
+        // Confetti de graduación
+        // =====================================================================
+        const confettiParts = [];
+        let confettiRunning = false;
+
+        function confettiResize() {
+            const c = document.getElementById('confettiCanvas');
+            c.width = window.innerWidth;
+            c.height = window.innerHeight;
+        }
+        window.addEventListener('resize', confettiResize);
+        confettiResize();
+
+        function launchConfetti(ms) {
+            const c = document.getElementById('confettiCanvas');
+            const ctx = c.getContext('2d');
+            const colors = ['#f6c90e', '#ef6c00', '#4CAF50', '#2196F3', '#e91e63', '#9c27b0', '#ffffff'];
+            const emojis = ['🎓', '⭐', '🎉'];
+            const end = performance.now() + ms;
+            if (!confettiRunning) {
+                confettiRunning = true;
+                requestAnimationFrame(confettiFrame);
+            }
+            const spawn = setInterval(() => {
+                if (performance.now() > end) {
+                    clearInterval(spawn);
+                    return;
+                }
+                for (let i = 0; i < 6; i++) {
+                    confettiParts.push({
+                        x: Math.random() * c.width,
+                        y: -20,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: 2 + Math.random() * 3,
+                        size: 6 + Math.random() * 8,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        emoji: Math.random() < 0.15 ? emojis[Math.floor(Math.random() * emojis.length)] : null,
+                        rot: Math.random() * Math.PI * 2,
+                        vr: (Math.random() - 0.5) * 0.2
+                    });
+                }
+            }, 120);
+
+            function confettiFrame() {
+                ctx.clearRect(0, 0, c.width, c.height);
+                for (let i = confettiParts.length - 1; i >= 0; i--) {
+                    const p = confettiParts[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.05;
+                    p.rot += p.vr;
+                    if (p.y > c.height + 30) {
+                        confettiParts.splice(i, 1);
+                        continue;
+                    }
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot);
+                    if (p.emoji) {
+                        ctx.font = Math.round(p.size * 2) + 'px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(p.emoji, 0, 0);
+                    } else {
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+                    }
+                    ctx.restore();
+                }
+                if (confettiParts.length > 0 || performance.now() < end) {
+                    requestAnimationFrame(confettiFrame);
+                } else {
+                    confettiRunning = false;
+                    ctx.clearRect(0, 0, c.width, c.height);
+                }
+            }
+        }
+
+        // =====================================================================
+        // Lógica compartida
+        // =====================================================================
         function isValidMove(maze, x, y) {
             return x >= 0 && x < GRID_COLS && y >= 0 && y < GRID_ROWS && maze[y][x] === 0;
         }
 
-        // Mostrar mensaje
         function showMessage(text, type) {
             const existing = document.querySelector('.message');
             if (existing) existing.remove();
-            
+
             const msg = document.createElement('div');
-            msg.className = `message ${type}`;
+            msg.className = 'message ' + type;
             msg.textContent = text;
             document.body.appendChild(msg);
             setTimeout(() => msg.remove(), 3000);
         }
 
-        // Actualizar programa en el DOM
-        function updateProgramDisplay(state, areaId, counterId) {
+        function updateProgramDisplay(state, areaId, counterId, maxCommands) {
             const area = document.getElementById(areaId);
             area.innerHTML = '';
-            
+
             if (state.program.length === 0) {
                 area.innerHTML = '<p style="color: #999; text-align: center; margin-top: 60px;">Arrastra los bloques aquí</p>';
             } else {
                 state.program.forEach((cmd, index) => {
                     const block = document.createElement('div');
-                    block.className = `program-block ${cmd}`;
+                    block.className = 'program-block ' + cmd;
                     if (state.executing && index === state.currentIndex) {
                         block.classList.add('executing');
                     }
                     block.textContent = cmd.toUpperCase();
                     block.addEventListener('click', () => {
                         if (!state.executing) {
+                            sfxClick();
                             state.program.splice(index, 1);
-                            updateProgramDisplay(state, areaId, counterId);
+                            updateProgramDisplay(state, areaId, counterId, maxCommands);
                         }
                     });
                     area.appendChild(block);
                 });
             }
-            
-            document.getElementById(counterId).textContent = `${state.program.length} / ${MAX_COMMANDS} comandos`;
+
+            document.getElementById(counterId).textContent = state.program.length + ' / ' + maxCommands + ' comandos';
         }
 
-        // Añadir al programa
-        function addToProgram(state, command, areaId, counterId) {
-            if (state.program.length < MAX_COMMANDS && !state.executing) {
+        function addToProgram(state, command, areaId, counterId, maxCommands) {
+            if (state.program.length < maxCommands && !state.executing) {
                 state.program.push(command);
-                updateProgramDisplay(state, areaId, counterId);
+                sfxClick();
+                updateProgramDisplay(state, areaId, counterId, maxCommands);
+            } else if (state.program.length >= maxCommands) {
+                showMessage('¡Máximo de comandos alcanzado!', 'info');
             }
         }
 
-        // Juego del Ratón
+        function updateMouseHUD() {
+            document.getElementById('mouseWins').textContent = '🧀 ' + mouseState.wins;
+        }
+
+        // =====================================================================
+        // Juego del Ratón: ejecución
+        // =====================================================================
         function runMouseGame() {
             if (mouseState.program.length === 0) {
                 showMessage('¡Añade comandos primero!', 'info');
                 return;
             }
             if (mouseState.executing) return;
-            
+
             mouseState.pos = { ...MOUSE_START };
             mouseState.executing = true;
             mouseState.currentIndex = 0;
-            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
-            executeMouseCommand();
+            const token = ++mouseState.runToken;
+            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+            drawMouseGame();
+            setTimeout(() => executeMouseCommand(token), MOUSE_SPEED);
         }
 
-        function executeMouseCommand() {
+        function executeMouseCommand(token) {
+            if (token !== mouseState.runToken || !mouseState.executing) return;
             if (mouseState.currentIndex < mouseState.program.length) {
                 const cmd = mouseState.program[mouseState.currentIndex];
                 const dir = DIRECTIONS[cmd];
                 const newX = mouseState.pos.x + dir.x;
                 const newY = mouseState.pos.y + dir.y;
-                
+
                 if (isValidMove(MOUSE_MAZE, newX, newY)) {
                     mouseState.pos = { x: newX, y: newY };
+                    sfxStep(mouseState.currentIndex);
                 } else {
+                    sfxBump();
                     showMessage('¡El ratón chocó con una pared!', 'info');
                 }
-                
+
+                // ¡Victoria o trampa inmediata al pisar la casilla!
+                if (mouseState.pos.x === CHEESE_POS.x && mouseState.pos.y === CHEESE_POS.y) {
+                    mouseState.currentIndex++;
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                    drawMouseGame();
+                    mouseWinEffect(() => {
+                        mouseState.wins++;
+                        store.set('sara_mouse_wins', mouseState.wins);
+                        updateMouseHUD();
+                        updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                        showMessage('¡GANASTE! El ratón llegó al queso 🧀', 'win');
+                    });
+                    return;
+                }
+                if (mouseState.pos.x === TRAP_POS.x && mouseState.pos.y === TRAP_POS.y) {
+                    mouseState.currentIndex++;
+                    updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                    drawMouseGame();
+                    triggerBoxTrap();
+                    return;
+                }
+
                 mouseState.currentIndex++;
-                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
+                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
                 drawMouseGame();
-                
-                setTimeout(executeMouseCommand, 500);
+
+                setTimeout(() => executeMouseCommand(token), MOUSE_SPEED);
             } else {
                 mouseState.executing = false;
-                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
-                
-                if (mouseState.pos.x === CHEESE_POS.x && mouseState.pos.y === CHEESE_POS.y) {
-                    showMessage('¡GANASTE! El ratón llegó al queso', 'win');
-                } else if (mouseState.pos.x === TRAP_POS.x && mouseState.pos.y === TRAP_POS.y) {
-                    showMessage('¡PERDISTE! El ratón cayó en la trampa', 'lose');
-                } else {
-                    showMessage('El ratón no llegó a ningún destino', 'info');
-                }
+                updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                showMessage('El ratón no llegó a ningún destino', 'info');
             }
         }
 
@@ -853,77 +1733,128 @@
             mouseState.program = [];
             mouseState.executing = false;
             mouseState.currentIndex = 0;
-            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
+            mouseState.boxT = -1;
+            mouseState.winFx = -1;
+            mouseState.runToken++;
+            mouseState.fxToken++;
+            sfxClick();
+            updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
             drawMouseGame();
         }
 
-        // Juego del Nene
+        // =====================================================================
+        // Juego del Nene: ejecución
+        // =====================================================================
         function runSchoolGame() {
+            const lv = schoolLevel();
             if (schoolState.program.length === 0) {
                 showMessage('¡Añade comandos primero!', 'info');
                 return;
             }
             if (schoolState.executing) return;
-            
-            schoolState.pos = { ...SCHOOL_START };
+
+            schoolState.pos = { x: lv.start[0], y: lv.start[1] };
             schoolState.executing = true;
             schoolState.currentIndex = 0;
-            updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
-            executeSchoolCommand();
+            const token = ++schoolState.runToken;
+            updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+            drawSchoolGame();
+            setTimeout(() => executeSchoolCommand(token), lv.speed);
         }
 
-        function executeSchoolCommand() {
+        function executeSchoolCommand(token) {
+            const lv = schoolLevel();
+            if (token !== schoolState.runToken || !schoolState.executing) return;
             if (schoolState.currentIndex < schoolState.program.length) {
                 const cmd = schoolState.program[schoolState.currentIndex];
                 const dir = DIRECTIONS[cmd];
                 const newX = schoolState.pos.x + dir.x;
                 const newY = schoolState.pos.y + dir.y;
-                
-                if (isValidMove(SCHOOL_MAZE, newX, newY)) {
+
+                if (isValidMove(lv.maze, newX, newY)) {
                     schoolState.pos = { x: newX, y: newY };
+                    sfxStep(schoolState.currentIndex);
                 } else {
+                    sfxBump();
                     showMessage('¡El nene chocó con una pared!', 'info');
                 }
-                
+
+                const used = schoolState.currentIndex + 1;
+
+                // ¡Llegada a la escuela inmediata!
+                if (schoolState.pos.x === lv.goal[0] && schoolState.pos.y === lv.goal[1]) {
+                    schoolState.currentIndex++;
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    drawSchoolGame();
+                    onSchoolWin(used);
+                    return;
+                }
+                // ¡Charco de barro inmediato!
+                if (lv.muds.some(p => p[0] === schoolState.pos.x && p[1] === schoolState.pos.y)) {
+                    schoolState.currentIndex++;
+                    updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                    drawSchoolGame();
+                    triggerMudSplash();
+                    return;
+                }
+
                 schoolState.currentIndex++;
-                updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
+                updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
                 drawSchoolGame();
-                
-                setTimeout(executeSchoolCommand, 500);
+
+                setTimeout(() => executeSchoolCommand(token), lv.speed);
             } else {
                 schoolState.executing = false;
-                updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
-                
-                if (schoolState.pos.x === SCHOOL_POS.x && schoolState.pos.y === SCHOOL_POS.y) {
-                    showMessage('¡GANASTE! El nene llegó a la escuela', 'win');
-                } else if (MUD_PUDDLES.some(p => p.x === schoolState.pos.x && p.y === schoolState.pos.y)) {
-                    showMessage('¡PERDISTE! El nene cayó en un charco', 'lose');
-                } else {
-                    showMessage('El nene no llegó a ningún destino', 'info');
-                }
+                updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                showMessage('El nene no llegó a ningún destino', 'info');
             }
         }
 
         function resetSchoolGame() {
-            schoolState.pos = { ...SCHOOL_START };
+            const lv = schoolLevel();
+            schoolState.pos = { x: lv.start[0], y: lv.start[1] };
             schoolState.program = [];
             schoolState.executing = false;
             schoolState.currentIndex = 0;
-            updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
+            schoolState.splashT = -1;
+            schoolState.winFx = -1;
+            schoolState.runToken++;
+            schoolState.fxToken++;
+            sfxClick();
+            updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+            updateSchoolHUD();
             drawSchoolGame();
         }
 
-        // Eventos de arrastrar y soltar
+        // =====================================================================
+        // Arrastrar, soltar y toque (click-to-add para táctil)
+        // =====================================================================
+        let justDraggedAt = 0;
         document.querySelectorAll('.block').forEach(block => {
             block.addEventListener('dragstart', (e) => {
                 e.dataTransfer.setData('command', block.dataset.command);
                 e.dataTransfer.setData('game', block.dataset.game);
             });
+            block.addEventListener('dragend', () => {
+                justDraggedAt = Date.now();
+            });
+            // Tocar un bloque lo agrega al programa (ideal para celular/tablet)
+            block.addEventListener('click', () => {
+                if (Date.now() - justDraggedAt < 350) return;
+                const command = block.dataset.command;
+                const game = block.dataset.game;
+                if (game === 'mouse') {
+                    addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+                } else {
+                    const lv = schoolLevel();
+                    addToProgram(schoolState, command, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
+                }
+            });
         });
 
         ['mouseProgramArea', 'schoolProgramArea'].forEach(areaId => {
             const area = document.getElementById(areaId);
-            
+
             area.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 area.classList.add('drag-over');
@@ -936,19 +1867,22 @@
             area.addEventListener('drop', (e) => {
                 e.preventDefault();
                 area.classList.remove('drag-over');
+                justDraggedAt = Date.now();
                 const command = e.dataTransfer.getData('command');
                 const game = e.dataTransfer.getData('game');
-                
+
                 if (command && game === 'mouse' && areaId === 'mouseProgramArea') {
-                    addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter');
+                    addToProgram(mouseState, command, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
                 } else if (command && game === 'school' && areaId === 'schoolProgramArea') {
-                    addToProgram(schoolState, command, 'schoolProgramArea', 'schoolCounter');
+                    const lv = schoolLevel();
+                    addToProgram(schoolState, command, 'schoolProgramArea', 'schoolCounter', lv.maxCommands);
                 }
             });
         });
 
         // Atajos de teclado
         document.addEventListener('keydown', (e) => {
+            if (overlayVisible()) return;
             if (e.code === 'Space') {
                 e.preventDefault();
                 if (document.getElementById('mouseGame').classList.contains('active')) {
@@ -967,8 +1901,11 @@
         });
 
         // Inicializar
-        updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter');
-        updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter');
+        updateProgramDisplay(mouseState, 'mouseProgramArea', 'mouseCounter', MOUSE_MAX_COMMANDS);
+        updateProgramDisplay(schoolState, 'schoolProgramArea', 'schoolCounter', schoolLevel().maxCommands);
+        updateMouseHUD();
+        updateMenuProgress();
+        if (!soundOn) document.getElementById('muteBtn').textContent = '🔇';
     </script>
 </body>
 </html>
