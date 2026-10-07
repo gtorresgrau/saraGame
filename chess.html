@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sara Game — Ajedrez: Jaque al Rey</title>
+<link rel="icon" href="icono.jpg">
+<meta name="theme-color" content="#0f1730">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a2340;
+  --ink-soft:#3c4767;
+  --night:#0f1730;
+  --paper:#fffefb;
+  --card:#ffffff;
+  --bus:#ffc93c;
+  --bus-deep:#e0a100;
+  --apple:#ff5d5d;
+  --leaf:#00c389;
+  --leaf-deep:#009e6f;
+  --sky:#3e9bff;
+  --sky-deep:#2473d6;
+  --grape:#7a5cff;
+  --mud:#8d6e63;
+  --line:#e9e4d8;
+  --radius:22px;
+  --border:3px solid var(--ink);
+  --shadow:6px 6px 0 var(--ink);
+  --shadow-sm:4px 4px 0 var(--ink);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Nunito',system-ui,sans-serif;
+  background:var(--night);
+  background-image:
+    radial-gradient(rgba(255,255,255,.14) 1.6px, transparent 1.7px),
+    radial-gradient(ellipse 60% 40% at 12% 8%, #24315e 0%, transparent 60%),
+    radial-gradient(ellipse 55% 45% at 88% 90%, #2a2358 0%, transparent 62%);
+  background-size:26px 26px, auto, auto;
+  min-height:100vh;
+  padding:22px 18px 60px;
+  color:var(--ink);
+}
+.container{max-width:1280px;margin:0 auto;position:relative;z-index:1}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.logo-badge{
+  font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.02em;
+  background:var(--bus);color:var(--ink);border:var(--border);border-radius:16px;
+  padding:10px 16px;transform:rotate(-2deg);box-shadow:var(--shadow-sm);
+  display:flex;align-items:center;gap:8px;
+}
+.logo-badge .dot{width:12px;height:12px;border-radius:50%;background:var(--apple);border:2.5px solid var(--ink);display:inline-block}
+.brand-text h1{font-family:'Fredoka',sans-serif;font-weight:600;color:#fff;font-size:clamp(1.25rem,2.6vw,1.7rem);line-height:1.1}
+.brand-text h1 em{font-style:normal;background:linear-gradient(transparent 62%, var(--bus) 62%, var(--bus) 92%, transparent 92%)}
+.brand-text p{color:#c9d2ea;font-size:.88rem;font-weight:700;margin-top:2px}
+.mute-btn{
+  font-family:'Fredoka',sans-serif;background:var(--paper);border:var(--border);border-radius:50%;
+  width:52px;height:52px;font-size:1.35rem;cursor:pointer;box-shadow:var(--shadow-sm);
+  transition:transform .15s ease;
+}
+.mute-btn:hover{transform:rotate(-8deg) scale(1.06)}
+.mute-btn:focus-visible,.back-btn:focus-visible,.btn:focus-visible,.lvl-btn:focus-visible{outline:4px solid var(--bus);outline-offset:2px}
+
+/* Menu */
+.menu-screen{display:flex;flex-direction:column;gap:22px;min-height:70vh}
+.hero{
+  background:var(--paper);border:var(--border);border-radius:28px;box-shadow:var(--shadow);
+  padding:28px 28px 24px;position:relative;overflow:hidden;
+}
+.hero::after{
+  content:"";position:absolute;right:-30px;top:-30px;width:190px;height:190px;border-radius:50%;
+  background:repeating-linear-gradient(-45deg,var(--bus) 0 12px,#ffd45e 12px 24px);
+  border:var(--border);transform:rotate(12deg);
+}
+.hero-kicker{
+  display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;
+  font-weight:900;font-size:.8rem;border-radius:999px;padding:7px 14px;margin-bottom:12px;
+}
+.hero h2{font-family:'Fredoka',sans-serif;font-size:clamp(1.7rem,4.4vw,2.9rem);line-height:1.02;max-width:16ch}
+.hero h2 .hl{background:var(--bus);border-radius:10px;padding:0 10px;display:inline-block;transform:rotate(-1deg);border:3px solid var(--ink)}
+.hero p{color:var(--ink-soft);font-weight:700;max-width:52ch;margin-top:10px;line-height:1.5}
+.hero-path{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.path-step{display:flex;align-items:center;gap:8px;background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:7px 13px;font-weight:900;font-size:.85rem;box-shadow:3px 3px 0 var(--ink)}
+.path-dots{font-weight:900;letter-spacing:3px;color:var(--bus-deep)}
+
+/* Game cards */
+.game-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px}
+@media(max-width:860px){.game-cards{grid-template-columns:1fr}}
+.game-card{
+  background:var(--card);border:var(--border);border-radius:26px;box-shadow:var(--shadow);
+  overflow:hidden;cursor:pointer;transition:transform .18s ease;text-align:left;
+}
+.game-card:first-child{transform:rotate(-.7deg)}
+.game-card:last-child{transform:rotate(.7deg)}
+.game-card:hover{transform:rotate(0deg) translateY(-6px)}
+.card-art{height:150px;position:relative;display:flex;align-items:flex-end;padding:16px;border-bottom:var(--border)}
+.card-art.chess{background:#e8eaf6;background-image:radial-gradient(#c5cae9 2.5px,transparent 2.6px);background-size:34px 34px}
+.card-emoji{font-size:4.2rem;line-height:1;filter:drop-shadow(3px 3px 0 var(--ink))}
+.card-tag{position:absolute;top:14px;right:14px;background:var(--ink);color:#fff;font-weight:900;font-size:.75rem;border-radius:999px;padding:6px 12px}
+.card-body{padding:20px 22px 22px}
+.card-body h3{font-family:'Fredoka',sans-serif;font-size:1.45rem;line-height:1.1;margin-bottom:6px}
+.card-body>p{color:var(--ink-soft);font-weight:700;font-size:.94rem;line-height:1.5}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;flex-wrap:wrap}
+.progress{display:inline-flex;align-items:center;gap:8px;background:#f2efe4;border:2.5px solid var(--ink);border-radius:999px;padding:7px 14px;font-weight:900;font-size:.85rem}
+.play-pill{font-family:'Fredoka',sans-serif;background:var(--leaf);color:#fff;border:var(--border);border-radius:999px;padding:10px 20px;font-size:1rem;box-shadow:4px 4px 0 var(--ink);transition:transform .15s ease}
+.game-card:hover .play-pill{transform:scale(1.05)}
+.play-pill.alt{background:var(--sky)}
+
+/* Game screen */
+.game-screen{display:none}
+.game-screen.active{display:block}
+.back-btn{
+  font-family:'Fredoka',sans-serif;background:var(--paper);border:var(--border);border-radius:999px;
+  padding:10px 18px;font-size:.95rem;cursor:pointer;box-shadow:var(--shadow-sm);margin-bottom:16px;font-weight:600;
+}
+.back-btn:hover{transform:translateX(-3px)}
+.game-container{display:grid;grid-template-columns:minmax(0,640px) minmax(320px,420px);gap:20px;justify-content:center;align-items:start}
+@media(max-width:1080px){.game-container{grid-template-columns:1fr;max-width:680px;margin:0 auto}.controls-section{order:-1}.maze-section{order:0}}
+.maze-section{background:var(--paper);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;position:relative}
+.maze-section::before,.maze-section::after{
+  content:"";position:absolute;width:86px;height:26px;background:#ffd45ecc;border:2.5px solid var(--ink);
+  border-radius:4px;top:-15px;opacity:.95;
+}
+.maze-section::before{left:28px;transform:rotate(-6deg)}
+.maze-section::after{right:28px;transform:rotate(6deg)}
+.maze-section.checkmate{box-shadow:6px 6px 0 var(--ink),0 0 0 5px var(--bus),0 0 44px #ffc93c99}
+.board-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 8px 12px;flex-wrap:wrap}
+.board-head .where{font-family:'Fredoka',sans-serif;font-size:1.05rem}
+.board-head .where small{display:block;font-family:'Nunito',sans-serif;font-weight:800;color:var(--ink-soft);font-size:.78rem}
+.canvas-wrap{background:#0e1530;border:var(--border);border-radius:16px;overflow:hidden;line-height:0}
+canvas{width:100%;height:auto;display:block;max-width:100%}
+.controls-section{background:var(--paper);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;position:sticky;top:14px}
+@media(max-width:1080px){.controls-section{position:static}}
+.hud{display:flex;align-items:center;gap:10px;background:#f4f1e4;border:2.5px solid var(--ink);border-radius:16px;padding:9px 11px;margin-bottom:14px;flex-wrap:wrap}
+.hud img.avatar{width:44px;height:44px;border-radius:14px;object-fit:cover;border:2.5px solid var(--ink);flex-shrink:0;background:#fff}
+.level-badge{font-family:'Fredoka',sans-serif;background:var(--ink);color:#fff;font-weight:600;padding:7px 14px;border-radius:999px;font-size:.88rem;white-space:nowrap}
+.level-badge.checkmate{background:var(--bus);color:var(--ink);border:2px solid var(--ink)}
+.hud-stars{font-size:.95rem;letter-spacing:1px;font-weight:900;color:#b98a00}
+.hud-par{margin-left:auto;font-size:.78rem;color:var(--ink-soft);font-weight:900;background:#fff;border:2px solid var(--ink);padding:4px 10px;border-radius:999px}
+.section-title{font-family:'Fredoka',sans-serif;font-size:1.02rem;margin:16px 0 10px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:"";flex:1;height:3px;background:var(--ink);border-radius:99px;opacity:.14}
+.level-select{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:6px}
+.lvl-btn{
+  border:2.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:13px;
+  padding:8px 2px;font-weight:900;cursor:pointer;font-size:.88rem;transition:transform .12s ease;line-height:1.25;
+  box-shadow:3px 3px 0 var(--ink);font-family:'Nunito',sans-serif;
+}
+.lvl-btn small{display:block;font-size:.72rem;color:inherit;opacity:.85}
+.lvl-btn:hover:not(.locked){transform:translateY(-2px);background:var(--bus)}
+.lvl-btn.current{background:var(--ink);color:#fff}
+.lvl-btn.locked{opacity:.45;cursor:not-allowed;box-shadow:none;background:#eee}
+.lvl-btn.checkmate-btn{border-color:var(--ink);background:#fff6d6}
+.lvl-btn.checkmate-btn.current,.lvl-btn.checkmate-btn:hover:not(.locked){background:var(--bus)}
+
+/* Piece selector */
+.piece-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px}
+@media(max-width:480px){.piece-selector{grid-template-columns:1fr 1fr}}
+.piece-btn{
+  border:var(--border);border-radius:15px;text-align:center;font-weight:900;color:#fff;cursor:pointer;
+  user-select:none;font-size:1.5rem;min-height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;touch-action:manipulation;box-shadow:0 5px 0 var(--ink);transition:transform .12s ease;font-family:'Fredoka',sans-serif;
+}
+.piece-btn span{font-size:.62rem;font-family:'Nunito',sans-serif;font-weight:900;letter-spacing:.04em;opacity:.95}
+.piece-btn:hover{transform:translateY(-3px)}
+.piece-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.piece-btn.selected{outline:4px solid var(--bus);outline-offset:2px}
+.piece-btn.tower{background:#546e7a}
+.piece-btn.knight{background:#795548}
+.piece-btn.bishop{background:#6a1b9a}
+.piece-btn.queen{background:#c62828}
+.piece-btn.king{background:#1565c0}
+.piece-btn.pawn{background:#2e7d32}
+
+/* Program area */
+.program-area{
+  background:#fbf8ec;border:3px dashed var(--ink);border-radius:14px;min-height:172px;padding:12px;margin-bottom:8px;
+  background-image:linear-gradient(#00000010 1px,transparent 1px);background-size:100% 30px;
+}
+.program-area.drag-over{border-color:var(--leaf);background:#e6f9f1;border-style:solid}
+.program-block{
+  padding:10px 38px 10px 14px;border-radius:11px;font-weight:900;color:#fff;margin-bottom:8px;cursor:pointer;
+  position:relative;animation:slideIn .25s ease;font-size:.86rem;border:2.5px solid var(--ink);
+  box-shadow:3px 3px 0 var(--ink);display:flex;align-items:center;gap:8px;
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+.program-block::before{content:attr(data-i);background:#ffffff33;border:2px solid #ffffff88;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
+.program-block:hover::after{content:"✕";position:absolute;right:11px;top:50%;transform:translateY(-50%)}
+.program-block.executing{animation:pulse .5s ease infinite alternate}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.03)}}
+.counter{text-align:left;color:var(--ink-soft);font-size:.82rem;font-weight:900;margin:2px 2px 12px}
+.counter b{color:var(--ink);background:var(--bus);border:2px solid var(--ink);border-radius:999px;padding:1px 9px;margin-right:4px}
+.buttons{display:flex;gap:10px}
+.btn{flex:1;padding:14px 12px;border:var(--border);border-radius:15px;font-size:1rem;font-weight:700;font-family:'Fredoka',sans-serif;cursor:pointer;transition:transform .12s ease;box-shadow:0 5px 0 var(--ink);color:var(--ink)}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn-run{background:var(--bus)}
+.btn-reset{background:#fff}
+.message{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);padding:20px 30px;border:var(--border);
+  border-radius:20px;font-size:clamp(1.05rem,2.6vw,1.5rem);font-family:'Fredoka',sans-serif;color:var(--ink);
+  z-index:1600;animation:fadeInOut 3s ease forwards;box-shadow:8px 8px 0 var(--ink);text-align:center;max-width:90%;background:#fff;
+}
+.message.win{background:#c9f5e2}.message.lose{background:#ffd9dc}.message.info{background:#d9ecff}.message.checkmate{background:var(--bus)}
+@keyframes fadeInOut{0%{opacity:0;transform:translate(-50%,-50%) scale(.85)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}25%{transform:translate(-50%,-50%) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.94)}}
+.overlay{position:fixed;inset:0;background:rgba(15,23,48,.72);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:1400;padding:20px}
+.overlay.show{display:flex}
+.overlay-card{background:var(--paper);border:var(--border);border-radius:26px;padding:28px;max-width:460px;width:100%;text-align:center;box-shadow:10px 10px 0 var(--ink);animation:pop .35s ease;max-height:90vh;overflow-y:auto;transform:rotate(-.6deg)}
+.overlay-card.checkmate-card{background:#fff6d0}
+@keyframes pop{from{opacity:0;transform:scale(.88) rotate(2deg)}to{opacity:1;transform:scale(1) rotate(-.6deg)}}
+.overlay-card h2{font-family:'Fredoka',sans-serif;margin-bottom:6px;font-size:1.5rem;line-height:1.15}
+.overlay-card .overlay-stars{font-size:1.9rem;letter-spacing:4px;margin:8px 0;color:#b98a00}
+.overlay-card p{color:#4a5578;margin-bottom:20px;font-size:.98rem;line-height:1.55;font-weight:700}
+.overlay-card .btn{flex:none;padding:13px 30px;font-size:1.05rem;background:var(--leaf);color:#fff}
+#confettiCanvas{position:fixed;inset:0;pointer-events:none;z-index:1500}
+.foot{margin-top:22px;text-align:center;color:#8b96b8;font-size:.8rem;font-weight:700}
+.top-actions{display:flex;gap:10px;align-items:center}
+.wipe-btn{font-family:'Fredoka',sans-serif;background:#fff;border:var(--border);border-radius:50%;width:52px;height:52px;font-size:1.3rem;cursor:pointer;box-shadow:var(--shadow-sm);transition:transform .15s ease}
+.wipe-btn:hover{transform:rotate(8deg) scale(1.06)}
+.wipe-btn:focus-visible{outline:4px solid var(--bus);outline-offset:2px}
+.tools{display:flex;gap:8px;margin-top:8px}
+.tool-btn{flex:1;background:#fff;border:2.5px solid var(--ink);border-radius:12px;padding:9px 4px;font-weight:900;font-size:.8rem;cursor:pointer;box-shadow:3px 3px 0 var(--ink);font-family:'Nunito',sans-serif;color:var(--ink)}
+.tool-btn:hover{transform:translateY(-2px);background:var(--bus)}
+.tool-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.tool-btn:focus-visible{outline:4px solid var(--bus);outline-offset:2px}
+.album{background:var(--paper);border:var(--border);border-radius:26px;box-shadow:var(--shadow);padding:20px 22px}
+.album-head{font-family:'Fredoka',sans-serif;font-size:1.2rem}
+.album-head .count{background:var(--bus);border:2.5px solid var(--ink);border-radius:999px;padding:1px 12px;font-size:.9rem;margin-left:6px}
+.album-sub{color:var(--ink-soft);font-weight:700;font-size:.85rem;margin:4px 0 6px}
+.album-row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.album-name{font-weight:900;font-size:.85rem;white-space:nowrap;min-width:110px}
+.stickers{flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.sticker{background:#f2efe4;border:2.5px solid var(--ink);border-radius:12px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:1.25rem}
+.sticker.locked{opacity:.5}
+.site-foot{margin-top:22px;background:var(--paper);border:var(--border);border-radius:18px;box-shadow:var(--shadow-sm);padding:14px 18px;text-align:center}
+.site-foot .made{color:var(--ink-soft);font-size:.85rem;font-weight:800;margin-bottom:6px}
+.site-foot .author{color:var(--ink);font-size:.85rem;font-weight:900}
+.site-foot .author a{color:var(--sky-deep);text-decoration:none;border-bottom:2px solid var(--bus)}
+.site-foot .author a:hover{color:var(--ink)}
+@media(max-width:640px){
+  body{padding:14px 12px 44px}
+  .hero{padding:20px}.hero::after{width:120px;height:120px}
+  .controls-section{padding:14px}
+  .level-select{grid-template-columns:repeat(5,1fr);gap:6px}
+  .piece-btn{min-height:64px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<canvas id="confettiCanvas"></canvas>
+<div class="container">
+<div class="topbar">
+<div class="brand">
+<div class="logo-badge"><span class="dot"></span> SARA GAME</div>
+<div class="brand-text">
+<h1>Ajedrez: <em>Jaque al Rey</em></h1>
+<p>Elegí la pieza correcta y trazá la ruta hasta el rey negro</p>
+</div>
+</div>
+<div class="top-actions">
+<button class="mute-btn" id="muteBtn" onclick="toggleSound()" title="Activar o silenciar sonido" aria-label="Activar o silenciar sonido">🔊</button>
+<button class="wipe-btn" onclick="askWipeProgress()" title="Borrar todo el progreso" aria-label="Borrar todo el progreso">🗑️</button>
+</div>
+</div>
+
+<!-- Menu principal -->
+<div class="menu-screen" id="menuScreen">
+<section class="hero">
+<span class="hero-kicker">♟️ Ajedrez · 10 niveles · Jaque mate</span>
+<h2>Elegí tu <span class="hl">pieza</span> y dale jaque al rey</h2>
+<p>Seleccioná la pieza de ajedrez correcta según su forma de moverse, esquivá los obstáculos y trazá la ruta hasta poner en jaque al rey negro.</p>
+<div class="hero-path">
+<span class="path-step">♟️ Elegí</span><span class="path-dots">•••</span>
+<span class="path-step">🗺️ Trazá</span><span class="path-dots">•••</span>
+<span class="path-step">⭐ Jaque</span>
+</div>
+</section>
+<div class="game-cards">
+<article class="game-card" onclick="showGame('chess')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showGame('chess')">
+<div class="card-art chess">
+<div class="card-emoji">♟️</div>
+<span class="card-tag">Estrategia · 10 niveles</span>
+</div>
+<div class="card-body">
+<h3>Jaque al Rey</h3>
+<p>Elegí la pieza correcta, esquivá obstáculos y poné en jaque al rey negro en 10 niveles.</p>
+<div class="card-foot">
+<span class="progress" id="chessMenuProgress">Nivel 1/10 ⭐ 0</span>
+<span class="play-pill">Jugar ♟️</span>
+</div>
+</div>
+</article>
+</div>
+<section class="album">
+<div class="album-head">🏅 Mi álbum de ajedrez<span class="count" id="albumCount">0/10</span></div>
+<p class="album-sub">Ganate una figurita por cada nivel con estrellas. ¡Completá la colección!</p>
+<div class="album-row"><span class="album-name">♟️ Jaque al Rey</span><div class="stickers" id="albumChess"></div></div>
+</section>
+</div>
+
+<!-- Juego de Ajedrez -->
+<div class="game-screen" id="chessGame">
+<button class="back-btn" onclick="showMenu()">← Volver al menú</button>
+<div class="game-container">
+<div class="maze-section" id="chessMazeSection">
+<div class="board-head">
+<div class="where">♟️ Tablero de ajedrez<small>Elegí la pieza correcta y trazá la ruta hasta el rey negro</small></div>
+</div>
+<div class="canvas-wrap"><canvas id="chessCanvas" width="600" height="480"></canvas></div>
+</div>
+<div class="controls-section">
+<div class="hud">
+<img class="avatar" src="icono.jpg" alt="Sara Game" onerror="this.onerror=null;this.src='https://raw.githubusercontent.com/gtorresgrau/saraGame/main/icono.jpg'">
+<span class="level-badge" id="chessLevelBadge">Nivel 1/10</span>
+<span class="hud-stars" id="chessStars">☆☆☆</span>
+<span class="hud-par" id="chessPar">Par 3</span>
+</div>
+<div class="section-title">🗺️ Mapa de niveles</div>
+<div class="level-select" id="chessLevelSelect"></div>
+<div class="section-title">♟️ Elegí tu pieza</div>
+<div class="piece-selector" id="pieceSelector">
+<div class="piece-btn tower" data-piece="tower" data-game="chess">🗼<span>Torre</span></div>
+<div class="piece-btn knight" data-piece="knight" data-game="chess">🐘<span>Caballo</span></div>
+<div class="piece-btn bishop" data-piece="bishop" data-game="chess">⛪<span>Alfil</span></div>
+<div class="piece-btn queen" data-piece="queen" data-game="chess">👑<span>Reina</span></div>
+<div class="piece-btn king" data-piece="king" data-game="chess">🤴<span>Rey</span></div>
+<div class="piece-btn pawn" data-piece="pawn" data-game="chess">♟️<span>Peón</span></div>
+</div>
+<div class="section-title">📋 Mi ruta</div>
+<div class="program-area" id="chessProgramArea"><p style="color:#8b96b8;text-align:center;margin-top:60px;font-weight:800;">Elegí una pieza y tocá el tablero</p></div>
+<div class="counter" id="chessCounter">0 / 8 movimientos</div>
+<div class="buttons">
+<button class="btn btn-run" onclick="runChessGame()">▶ Ejecutar</button>
+<button class="btn btn-reset" onclick="resetChessGame()">↺ Limpiar</button>
+</div>
+<div class="tools">
+<button class="tool-btn" onclick="undoLastChess()">↩ Deshacer</button>
+<button class="tool-btn" onclick="stepChessGame()">👣 Paso</button>
+<button class="tool-btn" onclick="hintChess()">💡 Pista</button>
+</div>
+</div>
+</div>
+</div>
+
+<footer class="site-foot">
+<p class="made">Hecho con cariño para el cole Sara Eccleston · aprendé ajedrez jugando</p>
+<p class="author">Gonzalo Torres Grau · 2026 · <a href="https://gonzalotorresgrau.com/" target="_blank" rel="noopener">gonzalotorresgrau.com</a> · <a href="https://github.com/gtorresgrau" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+</div>
+
+<!-- Overlay -->
+<div class="overlay" id="levelOverlay">
+<div class="overlay-card" id="levelOverlayCard">
+<h2 id="overlayTitle">Nivel 1</h2>
+<div class="overlay-stars" id="overlayStars" style="display:none;">⭐⭐⭐</div>
+<p id="overlayMessage">¡Vamos!</p>
+<div class="confirm-row">
+<button class="btn btn-run" id="overlayButton" onclick="closeLevelOverlay()">¡Jugar!</button>
+</div>
+</div>
+</div>
+
+<!-- Confirmar borrado total del progreso -->
+<div class="overlay" id="wipeOverlay">
+<div class="overlay-card">
+<h2>¿Borrar todo el progreso? 🧹</h2>
+<p>Se borran los niveles desbloqueados y las estrellas. Esta acción no se puede deshacer.</p>
+<div class="confirm-row">
+<button class="btn btn-reset" onclick="closeWipeOverlay()">Cancelar</button>
+<button class="btn btn-wipe" onclick="wipeAllProgress()">Sí, borrar todo</button>
+</div>
+</div>
+</div>
+
+<script>
+// =====================================================================
+// Configuración general
+// =====================================================================
+const CELL_SIZE = 60;
+const GRID_COLS = 10;
+const GRID_ROWS = 8;
+
+// =====================================================================
+// Sonido (Web Audio API, sin archivos externos)
+// =====================================================================
+let audioCtx = null;
+let soundOn = true;
+
+function ac() {
+    if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        audioCtx = new AC();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+}
+
+function tone(freq, dur, opts) {
+    if (!soundOn) return;
+    const ctx = ac();
+    if (!ctx) return;
+    const o = opts || {};
+    const type = o.type || 'sine';
+    const delay = o.delay || 0;
+    const vol = o.vol || 0.18;
+    const t0 = ctx.currentTime + delay;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.05);
+}
+
+function sfxClick() { tone(600, 0.08, { type: 'triangle' }); }
+function sfxStep(n) { tone(380 + (n % 8) * 40, 0.09, { type: 'square', vol: 0.08 }); }
+function sfxBump() { tone(140, 0.15, { type: 'sawtooth', vol: 0.12 }); }
+function sfxWin() {
+    [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.25, { delay: i * 0.12, type: 'triangle', vol: 0.2 }));
+}
+function sfxLose() {
+    [400, 320, 240, 160].forEach((f, i) => tone(f, 0.22, { delay: i * 0.13, type: 'sawtooth', vol: 0.12 }));
+}
+function sfxLevel() {
+    [659, 784, 1047].forEach((f, i) => tone(f, 0.2, { delay: i * 0.1, type: 'sine', vol: 0.2 }));
+}
+function sfxFanfare() {
+    [523, 523, 523, 659, 784, 784, 1047, 784, 1047].forEach((f, i) =>
+        tone(f, 0.28, { delay: i * 0.16, type: 'triangle', vol: 0.2 }));
+}
+
+function toggleSound() {
+    soundOn = !soundOn;
+    document.getElementById('muteBtn').textContent = soundOn ? '🔊' : '🔇';
+    if (soundOn) sfxClick();
+}
+
+// =====================================================================
+// Almacenamiento seguro (localStorage con fallback en memoria)
+// =====================================================================
+const memStore = {};
+const store = {
+    get(k, d) {
+        try {
+            const v = localStorage.getItem(k);
+            return v === null ? d : JSON.parse(v);
+        } catch (e) {
+            return (k in memStore) ? memStore[k] : d;
+        }
+    },
+    set(k, v) {
+        try {
+            localStorage.setItem(k, JSON.stringify(v));
+        } catch (e) {
+            memStore[k] = v;
+        }
+    }
+};
+
+// =====================================================================
+// Niveles de Ajedrez (10 niveles, dificultad escalada)
+// Cada nivel tiene: pieza correcta, posición inicial del rey negro,
+// obstáculos, y la ruta correcta para dar jaque.
+// =====================================================================
+const CHESS_LEVELS = [
+    {
+        id: 1,
+        levelTitle: "¡La Torre! 🗼",
+        message: "La torre mueve en línea recta. Elegila y trazá la ruta hasta el rey.",
+        piece: "tower",
+        kingPos: [7, 2],
+        obstacles: [[3, 2], [5, 2]],
+        start: [1, 2],
+        par: 3,
+        maxCommands: 8,
+        theme: { floor: "#e8eaf6", line: "#c5cae9", wall: "#546e7a", edge: "#37474f" }
+    },
+    {
+        id: 2,
+        levelTitle: "El Caballo 🐘",
+        message: "El caballo mueve en L. Elegilo y esquivá los obstáculos.",
+        piece: "knight",
+        kingPos: [6, 3],
+        obstacles: [[3, 1], [4, 4]],
+        start: [1, 1],
+        par: 3,
+        maxCommands: 8,
+        theme: { floor: "#fff3e0", line: "#ffcc80", wall: "#795548", edge: "#4e342e" }
+    },
+    {
+        id: 3,
+        levelTitle: "El Alfil ⛪",
+        message: "El alfil mueve en diagonal. Elegilo y trazá la ruta.",
+        piece: "bishop",
+        kingPos: [7, 5],
+        obstacles: [[4, 2], [5, 3]],
+        start: [2, 2],
+        par: 2,
+        maxCommands: 8,
+        theme: { floor: "#f3e5f5", line: "#ce93d8", wall: "#6a1b9a", edge: "#4a148c" }
+    },
+    {
+        id: 4,
+        levelTitle: "¡La Reina! 👑",
+        message: "La reina mueve en todas direcciones. Elegila y poné en jaque al rey.",
+        piece: "queen",
+        kingPos: [8, 3],
+        obstacles: [[4, 3], [6, 1]],
+        start: [1, 3],
+        par: 3,
+        maxCommands: 8,
+        theme: { floor: "#ffebee", line: "#ef9a9a", wall: "#c62828", edge: "#b71c1c" }
+    },
+    {
+        id: 5,
+        levelTitle: "El Rey 🤴",
+        message: "El rey mueve una casilla en cualquier dirección. Elegilo con cuidado.",
+        piece: "king",
+        kingPos: [5, 4],
+        obstacles: [[3, 3], [4, 5]],
+        start: [2, 4],
+        par: 3,
+        maxCommands: 10,
+        theme: { floor: "#e3f2fd", line: "#90caf9", wall: "#1565c0", edge: "#0d47a1" }
+    },
+    {
+        id: 6,
+        levelTitle: "El Peón ♟️",
+        message: "El peón mueve hacia adelante. Elegilo y avanzá hasta el rey.",
+        piece: "pawn",
+        kingPos: [4, 1],
+        obstacles: [[2, 3], [3, 5]],
+        start: [4, 6],
+        par: 5,
+        maxCommands: 10,
+        theme: { floor: "#e8f5e9", line: "#a5d6a7", wall: "#2e7d32", edge: "#1b5e20" }
+    },
+    {
+        id: 7,
+        levelTitle: "Torre vs Rey 🗼",
+        message: "La torre otra vez, pero con más obstáculos. ¡Pensá bien la ruta!",
+        piece: "tower",
+        kingPos: [8, 1],
+        obstacles: [[3, 1], [5, 1], [6, 3]],
+        start: [1, 1],
+        par: 3,
+        maxCommands: 8,
+        theme: { floor: "#e0f7fa", line: "#80deea", wall: "#00838f", edge: "#006064" }
+    },
+    {
+        id: 8,
+        levelTitle: "Caballo vs Rey 🐘",
+        message: "El caballo necesita más movimientos. ¡Esquivá todo!",
+        piece: "knight",
+        kingPos: [7, 4],
+        obstacles: [[2, 2], [4, 4], [5, 2]],
+        start: [1, 6],
+        par: 4,
+        maxCommands: 10,
+        theme: { floor: "#fff8e1", line: "#ffe082", wall: "#ff8f00", edge: "#e65100" }
+    },
+    {
+        id: 9,
+        levelTitle: "Alfil vs Rey ⛪",
+        message: "El alfil en un tablero complicado. ¡Concentrate!",
+        piece: "bishop",
+        kingPos: [8, 6],
+        obstacles: [[3, 3], [5, 5], [6, 2]],
+        start: [1, 1],
+        par: 2,
+        maxCommands: 10,
+        theme: { floor: "#fce4ec", line: "#f48fb1", wall: "#c2185b", edge: "#880e4f" }
+    },
+    {
+        id: 10,
+        levelTitle: "¡JAQUE MATE! 👑",
+        message: "¡Último nivel! La reina contra el rey. ¡Demostrá lo que aprendiste!",
+        piece: "queen",
+        kingPos: [8, 2],
+        obstacles: [[3, 2], [5, 4], [6, 1]],
+        start: [1, 5],
+        par: 2,
+        maxCommands: 8,
+        theme: { floor: "#fffde7", line: "#f0d060", wall: "#f57f17", edge: "#e65100" },
+        checkmate: true
+    }
+];
+
+// =====================================================================
+// Estado del juego de ajedrez
+// =====================================================================
+let chessState = {
+    levelIdx: (() => { const u = store.get('sara_chess_unlocked', 1); return (u >= 10) ? 0 : Math.min(Math.max(u - 1, 0), 9); })(),
+    selectedPiece: null,
+    path: [],
+    executing: false,
+    currentIndex: 0,
+    runToken: 0,
+    fxToken: 0,
+    winFx: -1,
+    stars: store.get('sara_chess_stars', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+    unlocked: store.get('sara_chess_unlocked', 1),
+    hints: 0
+};
+
+// Normalizar estrellas por si cambió el formato guardado
+if (!Array.isArray(chessState.stars) || chessState.stars.length !== 10) {
+    chessState.stars = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+}
+
+function chessLevel() {
+    return CHESS_LEVELS[chessState.levelIdx];
+}
+
+// =====================================================================
+// Navegación
+// =====================================================================
+function showGame(game) {
+    document.getElementById('menuScreen').style.display = 'none';
+    document.getElementById('chessGame').classList.add('active');
+    loadChessLevel(chessState.levelIdx, { intro: true });
+}
+
+function showMenu() {
+    document.getElementById('menuScreen').style.display = 'flex';
+    document.getElementById('chessGame').classList.remove('active');
+    hideLevelOverlay();
+    updateChessMenuProgress();
+    renderAlbum();
+}
+
+function updateChessMenuProgress() {
+    const total = chessState.stars.reduce((a, b) => a + b, 0);
+    const lvl = Math.min(chessState.unlocked, 10);
+    document.getElementById('chessMenuProgress').textContent = 'Nivel ' + lvl + '/10 ⭐ ' + total;
+}
+
+// Borrado total del progreso
+const PROGRESS_KEYS = ['sara_chess_unlocked', 'sara_chess_stars'];
+
+function askWipeProgress() {
+    sfxClick();
+    document.getElementById('wipeOverlay').classList.add('show');
+}
+
+function closeWipeOverlay() {
+    sfxClick();
+    document.getElementById('wipeOverlay').classList.remove('show');
+}
+
+function wipeAllProgress() {
+    try {
+        PROGRESS_KEYS.forEach(k => localStorage.removeItem(k));
+    } catch (e) {}
+    PROGRESS_KEYS.forEach(k => { try { delete memStore[k]; } catch (e) {} });
+    chessState.levelIdx = 0;
+    chessState.stars = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    chessState.unlocked = 1;
+    document.getElementById('wipeOverlay').classList.remove('show');
+    loadChessLevel(0, {});
+    showMenu();
+    showMessage('Progreso borrado. ¡A empezar de nuevo! 🧹', 'info');
+}
+
+// =====================================================================
+// Dibujado del tablero de ajedrez
+// =====================================================================
+function drawEmoji(ctx, emoji, gridX, gridY, opts) {
+    const o = opts || {};
+    const scale = o.scale || 1;
+    const alpha = (o.alpha === undefined) ? 1 : o.alpha;
+    const dy = o.dy || 0;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font = Math.round(30 * scale) + 'px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, gridX * CELL_SIZE + CELL_SIZE / 2, gridY * CELL_SIZE + CELL_SIZE / 2 + dy);
+    ctx.restore();
+}
+
+function drawGrid(ctx, canvas, theme) {
+    ctx.fillStyle = theme.floor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (let y = 0; y < GRID_ROWS; y++) {
+        for (let x = 0; x < GRID_COLS; x++) {
+            ctx.fillStyle = theme.floor;
+            ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            ctx.strokeStyle = theme.line;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+    }
+}
+
+function drawChessGame() {
+    const canvas = document.getElementById('chessCanvas');
+    const ctx = canvas.getContext('2d');
+    const lv = chessLevel();
+    drawGrid(ctx, canvas, lv.theme);
+
+    // Dibujar obstáculos
+    lv.obstacles.forEach(obs => {
+        ctx.fillStyle = '#455a64';
+        ctx.fillRect(obs[0] * CELL_SIZE + 5, obs[1] * CELL_SIZE + 5, CELL_SIZE - 10, CELL_SIZE - 10);
+        ctx.strokeStyle = '#263238';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(obs[0] * CELL_SIZE + 5, obs[1] * CELL_SIZE + 5, CELL_SIZE - 10, CELL_SIZE - 10);
+        drawEmoji(ctx, '🪨', obs[0], obs[1], { scale: 0.8 });
+    });
+
+    // Dibujar la ruta trazada
+    if (chessState.path.length > 0) {
+        ctx.strokeStyle = '#ffc93c';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([8, 4]);
+        ctx.beginPath();
+        chessState.path.forEach((pos, i) => {
+            const x = pos[0] * CELL_SIZE + CELL_SIZE / 2;
+            const y = pos[1] * CELL_SIZE + CELL_SIZE / 2;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Dibujar números de paso
+        chessState.path.forEach((pos, i) => {
+            ctx.fillStyle = '#1a2340';
+            ctx.beginPath();
+            ctx.arc(pos[0] * CELL_SIZE + 12, pos[1] * CELL_SIZE + 12, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(String(i + 1), pos[0] * CELL_SIZE + 12, pos[1] * CELL_SIZE + 12);
+        });
+    }
+
+    // Dibujar la pieza seleccionada en la posición inicial
+    if (chessState.selectedPiece && chessState.path.length === 0) {
+        const pieceEmoji = getPieceEmoji(chessState.selectedPiece);
+        drawEmoji(ctx, pieceEmoji, lv.start[0], lv.start[1], { scale: 1.2 });
+    }
+
+    // Dibujar la pieza en movimiento durante la ejecución
+    if (chessState.executing && chessState.path.length > 0) {
+        const currentPos = chessState.path[Math.min(chessState.currentIndex, chessState.path.length - 1)];
+        const pieceEmoji = getPieceEmoji(chessState.selectedPiece);
+        drawEmoji(ctx, pieceEmoji, currentPos[0], currentPos[1], { scale: 1.3 });
+    }
+
+    // Dibujar el rey negro
+    const kingEmoji = '♚';
+    drawEmoji(ctx, kingEmoji, lv.kingPos[0], lv.kingPos[1], { scale: 1.4 });
+
+    // Destello de victoria
+    if (chessState.winFx >= 0) {
+        const t = chessState.winFx;
+        drawEmoji(ctx, '⭐', lv.kingPos[0], lv.kingPos[1] - 0.4 * t, {
+            scale: 1 + t * 1.2, alpha: 1 - t * 0.6
+        });
+    }
+}
+
+function getPieceEmoji(piece) {
+    const emojis = {
+        tower: '🗼',
+        knight: '🐘',
+        bishop: '⛪',
+        queen: '👑',
+        king: '🤴',
+        pawn: '♟️'
+    };
+    return emojis[piece] || '♟️';
+}
+
+// =====================================================================
+// Lógica del juego de ajedrez
+// =====================================================================
+function isValidMove(x, y) {
+    return x >= 0 && x < GRID_COLS && y >= 0 && y < GRID_ROWS;
+}
+
+function isObstacle(lv, x, y) {
+    return lv.obstacles.some(obs => obs[0] === x && obs[1] === y);
+}
+
+// Verificar si la pieza puede moverse de (x1,y1) a (x2,y2)
+function canPieceMove(piece, x1, y1, x2, y2) {
+    const dx = Math.abs(x2 - x1);
+    const dy = Math.abs(y2 - y1);
+
+    switch (piece) {
+        case 'tower':
+            return (dx === 0 && dy > 0) || (dy === 0 && dx > 0);
+        case 'knight':
+            return (dx === 2 && dy === 1) || (dx === 1 && dy === 2);
+        case 'bishop':
+            return dx === dy && dx > 0;
+        case 'queen':
+            return (dx === 0 && dy > 0) || (dy === 0 && dx > 0) || (dx === dy && dx > 0);
+        case 'king':
+            return dx <= 1 && dy <= 1 && (dx > 0 || dy > 0);
+        case 'pawn':
+            // El peón avanza hacia arriba (y decrece)
+            return x2 === x1 && y2 === y1 - 1;
+        default:
+            return false;
+    }
+}
+
+// Las torres, alfiles y reinas no pueden saltar obstáculos ni piezas
+function isPathClear(lv, x1, y1, x2, y2) {
+    const piece = chessState.selectedPiece || lv.piece;
+    if (piece === 'knight' || piece === 'king' || piece === 'pawn') return true;
+    const stepX = Math.sign(x2 - x1);
+    const stepY = Math.sign(y2 - y1);
+    let cx = x1 + stepX, cy = y1 + stepY;
+    while (cx !== x2 || cy !== y2) {
+        if (isObstacle(lv, cx, cy)) return false;
+        if (cx === lv.kingPos[0] && cy === lv.kingPos[1]) return false;
+        cx += stepX; cy += stepY;
+    }
+    return true;
+}
+
+function pieceName(p) {
+    return { tower: 'la torre 🗼', knight: 'el caballo 🐘', bishop: 'el alfil ⛪', queen: 'la reina 👑', king: 'el rey 🤴', pawn: 'el peón ♟️' }[p] || p;
+}
+
+// Verificar si la ruta es válida para la pieza seleccionada
+function isPathValid(lv, path) {
+    if (path.length < 2) return false;
+    for (let i = 0; i < path.length - 1; i++) {
+        const [x1, y1] = path[i];
+        const [x2, y2] = path[i + 1];
+        if (!canPieceMove(lv.piece, x1, y1, x2, y2)) return false;
+        if (isObstacle(lv, x2, y2)) return false;
+    }
+    return true;
+}
+
+// Verificar si la última posición del path pone en jaque al rey
+function isCheckmate(lv, path) {
+    if (path.length === 0) return false;
+    const lastPos = path[path.length - 1];
+    return canPieceMove(lv.piece, lastPos[0], lastPos[1], lv.kingPos[0], lv.kingPos[1]);
+}
+
+// =====================================================================
+// Niveles: carga, HUD, selector y progresión
+// =====================================================================
+function loadChessLevel(i, opts) {
+    chessState.levelIdx = i;
+    const lv = chessLevel();
+    chessState.selectedPiece = null;
+    chessState.path = [];
+    chessState.executing = false;
+    chessState.currentIndex = 0;
+    chessState.runToken++;
+    chessState.fxToken++;
+    chessState.winFx = -1;
+    chessState.hints = 0;
+    updateChessHUD();
+    buildChessLevelSelect();
+    document.getElementById('chessMazeSection').classList.toggle('checkmate', !!lv.checkmate);
+    drawChessGame();
+    if (opts && opts.intro) {
+        showLevelOverlay({
+            title: 'Nivel ' + lv.id + ': ' + lv.levelTitle,
+            stars: 0,
+            message: lv.message,
+            button: '¡Jugar! ▶',
+            grad: !!lv.checkmate,
+            onGo: null
+        });
+    }
+}
+
+function updateChessHUD() {
+    const lv = chessLevel();
+    const badge = document.getElementById('chessLevelBadge');
+    badge.textContent = 'Nivel ' + lv.id + '/10';
+    badge.classList.toggle('checkmate', !!lv.checkmate);
+    const best = chessState.stars[chessState.levelIdx] || 0;
+    document.getElementById('chessStars').textContent = '★'.repeat(best) + '☆'.repeat(3 - best);
+    document.getElementById('chessPar').textContent = 'Par ' + lv.par;
+}
+
+function buildChessLevelSelect() {
+    const box = document.getElementById('chessLevelSelect');
+    box.innerHTML = '';
+    CHESS_LEVELS.forEach((lv, idx) => {
+        const b = document.createElement('button');
+        const locked = idx + 1 > chessState.unlocked;
+        const best = chessState.stars[idx] || 0;
+        b.className = 'lvl-btn' + (locked ? ' locked' : '') +
+            (idx === chessState.levelIdx ? ' current' : '') +
+            (lv.checkmate ? ' checkmate-btn' : '');
+        b.innerHTML = (locked ? '🔒 ' : '') + lv.id +
+            '<small>' + (locked ? '···' : ('★'.repeat(best) + '☆'.repeat(3 - best))) + '</small>';
+        if (!locked) {
+            b.addEventListener('click', () => {
+                if (chessState.executing) return;
+                sfxClick();
+                loadChessLevel(idx, { intro: true });
+            });
+        } else {
+            b.addEventListener('click', () => showMessage('Completa el nivel anterior para desbloquear', 'info'));
+        }
+        box.appendChild(b);
+    });
+}
+
+function starsFor(used, par) {
+    if (used <= par) return 3;
+    if (used <= par + 2) return 2;
+    return 1;
+}
+
+function onChessWin(used) {
+    const lv = chessLevel();
+    const stars = starsFor(used, lv.par);
+    const prev = chessState.stars[chessState.levelIdx] || 0;
+    if (stars > prev) {
+        chessState.stars[chessState.levelIdx] = stars;
+        store.set('sara_chess_stars', chessState.stars);
+    }
+    const last = chessState.levelIdx === CHESS_LEVELS.length - 1;
+    if (!last && chessState.unlocked < chessState.levelIdx + 2) {
+        chessState.unlocked = chessState.levelIdx + 2;
+        store.set('sara_chess_unlocked', chessState.unlocked);
+    }
+    updateChessHUD();
+    buildChessLevelSelect();
+    updateChessMenuProgress();
+    renderAlbum();
+    chessWinEffect(() => {
+        const lvNow = chessLevel();
+        updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lvNow.maxCommands);
+        if (last) {
+            showLevelOverlay({
+                title: '👑 ¡JAQUE MATE! 👑',
+                stars: stars,
+                message: '¡INCREÍBLE! Completaste los 10 niveles de ajedrez y aprendiste a dar jaque mate. ¡Sos un estratega increíble! 🎉',
+                button: '👑 Jugar de nuevo',
+                grad: true,
+                onGo: () => {
+                    chessState.unlocked = 10;
+                    store.set('sara_chess_unlocked', 10);
+                    loadChessLevel(0, { intro: true });
+                }
+            });
+        } else {
+            sfxLevel();
+            const next = CHESS_LEVELS[chessState.levelIdx + 1];
+            showLevelOverlay({
+                title: '¡Nivel ' + lv.id + ' completado! 🎉',
+                stars: stars,
+                message: next.message,
+                button: 'Siguiente: Nivel ' + next.id + ' ▶',
+                grad: !!next.checkmate,
+                onGo: () => {
+                    loadChessLevel(chessState.levelIdx + 1, { intro: false });
+                    showLevelIntro(next);
+                }
+            });
+        }
+    });
+}
+
+// =====================================================================
+// Overlay de niveles (intro + completado)
+// =====================================================================
+let overlayAction = null;
+
+function showLevelOverlay(o) {
+    document.getElementById('overlayTitle').textContent = o.title;
+    document.getElementById('overlayMessage').textContent = o.message;
+    const starsEl = document.getElementById('overlayStars');
+    if (o.stars) {
+        starsEl.style.display = 'block';
+        starsEl.textContent = '★'.repeat(o.stars) + '☆'.repeat(3 - o.stars);
+    } else {
+        starsEl.style.display = 'none';
+    }
+    document.getElementById('overlayButton').textContent = o.button;
+    document.getElementById('levelOverlayCard').classList.toggle('checkmate-card', !!o.grad);
+    overlayAction = o.onGo || null;
+    document.getElementById('levelOverlay').classList.add('show');
+}
+
+function showLevelIntro(lv) {
+    showLevelOverlay({
+        title: 'Nivel ' + lv.id + ': ' + lv.levelTitle,
+        stars: 0,
+        message: lv.message,
+        button: '¡Jugar! ▶',
+        grad: !!lv.checkmate,
+        onGo: null
+    });
+}
+
+function closeLevelOverlay() {
+    sfxClick();
+    hideLevelOverlay();
+    if (overlayAction) {
+        const fn = overlayAction;
+        overlayAction = null;
+        fn();
+    }
+}
+
+function hideLevelOverlay() {
+    document.getElementById('levelOverlay').classList.remove('show');
+}
+
+function overlayVisible() {
+    return document.getElementById('levelOverlay').classList.contains('show');
+}
+
+// =====================================================================
+// Confetti de victoria
+// =====================================================================
+const confettiParts = [];
+let confettiRunning = false;
+
+function confettiResize() {
+    const c = document.getElementById('confettiCanvas');
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+}
+window.addEventListener('resize', confettiResize);
+confettiResize();
+
+function launchConfetti(ms) {
+    const c = document.getElementById('confettiCanvas');
+    const ctx = c.getContext('2d');
+    const colors = ['#f6c90e', '#ef6c00', '#4CAF50', '#2196F3', '#e91e63', '#9c27b0', '#ffffff'];
+    const emojis = ['👑', '⭐', '🎉'];
+    const end = performance.now() + ms;
+    if (!confettiRunning) {
+        confettiRunning = true;
+        requestAnimationFrame(confettiFrame);
+    }
+    const spawn = setInterval(() => {
+        if (performance.now() > end) {
+            clearInterval(spawn);
+            return;
+        }
+        for (let i = 0; i < 6; i++) {
+            confettiParts.push({
+                x: Math.random() * c.width,
+                y: -20,
+                vx: (Math.random() - 0.5) * 3,
+                vy: 2 + Math.random() * 3,
+                size: 6 + Math.random() * 8,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                emoji: Math.random() < 0.15 ? emojis[Math.floor(Math.random() * emojis.length)] : null,
+                rot: Math.random() * Math.PI * 2,
+                vr: (Math.random() - 0.5) * 0.2
+            });
+        }
+    }, 120);
+
+    function confettiFrame() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        for (let i = confettiParts.length - 1; i >= 0; i--) {
+            const p = confettiParts[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.05;
+            p.rot += p.vr;
+            if (p.y > c.height + 30) {
+                confettiParts.splice(i, 1);
+                continue;
+            }
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            if (p.emoji) {
+                ctx.font = Math.round(p.size * 2) + 'px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(p.emoji, 0, 0);
+            } else {
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+            }
+            ctx.restore();
+        }
+        if (confettiParts.length > 0 || performance.now() < end) {
+            requestAnimationFrame(confettiFrame);
+        } else {
+            confettiRunning = false;
+            ctx.clearRect(0, 0, c.width, c.height);
+        }
+    }
+}
+
+// =====================================================================
+// Lógica compartida
+// =====================================================================
+function showMessage(text, type) {
+    const existing = document.querySelector('.message');
+    if (existing) existing.remove();
+
+    const msg = document.createElement('div');
+    msg.className = 'message ' + type;
+    msg.textContent = text;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 3000);
+}
+
+function updateProgramDisplay(state, areaId, counterId, maxCommands) {
+    const area = document.getElementById(areaId);
+    area.innerHTML = '';
+
+    if (state.path.length === 0) {
+        area.innerHTML = '<p style="color: #999; text-align: center; margin-top: 60px;">Elegí una pieza y tocá el tablero</p>';
+    } else {
+        state.path.forEach((pos, index) => {
+            const block = document.createElement('div');
+            block.className = 'program-block ' + (state.selectedPiece || 'pawn');
+            if (state.executing && index === state.currentIndex) {
+                block.classList.add('executing');
+            }
+            block.dataset.i = (index + 1);
+            block.textContent = (index + 1) + '. ' + pos[0] + ',' + pos[1];
+            block.addEventListener('click', () => {
+                if (!state.executing) {
+                    sfxClick();
+                    state.path.splice(index);
+                    updateProgramDisplay(state, areaId, counterId, maxCommands);
+                    drawChessGame();
+                }
+            });
+            area.appendChild(block);
+        });
+    }
+
+    document.getElementById(counterId).textContent = state.path.length + ' / ' + maxCommands + ' movimientos' + (state.hints ? ' · 💡' + state.hints : '');
+}
+
+// =====================================================================
+// Álbum de figuritas
+// =====================================================================
+const STICKERS_CHESS = ['🗼', '🐘', '⛪', '👑', '🤴', '♟️', '🗼', '🐘', '⛪', '👑'];
+
+function stickerCell(emoji, got, title) {
+    const d = document.createElement('div');
+    d.className = 'sticker' + (got ? '' : ' locked');
+    d.textContent = got ? emoji : '❔';
+    d.title = title;
+    return d;
+}
+
+function renderAlbum() {
+    const c = document.getElementById('albumChess');
+    if (!c) return;
+    c.innerHTML = '';
+    let got = 0;
+    chessState.stars.forEach((n, i) => {
+        if (n > 0) got++;
+        c.appendChild(stickerCell(STICKERS_CHESS[i], n > 0, 'Ajedrez nivel ' + (i + 1)));
+    });
+    const countEl = document.getElementById('albumCount');
+    if (countEl) countEl.textContent = got + '/10';
+}
+
+// =====================================================================
+// Juego de Ajedrez: ejecución
+// =====================================================================
+function runChessGame(manual) {
+    const lv = chessLevel();
+    if (!chessState.selectedPiece) {
+        showMessage('¡Elegí una pieza primero!', 'info');
+        return;
+    }
+    if (chessState.selectedPiece !== lv.piece) {
+        showMessage('Esa pieza no es la correcta. Este nivel pide ' + pieceName(lv.piece), 'info');
+        sfxBump();
+        return;
+    }
+    if (chessState.path.length === 0) {
+        showMessage('¡Tocá el tablero para trazar la ruta!', 'info');
+        return;
+    }
+    if (chessState.path.length > lv.maxCommands) {
+        showMessage('¡Te pasaste del máximo de movimientos!', 'info');
+        return;
+    }
+    // Validar que la ruta respete el movimiento de la pieza
+    let prev = { '0': lv.start[0], '1': lv.start[1] };
+    // validar desde el inicio
+    let px = lv.start[0], py = lv.start[1];
+    for (const [qx, qy] of chessState.path) {
+        if (!canPieceMove(lv.piece, px, py, qx, qy) || !isPathClear(lv, px, py, qx, qy)) {
+            showMessage('¡Ese paso no lo puede hacer ' + pieceName(lv.piece) + '!', 'lose');
+            sfxBump();
+            return;
+        }
+        px = qx; py = qy;
+    }
+    const last = chessState.path[chessState.path.length - 1];
+    if (!(last[0] === lv.kingPos[0] && last[1] === lv.kingPos[1])) {
+        // También vale llegar a una casilla que dé jaque en un movimiento
+        if (!canPieceMove(lv.piece, last[0], last[1], lv.kingPos[0], lv.kingPos[1])) {
+            showMessage('La ruta no pone en jaque al rey. ¡Seguí trazando!', 'info');
+            return;
+        }
+    }
+    if (chessState.executing) return;
+
+    chessState.executing = true;
+    chessState.manual = !!manual;
+    chessState.currentIndex = 0;
+    const token = ++chessState.runToken;
+    updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lv.maxCommands);
+    drawChessGame();
+    if (manual) {
+        executeChessCommand(token);
+    } else {
+        setTimeout(() => executeChessCommand(token), 500);
+    }
+}
+
+function stepChessGame() {
+    if (overlayVisible()) return;
+    if (document.getElementById('wipeOverlay').classList.contains('show')) return;
+    if (!document.getElementById('chessGame').classList.contains('active')) return;
+    if (!chessState.executing) {
+        runChessGame(true);
+        return;
+    }
+    if (chessState.executing !== true) return;
+    chessState.manual = true;
+    const token = ++chessState.runToken;
+    executeChessCommand(token);
+}
+
+function executeChessCommand(token) {
+    const lv = chessLevel();
+    if (token !== chessState.runToken || !chessState.executing) return;
+    if (chessState.currentIndex < chessState.path.length) {
+        const pos = chessState.path[chessState.currentIndex];
+        sfxStep(chessState.currentIndex);
+
+        const used = chessState.currentIndex + 1 + (chessState.hints || 0);
+        chessState.currentIndex++;
+
+        // Verificar si llegó al rey
+        if (pos[0] === lv.kingPos[0] && pos[1] === lv.kingPos[1]) {
+            updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lv.maxCommands);
+            drawChessGame();
+            onChessWin(used);
+            return;
+        }
+
+        updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lv.maxCommands);
+        drawChessGame();
+
+        if (!chessState.manual) setTimeout(() => executeChessCommand(token), 500);
+    } else {
+        chessState.executing = false;
+        chessState.manual = false;
+        updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lv.maxCommands);
+        showMessage('La ruta no llegó al rey. ¡Intentá de nuevo!', 'info');
+    }
+}
+
+function resetChessGame() {
+    const lv = chessLevel();
+    chessState.selectedPiece = null;
+    chessState.path = [];
+    chessState.executing = false;
+    chessState.currentIndex = 0;
+    chessState.winFx = -1;
+    chessState.hints = 0;
+    chessState.runToken++;
+    chessState.fxToken++;
+    sfxClick();
+    updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lv.maxCommands);
+    updateChessHUD();
+    drawChessGame();
+}
+
+// =====================================================================
+// Pista para el juego de ajedrez
+// =====================================================================
+function hintChess() {
+    const lv = chessLevel();
+    if (chessState.executing || overlayVisible()) return;
+    if (document.getElementById('wipeOverlay').classList.contains('show')) return;
+    if (!chessState.selectedPiece || chessState.selectedPiece !== lv.piece) {
+        chessState.selectedPiece = lv.piece;
+        document.querySelectorAll('.piece-btn').forEach(b => b.classList.toggle('selected', b.dataset.piece === lv.piece));
+        showMessage('Pista: este nivel se juega con ' + pieceName(lv.piece) + ' 💡', 'info');
+    }
+    if (chessState.path.length >= lv.maxCommands) {
+        showMessage('¡Máximo de movimientos alcanzado!', 'info');
+        return;
+    }
+
+    // Encontrar el próximo paso correcto usando BFS
+    const start = chessState.path.length > 0 ? chessState.path[chessState.path.length - 1] : lv.start;
+    const step = bfsChessStep(lv, start[0], start[1], lv.kingPos[0], lv.kingPos[1]);
+    if (!step) {
+        showMessage('Ese camino no llega: sacá algún paso ↩', 'info');
+        return;
+    }
+    chessState.path.push(step);
+    chessState.hints = (chessState.hints || 0) + 1;
+    sfxClick();
+    updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lv.maxCommands);
+    drawChessGame();
+    showMessage('Pista agregada 💡 (+1 al par)', 'info');
+}
+
+// BFS para ajedrez: encontrar el próximo paso hacia el rey
+function bfsChessStep(lv, sx, sy, gx, gy) {
+    const key = (x, y) => x + ',' + y;
+    const visited = new Set();
+    visited.add(key(sx, sy));
+    const queue = [[sx, sy, null]]; // [x, y, firstStep]
+
+    while (queue.length) {
+        const [cx, cy, first] = queue.shift();
+        if (cx === gx && cy === gy) {
+            return first || [cx, cy];
+        }
+
+        // Generar todos los movimientos posibles para la pieza
+        const moves = getPieceMoves(lv.piece, cx, cy, lv);
+        for (const [nx, ny] of moves) {
+            if (visited.has(key(nx, ny))) continue;
+            if (!isValidMove(nx, ny)) continue;
+            if (isObstacle(lv, nx, ny)) continue;
+            visited.add(key(nx, ny));
+            const firstStep = first || [nx, ny];
+            queue.push([nx, ny, firstStep]);
+        }
+    }
+    return null;
+}
+
+// Obtener todos los movimientos válidos para una pieza
+function getPieceMoves(piece, x, y, lv) {
+    const moves = [];
+    const directions = {
+        tower: [[0, 1], [0, -1], [1, 0], [-1, 0]],
+        bishop: [[1, 1], [1, -1], [-1, 1], [-1, -1]],
+        queen: [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]],
+        king: [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]],
+        knight: [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]],
+        pawn: [[0, -1]] // El peón solo mueve hacia arriba
+    };
+
+    const dirs = directions[piece] || [];
+    for (const [dx, dy] of dirs) {
+        if (piece === 'tower' || piece === 'bishop' || piece === 'queen') {
+            // Piezas de movimiento largo
+            let nx = x + dx, ny = y + dy;
+            while (isValidMove(nx, ny) && !isObstacle(lv, nx, ny)) {
+                moves.push([nx, ny]);
+                nx += dx;
+                ny += dy;
+            }
+        } else {
+            // Piezas de movimiento corto
+            const nx = x + dx, ny = y + dy;
+            if (isValidMove(nx, ny) && !isObstacle(lv, nx, ny)) {
+                moves.push([nx, ny]);
+            }
+        }
+    }
+    return moves;
+}
+
+// Deshacer el último paso
+function undoLastChess() {
+    const lv = chessLevel();
+    if (chessState.executing || overlayVisible()) return;
+    if (!chessState.path.length) {
+        showMessage('No hay pasos para sacar', 'info');
+        return;
+    }
+    chessState.path.pop();
+    sfxClick();
+    updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lv.maxCommands);
+    drawChessGame();
+}
+
+// =====================================================================
+// Efecto de victoria
+// =====================================================================
+function chessWinEffect(done) {
+    chessState.executing = 'win';
+    const token = ++chessState.fxToken;
+    const lv = chessLevel();
+    if (lv.checkmate) {
+        sfxFanfare();
+        launchConfetti(4500);
+    } else {
+        sfxWin();
+    }
+    const start = performance.now();
+    const DUR = lv.checkmate ? 1400 : 700;
+    function frame(now) {
+        if (token !== chessState.fxToken) return;
+        const t = Math.min(1, (now - start) / DUR);
+        chessState.winFx = t;
+        drawChessGame();
+        if (t < 1) requestAnimationFrame(frame);
+        else {
+            chessState.winFx = -1;
+            chessState.executing = false;
+            drawChessGame();
+            done();
+        }
+    }
+    requestAnimationFrame(frame);
+}
+
+// =====================================================================
+// Eventos del tablero (clic para agregar puntos)
+// =====================================================================
+document.getElementById('chessCanvas').addEventListener('click', (e) => {
+    if (chessState.executing || overlayVisible()) return;
+    if (document.getElementById('wipeOverlay').classList.contains('show')) return;
+
+    const lv = chessLevel();
+    if (!chessState.selectedPiece) {
+        showMessage('Elegí una pieza primero', 'info');
+        return;
+    }
+
+    const canvas = document.getElementById('chessCanvas');
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = Math.floor((e.clientX - rect.left) * scaleX / CELL_SIZE);
+    const y = Math.floor((e.clientY - rect.top) * scaleY / CELL_SIZE);
+
+    if (!isValidMove(x, y)) return;
+    if (isObstacle(lv, x, y)) {
+        showMessage('¡Hay un obstáculo ahí!', 'info');
+        return;
+    }
+
+    // Verificar si el movimiento es válido para la pieza
+    const lastPos = chessState.path.length > 0 ? chessState.path[chessState.path.length - 1] : lv.start;
+    if (!canPieceMove(chessState.selectedPiece, lastPos[0], lastPos[1], x, y)) {
+        showMessage('¡Esa pieza no puede moverse así! ' + pieceName(chessState.selectedPiece) + ' tiene su forma', 'info');
+        sfxBump();
+        return;
+    }
+    if (!isPathClear(lv, lastPos[0], lastPos[1], x, y)) {
+        showMessage('¡Hay un obstáculo 🪨 en el medio del camino!', 'lose');
+        sfxBump();
+        return;
+    }
+
+    // Verificar si ya está en el path
+    if (chessState.path.some(p => p[0] === x && p[1] === y)) {
+        showMessage('¡Ya pasaste por ahí!', 'info');
+        return;
+    }
+
+    chessState.path.push([x, y]);
+    sfxClick();
+    updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lv.maxCommands);
+    drawChessGame();
+});
+
+// =====================================================================
+// Eventos del selector de piezas
+// =====================================================================
+document.querySelectorAll('.piece-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (chessState.executing) return;
+        document.querySelectorAll('.piece-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        chessState.selectedPiece = btn.dataset.piece;
+        chessState.path = [];
+        sfxClick();
+        updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', chessLevel().maxCommands);
+        drawChessGame();
+    });
+});
+
+// =====================================================================
+// Inicializar
+// =====================================================================
+updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', chessLevel().maxCommands);
+updateChessHUD();
+updateChessMenuProgress();
+renderAlbum();
+if (!soundOn) document.getElementById('muteBtn').textContent = '🔇';
+</script>
+</body>
+</html>
