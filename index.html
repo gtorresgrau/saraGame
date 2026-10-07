@@ -522,12 +522,12 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="level-select" id="chessLevelSelect"></div>
 <div class="section-title">♟️ Elegí tu pieza</div>
 <div class="piece-selector" id="pieceSelector">
-<div class="piece-btn tower" data-piece="tower">🗼<span>Torre</span></div>
-<div class="piece-btn knight" data-piece="knight">🐘<span>Caballo</span></div>
-<div class="piece-btn bishop" data-piece="bishop">⛪<span>Alfil</span></div>
-<div class="piece-btn queen" data-piece="queen">👑<span>Reina</span></div>
-<div class="piece-btn king" data-piece="king">🤴<span>Rey</span></div>
-<div class="piece-btn pawn" data-piece="pawn">♟️<span>Peón</span></div>
+<div class="piece-btn tower" data-piece="tower">♖<span>Torre</span></div>
+<div class="piece-btn knight" data-piece="knight">♘<span>Caballo</span></div>
+<div class="piece-btn bishop" data-piece="bishop">♗<span>Alfil</span></div>
+<div class="piece-btn queen" data-piece="queen">♕<span>Reina</span></div>
+<div class="piece-btn king" data-piece="king">♔<span>Rey</span></div>
+<div class="piece-btn pawn" data-piece="pawn">♙<span>Peón</span></div>
 </div>
 <div class="section-title">📋 Mi ruta</div>
 <div class="program-area" id="chessProgramArea"><p style="color:#8b96b8;text-align:center;margin-top:60px;font-weight:800;">Elegí una pieza y tocá el tablero</p></div>
@@ -878,15 +878,15 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // la ruta hasta poner en jaque al rey negro. Con obstáculos y pistas.
         // =====================================================================
         const CHESS_LEVELS = [
-        {id: 1, levelTitle: "¡La Torre! 🗼", message: "La torre mueve en línea recta. Elegila y trazá la ruta hasta el rey.", piece: "tower", kingPos: [7, 2], obstacles: [[3, 2], [5, 2]], start: [1, 2], par: 3, maxCommands: 8, speed: 500, theme: {floor: "#e8eaf6", line: "#c5cae9", wall: "#546e7a", edge: "#37474f"}},
-        {id: 2, levelTitle: "El Caballo 🐘", message: "El caballo mueve en L y salta obstáculos. Elegilo y llegá al rey.", piece: "knight", kingPos: [6, 3], obstacles: [[3, 1], [4, 4]], start: [1, 1], par: 3, maxCommands: 8, speed: 500, theme: {floor: "#fff3e0", line: "#ffcc80", wall: "#795548", edge: "#4e342e"}},
-        {id: 3, levelTitle: "El Alfil ⛪", message: "El alfil mueve en diagonal. Elegilo y trazá la ruta.", piece: "bishop", kingPos: [7, 5], obstacles: [[4, 2], [5, 3]], start: [2, 2], par: 2, maxCommands: 8, speed: 500, theme: {floor: "#f3e5f5", line: "#ce93d8", wall: "#6a1b9a", edge: "#4a148c"}},
-        {id: 4, levelTitle: "¡La Reina! 👑", message: "La reina mueve en todas direcciones. Elegila y poné en jaque al rey.", piece: "queen", kingPos: [8, 3], obstacles: [[4, 3], [6, 1]], start: [1, 3], par: 3, maxCommands: 8, speed: 480, theme: {floor: "#ffebee", line: "#ef9a9a", wall: "#c62828", edge: "#b71c1c"}},
-        {id: 5, levelTitle: "El Rey 🤴", message: "El rey mueve una casilla en cualquier dirección. Elegilo con cuidado.", piece: "king", kingPos: [5, 4], obstacles: [[3, 3], [4, 5]], start: [2, 4], par: 3, maxCommands: 10, speed: 480, theme: {floor: "#e3f2fd", line: "#90caf9", wall: "#1565c0", edge: "#0d47a1"}},
+        {id: 1, levelTitle: "¡La Torre! ♖", message: "La torre mueve en línea recta. Elegila y trazá la ruta hasta el rey.", piece: "tower", kingPos: [7, 2], obstacles: [[3, 2], [5, 2]], start: [1, 2], par: 3, maxCommands: 8, speed: 500, theme: {floor: "#e8eaf6", line: "#c5cae9", wall: "#546e7a", edge: "#37474f"}},
+        {id: 2, levelTitle: "El Caballo ♘", message: "El caballo mueve en L y salta obstáculos. Elegilo y llegá al rey.", piece: "knight", kingPos: [6, 3], obstacles: [[3, 1], [4, 4]], start: [1, 1], par: 3, maxCommands: 8, speed: 500, theme: {floor: "#fff3e0", line: "#ffcc80", wall: "#795548", edge: "#4e342e"}},
+        {id: 3, levelTitle: "El Alfil ♗", message: "El alfil mueve en diagonal. Elegilo y trazá la ruta.", piece: "bishop", kingPos: [7, 5], obstacles: [[4, 2], [5, 3]], start: [2, 2], par: 2, maxCommands: 8, speed: 500, theme: {floor: "#f3e5f5", line: "#ce93d8", wall: "#6a1b9a", edge: "#4a148c"}},
+        {id: 4, levelTitle: "¡La Reina! ♕", message: "La reina mueve en todas direcciones. Elegila y poné en jaque al rey.", piece: "queen", kingPos: [8, 3], obstacles: [[4, 3], [6, 1]], start: [1, 3], par: 3, maxCommands: 8, speed: 480, theme: {floor: "#ffebee", line: "#ef9a9a", wall: "#c62828", edge: "#b71c1c"}},
+        {id: 5, levelTitle: "El Rey ♔", message: "El rey mueve una casilla en cualquier dirección. Elegilo con cuidado.", piece: "king", kingPos: [5, 4], obstacles: [[3, 3], [4, 5]], start: [2, 4], par: 3, maxCommands: 10, speed: 480, theme: {floor: "#e3f2fd", line: "#90caf9", wall: "#1565c0", edge: "#0d47a1"}},
         {id: 6, levelTitle: "El Peón ♟️", message: "El peón avanza una casilla hacia adelante. Elegilo y avanzá hasta el rey.", piece: "pawn", kingPos: [4, 1], obstacles: [[2, 3], [3, 5]], start: [4, 6], par: 5, maxCommands: 10, speed: 480, theme: {floor: "#e8f5e9", line: "#a5d6a7", wall: "#2e7d32", edge: "#1b5e20"}},
-        {id: 7, levelTitle: "Torre vs Rey 🗼", message: "La torre otra vez, pero con más obstáculos. ¡Pensá bien la ruta!", piece: "tower", kingPos: [8, 1], obstacles: [[3, 1], [5, 1], [6, 3]], start: [1, 1], par: 3, maxCommands: 8, speed: 450, theme: {floor: "#e0f7fa", line: "#80deea", wall: "#00838f", edge: "#006064"}},
-        {id: 8, levelTitle: "Caballo vs Rey 🐘", message: "El caballo necesita más movimientos. ¡Esquivá todo!", piece: "knight", kingPos: [7, 4], obstacles: [[2, 2], [4, 4], [5, 2]], start: [1, 6], par: 4, maxCommands: 10, speed: 450, theme: {floor: "#fff8e1", line: "#ffe082", wall: "#ff8f00", edge: "#e65100"}},
-        {id: 9, levelTitle: "Alfil vs Rey ⛪", message: "El alfil en un tablero complicado. ¡Concentrate!", piece: "bishop", kingPos: [8, 6], obstacles: [[3, 3], [5, 5], [6, 2]], start: [1, 1], par: 2, maxCommands: 10, speed: 420, theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#c2185b", edge: "#880e4f"}},
+        {id: 7, levelTitle: "Torre vs Rey ♖", message: "La torre otra vez, pero con más obstáculos. ¡Pensá bien la ruta!", piece: "tower", kingPos: [8, 1], obstacles: [[3, 1], [5, 1], [6, 3]], start: [1, 1], par: 3, maxCommands: 8, speed: 450, theme: {floor: "#e0f7fa", line: "#80deea", wall: "#00838f", edge: "#006064"}},
+        {id: 8, levelTitle: "Caballo vs Rey ♘", message: "El caballo necesita más movimientos. ¡Esquivá todo!", piece: "knight", kingPos: [7, 4], obstacles: [[2, 2], [4, 4], [5, 2]], start: [1, 6], par: 4, maxCommands: 10, speed: 450, theme: {floor: "#fff8e1", line: "#ffe082", wall: "#ff8f00", edge: "#e65100"}},
+        {id: 9, levelTitle: "Alfil vs Rey ♗", message: "El alfil en un tablero complicado. ¡Concentrate!", piece: "bishop", kingPos: [8, 6], obstacles: [[3, 3], [5, 5], [6, 2]], start: [1, 1], par: 2, maxCommands: 10, speed: 420, theme: {floor: "#fce4ec", line: "#f48fb1", wall: "#c2185b", edge: "#880e4f"}},
         {id: 10, levelTitle: "¡JAQUE MATE! 👑", message: "¡Último nivel! La reina contra el rey. ¡Demostrá lo que aprendiste!", piece: "queen", kingPos: [8, 2], obstacles: [[3, 2], [5, 4], [6, 1]], start: [1, 5], par: 2, maxCommands: 8, speed: 420, theme: {floor: "#fffde7", line: "#f0d060", wall: "#f57f17", edge: "#e65100"}, checkmate: true}
         ];
 
@@ -2228,7 +2228,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // Álbum de figuritas: un nivel con estrellas = figurita ganada
         const STICKERS_MOUSE = ['🧀', '🐭', '📦', '🐱', '🪤', '⭐', '🧀', '🐭', '🏆', '👑'];
         const STICKERS_SCHOOL = ['🛏️', '🎒', '🚶', '🌳', '💧', '🚗', '🏃', '🏫', '📚', '🎓'];
-        const STICKERS_CHESS = ['🗼', '🐘', '⛪', '👑', '🤴', '♟️', '🗼', '🐘', '⛪', '👑'];
+        const STICKERS_CHESS = ['♖', '♘', '♗', '♕', '♔', '♙', '♖', '♘', '♗', '♕'];
 
         function stickerCell(emoji, got, title) {
             const d = document.createElement('div');
@@ -2640,10 +2640,10 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
         // Ajedrez: Jaque al Rey — elegir pieza, trazar ruta, jaque al rey negro
         // =====================================================================
         function chessPieceEmoji(p) {
-            return { tower: '🗼', knight: '🐘', bishop: '⛪', queen: '👑', king: '🤴', pawn: '♟️' }[p] || '♟️';
+            return { tower: '♖', knight: '♘', bishop: '♗', queen: '♕', king: '♔', pawn: '♙' }[p] || '♙';
         }
         function chessPieceName(p) {
-            return { tower: 'la torre 🗼', knight: 'el caballo 🐘', bishop: 'el alfil ⛪', queen: 'la reina 👑', king: 'el rey 🤴', pawn: 'el peón ♟️' }[p] || p;
+            return { tower: 'la torre ♖', knight: 'el caballo ♘', bishop: 'el alfil ♗', queen: 'la reina ♕', king: 'el rey ♔', pawn: 'el peón ♙' }[p] || p;
         }
         function chessIsObstacle(lv, x, y) {
             return (lv.obstacles || []).some(o => o[0] === x && o[1] === y);

@@ -274,11 +274,11 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <!-- Menu principal -->
 <div class="menu-screen" id="menuScreen">
 <section class="hero">
-<span class="hero-kicker">♟️ Ajedrez · 10 niveles · Jaque mate</span>
+<span class="hero-kicker">♙ Ajedrez · 10 niveles · Jaque mate</span>
 <h2>Elegí tu <span class="hl">pieza</span> y dale jaque al rey</h2>
 <p>Seleccioná la pieza de ajedrez correcta según su forma de moverse, esquivá los obstáculos y trazá la ruta hasta poner en jaque al rey negro.</p>
 <div class="hero-path">
-<span class="path-step">♟️ Elegí</span><span class="path-dots">•••</span>
+<span class="path-step">♙ Elegí</span><span class="path-dots">•••</span>
 <span class="path-step">🗺️ Trazá</span><span class="path-dots">•••</span>
 <span class="path-step">⭐ Jaque</span>
 </div>
@@ -286,7 +286,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="game-cards">
 <article class="game-card" onclick="showGame('chess')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showGame('chess')">
 <div class="card-art chess">
-<div class="card-emoji">♟️</div>
+<div class="card-emoji">♙</div>
 <span class="card-tag">Estrategia · 10 niveles</span>
 </div>
 <div class="card-body">
@@ -294,7 +294,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <p>Elegí la pieza correcta, esquivá obstáculos y poné en jaque al rey negro en 10 niveles.</p>
 <div class="card-foot">
 <span class="progress" id="chessMenuProgress">Nivel 1/10 ⭐ 0</span>
-<span class="play-pill">Jugar ♟️</span>
+<span class="play-pill">Jugar ♙</span>
 </div>
 </div>
 </article>
@@ -302,7 +302,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <section class="album">
 <div class="album-head">🏅 Mi álbum de ajedrez<span class="count" id="albumCount">0/10</span></div>
 <p class="album-sub">Ganate una figurita por cada nivel con estrellas. ¡Completá la colección!</p>
-<div class="album-row"><span class="album-name">♟️ Jaque al Rey</span><div class="stickers" id="albumChess"></div></div>
+<div class="album-row"><span class="album-name">♙ Jaque al Rey</span><div class="stickers" id="albumChess"></div></div>
 </section>
 </div>
 
@@ -312,7 +312,7 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 <div class="game-container">
 <div class="maze-section" id="chessMazeSection">
 <div class="board-head">
-<div class="where">♟️ Tablero de ajedrez<small>Elegí la pieza correcta y trazá la ruta hasta el rey negro</small></div>
+<div class="where">♙ Tablero de ajedrez<small>Elegí la pieza correcta y trazá la ruta hasta el rey negro</small></div>
 </div>
 <div class="canvas-wrap"><canvas id="chessCanvas" width="600" height="480"></canvas></div>
 </div>
@@ -325,14 +325,14 @@ canvas{width:100%;height:auto;display:block;max-width:100%}
 </div>
 <div class="section-title">🗺️ Mapa de niveles</div>
 <div class="level-select" id="chessLevelSelect"></div>
-<div class="section-title">♟️ Elegí tu pieza</div>
+<div class="section-title">♙ Elegí tu pieza</div>
 <div class="piece-selector" id="pieceSelector">
-<div class="piece-btn tower" data-piece="tower" data-game="chess">🗼<span>Torre</span></div>
-<div class="piece-btn knight" data-piece="knight" data-game="chess">🐘<span>Caballo</span></div>
-<div class="piece-btn bishop" data-piece="bishop" data-game="chess">⛪<span>Alfil</span></div>
-<div class="piece-btn queen" data-piece="queen" data-game="chess">👑<span>Reina</span></div>
-<div class="piece-btn king" data-piece="king" data-game="chess">🤴<span>Rey</span></div>
-<div class="piece-btn pawn" data-piece="pawn" data-game="chess">♟️<span>Peón</span></div>
+<div class="piece-btn tower" data-piece="tower" data-game="chess">♖<span>Torre</span></div>
+<div class="piece-btn knight" data-piece="knight" data-game="chess">♘<span>Caballo</span></div>
+<div class="piece-btn bishop" data-piece="bishop" data-game="chess">♗<span>Alfil</span></div>
+<div class="piece-btn queen" data-piece="queen" data-game="chess">♕<span>Reina</span></div>
+<div class="piece-btn king" data-piece="king" data-game="chess">♔<span>Rey</span></div>
+<div class="piece-btn pawn" data-piece="pawn" data-game="chess">♙<span>Peón</span></div>
 </div>
 <div class="section-title">📋 Mi ruta</div>
 <div class="program-area" id="chessProgramArea"><p style="color:#8b96b8;text-align:center;margin-top:60px;font-weight:800;">Elegí una pieza y tocá el tablero</p></div>
@@ -479,7 +479,7 @@ const store = {
 const CHESS_LEVELS = [
     {
         id: 1,
-        levelTitle: "¡La Torre! 🗼",
+        levelTitle: "¡La Torre! ♖",
         message: "La torre mueve en línea recta. Elegila y trazá la ruta hasta el rey.",
         piece: "tower",
         kingPos: [7, 2],
@@ -491,7 +491,7 @@ const CHESS_LEVELS = [
     },
     {
         id: 2,
-        levelTitle: "El Caballo 🐘",
+        levelTitle: "El Caballo ♘",
         message: "El caballo mueve en L. Elegilo y esquivá los obstáculos.",
         piece: "knight",
         kingPos: [6, 3],
@@ -503,7 +503,7 @@ const CHESS_LEVELS = [
     },
     {
         id: 3,
-        levelTitle: "El Alfil ⛪",
+        levelTitle: "El Alfil ♗",
         message: "El alfil mueve en diagonal. Elegilo y trazá la ruta.",
         piece: "bishop",
         kingPos: [7, 5],
@@ -515,7 +515,7 @@ const CHESS_LEVELS = [
     },
     {
         id: 4,
-        levelTitle: "¡La Reina! 👑",
+        levelTitle: "¡La Reina! ♕",
         message: "La reina mueve en todas direcciones. Elegila y poné en jaque al rey.",
         piece: "queen",
         kingPos: [8, 3],
@@ -527,7 +527,7 @@ const CHESS_LEVELS = [
     },
     {
         id: 5,
-        levelTitle: "El Rey 🤴",
+        levelTitle: "El Rey ♔",
         message: "El rey mueve una casilla en cualquier dirección. Elegilo con cuidado.",
         piece: "king",
         kingPos: [5, 4],
@@ -539,7 +539,7 @@ const CHESS_LEVELS = [
     },
     {
         id: 6,
-        levelTitle: "El Peón ♟️",
+        levelTitle: "El Peón ♙",
         message: "El peón mueve hacia adelante. Elegilo y avanzá hasta el rey.",
         piece: "pawn",
         kingPos: [4, 1],
@@ -551,7 +551,7 @@ const CHESS_LEVELS = [
     },
     {
         id: 7,
-        levelTitle: "Torre vs Rey 🗼",
+        levelTitle: "Torre vs Rey ♖",
         message: "La torre otra vez, pero con más obstáculos. ¡Pensá bien la ruta!",
         piece: "tower",
         kingPos: [8, 1],
@@ -563,7 +563,7 @@ const CHESS_LEVELS = [
     },
     {
         id: 8,
-        levelTitle: "Caballo vs Rey 🐘",
+        levelTitle: "Caballo vs Rey ♘",
         message: "El caballo necesita más movimientos. ¡Esquivá todo!",
         piece: "knight",
         kingPos: [7, 4],
@@ -575,7 +575,7 @@ const CHESS_LEVELS = [
     },
     {
         id: 9,
-        levelTitle: "Alfil vs Rey ⛪",
+        levelTitle: "Alfil vs Rey ♗",
         message: "El alfil en un tablero complicado. ¡Concentrate!",
         piece: "bishop",
         kingPos: [8, 6],
@@ -587,7 +587,7 @@ const CHESS_LEVELS = [
     },
     {
         id: 10,
-        levelTitle: "¡JAQUE MATE! 👑",
+        levelTitle: "¡JAQUE MATE! ♕",
         message: "¡Último nivel! La reina contra el rey. ¡Demostrá lo que aprendiste!",
         piece: "queen",
         kingPos: [8, 2],
@@ -780,14 +780,14 @@ function drawChessGame() {
 
 function getPieceEmoji(piece) {
     const emojis = {
-        tower: '🗼',
-        knight: '🐘',
-        bishop: '⛪',
-        queen: '👑',
-        king: '🤴',
-        pawn: '♟️'
+        tower: '♖',
+        knight: '♘',
+        bishop: '♗',
+        queen: '♕',
+        king: '♔',
+        pawn: '♙'
     };
-    return emojis[piece] || '♟️';
+    return emojis[piece] || '♙';
 }
 
 // =====================================================================
@@ -841,7 +841,7 @@ function isPathClear(lv, x1, y1, x2, y2) {
 }
 
 function pieceName(p) {
-    return { tower: 'la torre 🗼', knight: 'el caballo 🐘', bishop: 'el alfil ⛪', queen: 'la reina 👑', king: 'el rey 🤴', pawn: 'el peón ♟️' }[p] || p;
+    return { tower: 'la torre ♖', knight: 'el caballo ♘', bishop: 'el alfil ♗', queen: 'la reina ♕', king: 'el rey ♔', pawn: 'el peón ♙' }[p] || p;
 }
 
 // Verificar si la ruta es válida para la pieza seleccionada
@@ -956,10 +956,10 @@ function onChessWin(used) {
         updateProgramDisplay(chessState, 'chessProgramArea', 'chessCounter', lvNow.maxCommands);
         if (last) {
             showLevelOverlay({
-                title: '👑 ¡JAQUE MATE! 👑',
+                title: '♕ ¡JAQUE MATE! ♕',
                 stars: stars,
                 message: '¡INCREÍBLE! Completaste los 10 niveles de ajedrez y aprendiste a dar jaque mate. ¡Sos un estratega increíble! 🎉',
-                button: '👑 Jugar de nuevo',
+                button: '♕ Jugar de nuevo',
                 grad: true,
                 onGo: () => {
                     chessState.unlocked = 10;
@@ -1053,7 +1053,7 @@ function launchConfetti(ms) {
     const c = document.getElementById('confettiCanvas');
     const ctx = c.getContext('2d');
     const colors = ['#f6c90e', '#ef6c00', '#4CAF50', '#2196F3', '#e91e63', '#9c27b0', '#ffffff'];
-    const emojis = ['👑', '⭐', '🎉'];
+    const emojis = ['♕', '⭐', '🎉'];
     const end = performance.now() + ms;
     if (!confettiRunning) {
         confettiRunning = true;
@@ -1161,7 +1161,7 @@ function updateProgramDisplay(state, areaId, counterId, maxCommands) {
 // =====================================================================
 // Álbum de figuritas
 // =====================================================================
-const STICKERS_CHESS = ['🗼', '🐘', '⛪', '👑', '🤴', '♟️', '🗼', '🐘', '⛪', '👑'];
+const STICKERS_CHESS = ['♖', '♘', '♗', '♕', '♔', '♙', '♖', '♘', '♗', '♕'];
 
 function stickerCell(emoji, got, title) {
     const d = document.createElement('div');
